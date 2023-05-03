@@ -1,0 +1,702 @@
+<script setup>
+import SiderBar from '@/components/frontEnd/SideBar.vue'
+import Modal from '@/components/TheModal.vue'
+import { ref, nextTick } from 'vue'
+
+/**
+ * 變色卡
+ * */
+const theme = ref('white')
+
+/**
+ * modal
+ * */
+const isCreate = ref(false)
+const childComponentRef = ref()
+
+const handleModalOpen = (checkIsCreate, item) => {
+  isCreate.value = checkIsCreate
+  const childComponent = childComponentRef.value
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.openModal()
+    }
+  })
+}
+const handleModalClose = () => {
+  const childComponent = childComponentRef.value
+
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.closeModal()
+    }
+  })
+}
+
+/**
+ * tailwind 樣式變化
+ */
+const cartLength = ref(1)
+</script>
+<template>
+  <section>
+    <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
+      <SiderBar />
+    </aside>
+    <main class="mx-[315px] bg-secondary-light p-6 min-h-screen">
+      <!-- menu -->
+      <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
+        <li class="mr-2">
+          <a
+            href="#"
+            class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active"
+            >馬卡龍</a
+          >
+        </li>
+        <li class="mr-2">
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >泡芙</a
+          >
+        </li>
+        <li class="mr-2">
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >聖代</a
+          >
+        </li>
+        <li class="mr-2">
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >蛋糕</a
+          >
+        </li>
+        <li class="mr-2">
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >氣泡水</a
+          >
+        </li>
+        <li class="mr-2">
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >其他</a
+          >
+        </li>
+      </ul>
+      <!-- product -->
+      <ul class="grid grid-cols-12 gap-4">
+        <li
+          class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
+        >
+          <a href="#" @click="handleModalOpen('create')">
+            <img
+              class="rounded-t-lg object-cover w-full h-[184px]"
+              src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+              alt="ImgProduct"
+            />
+            <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+              甜點
+            </p>
+          </a>
+          <div
+            :class="[
+              'transition-all duration-500 p-6 rounded-bl-lg rounded-br-lg',
+              theme === 'white' && 'bg-white',
+              theme === 'danger' && 'bg-[#F31F1F1A]'
+            ]"
+          >
+            <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+            <div class="flex justify-between items-center">
+              <p class="text-primary-light text-[32px] font-bold">$80</p>
+              <div class="flex flex-col items-end">
+                <p v-if="theme == 'white'" class="font-normal">
+                  <span class="text-neutralself-200">剩餘</span>
+                  &emsp;20份
+                </p>
+                <p
+                  v-else-if="theme === 'danger'"
+                  class="flex items-center text-primary-light font-normal"
+                >
+                  <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
+                  <span>剩餘</span>
+                  &emsp;08份
+                </p>
+                <p v-else-if="theme === 'over'" class="font-normal">
+                  <span class="text-neutralself-200">剩餘</span>
+                  &emsp;00份
+                </p>
+                <p v-else-if="theme === 'stop'" class="font-normal">
+                  <span class="text-neutralself-200">剩餘</span>
+                  &emsp;00份
+                </p>
+                <p class="font-normal">
+                  <span class="text-neutralself-200">製作時間</span>
+                  &emsp;20分
+                </p>
+              </div>
+            </div>
+          </div>
+          <section
+            v-if="theme === 'over'"
+            class="absolute top-0 bottom-0 left-0 right-0"
+            style="background: rgba(8, 8, 8, 0.5)"
+          >
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
+                已售完
+              </p>
+            </div>
+          </section>
+          <section
+            v-else-if="theme === 'stop'"
+            class="absolute top-0 bottom-0 left-0 right-0"
+            style="background: rgba(8, 8, 8, 0.5)"
+          >
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
+                已停用
+              </p>
+            </div>
+          </section>
+        </li>
+      </ul>
+      <section class="flex">
+        <button @click="theme = 'white'" class="p-1 m-1 bg-gray-200 rounded">預設</button>
+        <button @click="theme = 'danger'" class="p-1 m-1 bg-gray-200 rounded">低於10</button>
+        <button @click="theme = 'over'" class="p-1 m-1 bg-gray-200 rounded">已售完</button>
+        <button @click="theme = 'stop'" class="p-1 m-1 bg-gray-200 rounded">已停用</button>
+      </section>
+    </main>
+    <aside class="fixed top-0 right-0 z-40 w-[315px] h-screen">
+      <div class="w-full h-full border-l-2 border-textself">
+        <div class="h-full bg-white flex flex-col justify-between">
+          <div class="flex justify-between px-3 py-4 border-b-2 border-black">
+            <h1 class="text-xl font-medium">確認訂單</h1>
+            <p class="text-xl font-medium">
+              桌號
+              <span class="text-white bg-primary-light rounded py-1 px-2">2</span>
+            </p>
+          </div>
+          <!-- cartList：圖片 -->
+          <div v-if="cartLength === 0" class="text-center">
+            <img src="@/assets/img/ImgFeature02.svg" class="object-cover" alt="Feature_Card_Img2" />
+            <p class="font-medium">還沒有點選餐點喔！</p>
+          </div>
+          <!-- cartList -->
+          <ul v-else class="flex flex-col p-3 overflow-scroll">
+            <li class="flex justify-between items-center border-b border-textself pb-4">
+              <div>
+                <h2 class="font-medium text-xl">
+                  <span>香草鮮奶酪</span>
+                  <span>&emsp;x1</span>
+                </h2>
+                <p class="font-medium text-xl text-primary-light my-2">$80</p>
+                <p
+                  class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
+                >
+                  已符合 A + B
+                </p>
+              </div>
+              <div class="flex flex-col">
+                <button
+                  @click="handleModalOpen('update')"
+                  class="btn btn-outline-dark py-2 px-3 mb-2"
+                >
+                  修改
+                </button>
+                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
+                  刪除
+                </button>
+              </div>
+            </li>
+            <li class="flex justify-between items-center border-b border-textself py-4">
+              <div>
+                <h2 class="font-medium text-xl">
+                  <span>巧克力糖霜甜甜圈</span>
+                  <span>&emsp;x2</span>
+                </h2>
+                <p class="font-medium text-xl text-primary-light my-2">$300</p>
+                <p
+                  class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
+                >
+                  已符合買一送一
+                </p>
+              </div>
+              <div class="flex flex-col">
+                <button
+                  @click="handleModalOpen('update')"
+                  class="btn btn-outline-dark py-2 px-3 mb-2"
+                >
+                  修改
+                </button>
+                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
+                  刪除
+                </button>
+              </div>
+            </li>
+            <li class="flex justify-between items-center border-b border-textself py-4">
+              <div>
+                <h2 class="font-medium text-xl">
+                  <span>香草鮮奶酪</span>
+                  <span>&emsp;x1</span>
+                </h2>
+                <p class="font-medium text-xl text-primary-light my-2">$80</p>
+                <p
+                  class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
+                >
+                  已符合 A + B
+                </p>
+              </div>
+              <div class="flex flex-col">
+                <button
+                  @click="handleModalOpen('update')"
+                  class="btn btn-outline-dark py-2 px-3 mb-2"
+                >
+                  修改
+                </button>
+                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
+                  刪除
+                </button>
+              </div>
+            </li>
+          </ul>
+          <!-- cartBtn -->
+          <ul class="grid grid-cols-2 gap-3 border-y-2 p-3 border-textself">
+            <li class="col-span-2 lg:col-span-1">
+              <button
+                @click="handleModalOpen('readMember')"
+                class="w-full btn btn-outline-dark flex items-center justify-center"
+              >
+                <span>查詢會員</span>
+                <img class="ms-2" src="@/assets/img/IconMemberSearch.png" alt="IconMemberSearch" />
+              </button>
+            </li>
+            <li class="col-span-2 lg:col-span-1">
+              <button
+                @click="handleModalOpen('createMember')"
+                class="w-full btn btn-outline-dark flex items-center justify-center"
+              >
+                <span>加入會員</span>
+                <img class="ms-2" src="@/assets/img/IconMemberPlus.png" alt="IconMemberSearch" />
+              </button>
+            </li>
+            <li class="col-span-2 lg:col-span-1">
+              <button
+                @click="handleModalOpen('createActivity')"
+                class="w-full btn btn-outline-dark flex items-center justify-center"
+              >
+                <span>選擇活動</span>
+                <img
+                  class="ms-2"
+                  src="@/assets/img/IconSelectaActivity.png"
+                  alt="IconMemberSearch"
+                />
+              </button>
+            </li>
+            <li class="col-span-2 lg:col-span-1">
+              <button class="w-full btn btn-outline-dark flex items-center justify-center">
+                <span>金額試算</span>
+                <img class="ms-2" src="@/assets/img/IconCashCalculate.png" alt="IconMemberSearch" />
+              </button>
+            </li>
+          </ul>
+          <div class="flex flex-col px-3 py-4">
+            <p class="flex justify-between items-center font-medium">
+              <span>製作時間</span>
+              <span>0 分</span>
+            </p>
+            <p class="flex justify-between items-center font-medium">
+              <span>&emsp;&emsp;餐點</span>
+              <span>0 份</span>
+            </p>
+            <p class="flex justify-between items-center font-medium mt-4">
+              <span>折扣金額</span>
+              <span class="text-primary">0</span>
+            </p>
+            <p class="flex justify-between items-center font-medium mb-7">
+              <span class="text-xl ps-1">&emsp;合計</span>
+              <span class="text-xl text-primary">NT$ 0</span>
+            </p>
+            <router-link to="/" class="btn btn-dark py-2 w-full"> 送出訂單 </router-link>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+  <Modal ref="childComponentRef">
+    <section class="relative w-full h-full max-w-md md:h-auto">
+      <!-- Modal content -->
+      <div class="relative bg-white border-2 border-textself rounded-lg shadow">
+        <!-- Modal header -->
+        <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
+          <h2 v-if="isCreate === 'create'" class="text-xl font-medium">新增餐點</h2>
+          <h2 v-else-if="isCreate === 'update'" class="text-xl font-medium">修改餐點</h2>
+          <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除餐點</h2>
+          <h2 v-else-if="isCreate === 'readMember'" class="text-xl font-medium">查詢會員</h2>
+          <h2 v-else-if="isCreate === 'createMember'" class="text-xl font-medium">加入會員</h2>
+          <h2 v-else-if="isCreate === 'createActivity'" class="text-xl font-medium">
+            選擇活動 (活動擇一)
+          </h2>
+          <button
+            @click="handleModalClose()"
+            type="button"
+            class="text-gray-400 bg-black hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+          >
+            <svg
+              aria-hidden="true"
+              class="w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span class="sr-only text-black">Close modal</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="w-full rounded-lg">
+          <form v-if="isCreate === 'create'" class="space-y-6" action="#">
+            <div class="relative">
+              <img
+                class="object-cover w-full h-[184px] border-b-2 border-textself"
+                src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+                alt="ImgProduct"
+              />
+              <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+                甜點
+              </p>
+              <div
+                :class="[
+                  'transition-all duration-500 p-3',
+                  theme === 'white' && 'bg-white',
+                  theme === 'danger' && 'bg-white'
+                ]"
+              >
+                <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+                <div class="flex justify-between items-center">
+                  <p class="text-primary-light text-[32px] font-bold">$80</p>
+                  <div class="flex flex-col items-end">
+                    <p v-if="theme == 'white'" class="font-normal">
+                      <span class="text-neutralself-200">剩餘</span>
+                      &emsp;20份
+                    </p>
+                    <p
+                      v-else-if="theme === 'danger'"
+                      class="flex items-center text-primary-light font-normal"
+                    >
+                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
+                      <span>剩餘</span>
+                      &emsp;08份
+                    </p>
+                    <p class="font-normal">
+                      <span class="text-neutralself-200">製作時間</span>
+                      &emsp;20分
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-3">
+              <div class="flex">
+                <button type="button" class="form-qty border-r-0 rounded-l-lg">－</button>
+                <input
+                  type="text"
+                  id="form_qty"
+                  class="form-input flex-1 rounded-none rounded-x-lg"
+                  placeholder="1"
+                  required
+                />
+                <button type="button" class="form-qty border-l-0 rounded-r-lg">＋</button>
+              </div>
+              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+            </div>
+            <div class="px-3">
+              <textarea
+                id="form_textarea"
+                rows="4"
+                class="form-input"
+                placeholder="請輸入客製化內容，例如：飲料去冰、加料"
+              ></textarea>
+            </div>
+            <!-- send_btn -->
+            <div class="flex p-3">
+              <button type="submit" class="w-full btn btn-dark">確認新增</button>
+            </div>
+          </form>
+          <form v-else-if="isCreate === 'update'" class="space-y-6" action="#">
+            <div class="relative">
+              <img
+                class="object-cover w-full h-[184px] border-b-2 border-textself"
+                src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+                alt="ImgProduct"
+              />
+              <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+                甜點
+              </p>
+              <div
+                :class="[
+                  'transition-all duration-500 p-3',
+                  theme === 'white' && 'bg-white',
+                  theme === 'danger' && 'bg-white'
+                ]"
+              >
+                <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+                <div class="flex justify-between items-center">
+                  <p class="text-primary-light text-[32px] font-bold">$80</p>
+                  <div class="flex flex-col items-end">
+                    <p v-if="theme == 'white'" class="font-normal">
+                      <span class="text-neutralself-200">剩餘</span>
+                      &emsp;20份
+                    </p>
+                    <p
+                      v-else-if="theme === 'danger'"
+                      class="flex items-center text-primary-light font-normal"
+                    >
+                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
+                      <span>剩餘</span>
+                      &emsp;08份
+                    </p>
+                    <p class="font-normal">
+                      <span class="text-neutralself-200">製作時間</span>
+                      &emsp;20分
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="px-3">
+              <div class="flex">
+                <button type="button" class="form-qty border-r-0 rounded-l-lg">－</button>
+                <input
+                  type="text"
+                  id="form_qty"
+                  class="form-input flex-1 rounded-none rounded-x-lg"
+                  placeholder="1"
+                  required
+                />
+                <button type="button" class="form-qty border-l-0 rounded-r-lg">＋</button>
+              </div>
+              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+            </div>
+            <div class="px-3">
+              <textarea
+                id="form_textarea"
+                rows="4"
+                class="form-input"
+                placeholder="請輸入客製化內容，例如：飲料去冰、加料"
+              ></textarea>
+            </div>
+            <!-- send_btn -->
+            <div class="flex p-3">
+              <button type="submit" class="w-full btn btn-dark">確認修改</button>
+            </div>
+          </form>
+          <form v-else-if="isCreate === 'delete'" class="space-y-6" action="#">
+            <div class="flex flex-col">
+              <h3 class="text-xl text-center font-medium p-3 pb-0">
+                請確認是否刪除
+                <span class="text-primary-light">巧克力糖霜甜甜圈</span> ?
+              </h3>
+              <!-- send_btn -->
+              <div class="flex m-3">
+                <button type="submit" class="w-full ml-1 btn btn-dark">確認刪除</button>
+              </div>
+            </div>
+          </form>
+          <form v-else-if="isCreate === 'readMember'" class="space-y-6 p-3" action="#">
+            <div>
+              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <input
+                type="tel"
+                id="form_tel"
+                class="form-input"
+                placeholder="0912345678"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+            </div>
+            <div class="bg-bgself-light p-4">
+              <h3 class="mb-2 font-medium">查詢結果</h3>
+              <div class="flex items-center">
+                <input
+                  checked
+                  id="form_readmember_radio"
+                  type="radio"
+                  value=""
+                  name="form-radio"
+                  class="form-radio"
+                />
+                <label for="form_readmember_radio" class="ml-2 text-xl font-medium">王小美</label>
+              </div>
+            </div>
+            <!-- send_btn -->
+            <div class="flex">
+              <button type="submit" class="w-full mr-1 btn btn-outline-dark">重新查詢</button>
+              <button type="button" class="w-full ml-1 btn btn-dark">確認</button>
+            </div>
+          </form>
+          <form v-else-if="isCreate === 'createMember'" class="space-y-6 p-3" action="#">
+            <div>
+              <label for="form_name" class="block mb-2 font-medium">姓名</label>
+              <input type="text" id="form_name" class="form-input" placeholder="王小美" required />
+              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+            </div>
+            <div>
+              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <input
+                type="tel"
+                id="form_tel"
+                class="form-input"
+                placeholder="0912345678"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+            </div>
+            <!-- send_btn -->
+            <div class="flex">
+              <button type="submit" class="w-full ml-1 btn btn-dark">確認加入</button>
+            </div>
+          </form>
+          <form v-else-if="isCreate === 'createActivity'" class="space-y-4 p-3" action="#">
+            <ul class="flex flex-col">
+              <li class="mb-3">
+                <div class="flex items-center mb-3">
+                  <input
+                    checked
+                    id="form_checkIn_radio"
+                    type="radio"
+                    value=""
+                    name="form-radio"
+                    class="form-radio"
+                  />
+                  <label for="form_checkIn_radio" class="ml-2 text-xl font-medium">打卡優惠</label>
+                </div>
+                <div class="bg-bgself-light p-4">
+                  <select id="checkIn_status" class="form-select mb-3">
+                    <option value="85%" selected>85 折</option>
+                    <option value="88%">88 折</option>
+                    <option value="90%">90 折</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="form_checkIn"
+                    class="form-input"
+                    placeholder="優惠代碼"
+                    required
+                  />
+                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+                </div>
+              </li>
+              <li class="mb-3">
+                <div class="flex items-center mb-3">
+                  <input
+                    disabled
+                    id="form_newMember_radio"
+                    type="radio"
+                    value=""
+                    name="form-radio"
+                    class="form-radio"
+                  />
+                  <label
+                    for="form_newMember_radio"
+                    class="ml-2 text-xl font-medium text-neutralself-100"
+                    >新會員優惠</label
+                  >
+                </div>
+                <div class="bg-bgself-light p-4 hidden">
+                  <select id="newMember_status" class="form-select mb-3">
+                    <option value="85%" selected>85 折</option>
+                    <option value="88%">88 折</option>
+                    <option value="90%">90 折</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="form_newMember"
+                    class="form-input"
+                    placeholder="優惠代碼"
+                    required
+                  />
+                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+                </div>
+              </li>
+              <li class="mb-3">
+                <div class="flex items-center mb-3">
+                  <input
+                    disabled
+                    id="form_member_radio"
+                    type="radio"
+                    value=""
+                    name="form-radio"
+                    class="form-radio"
+                  />
+                  <label
+                    for="form_member_radio"
+                    class="ml-2 text-xl font-medium text-neutralself-100"
+                    >熟客優惠</label
+                  >
+                </div>
+                <div class="bg-bgself-light p-4 hidden">
+                  <select id="member_status" class="form-select mb-3">
+                    <option value="85%" selected>85 折</option>
+                    <option value="88%">88 折</option>
+                    <option value="90%">90 折</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="form_member"
+                    class="form-input"
+                    placeholder="優惠代碼"
+                    required
+                  />
+                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+                </div>
+              </li>
+              <li class="mb-3">
+                <div class="flex items-center mb-3">
+                  <input
+                    disabled
+                    id="form_birth_radio"
+                    type="radio"
+                    value=""
+                    name="form-radio"
+                    class="form-radio"
+                  />
+                  <label
+                    for="form_birth_radio"
+                    class="ml-2 text-xl font-medium text-neutralself-100"
+                    >生日優惠</label
+                  >
+                </div>
+                <div class="bg-bgself-light p-4 hidden">
+                  <select id="birth_status" class="form-select mb-3">
+                    <option value="85%" selected>85 折</option>
+                    <option value="88%">88 折</option>
+                    <option value="90%">90 折</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="form_birth"
+                    class="form-input"
+                    placeholder="優惠代碼"
+                    required
+                  />
+                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+                </div>
+              </li>
+            </ul>
+            <!-- send_btn -->
+            <div class="flex">
+              <button type="submit" class="w-full ml-1 btn btn-dark">確認</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </Modal>
+</template>
+<style scoped>
+.tabbar-active {
+  @apply text-primary-light bg-white;
+}
+</style>

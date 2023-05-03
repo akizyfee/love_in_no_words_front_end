@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Noto Sans TC','Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer components {
+	.btn {
+		@apply rounded-xl py-3 px-5 text-center transition duration-300 ease-in-out;
+	}
+	
+	.btn-outline-dark {
+		@apply text-textself bg-white focus:ring-2 focus:ring-neutralself-50 focus:bg-neutralself-50 focus:border-neutralself-50 border-2 border-textself shadow-self;
+	}
+	.btn-outline-dark:hover {
+		@apply bg-neutralself-50 border-0 shadow-white
+	}
+	.btn-outline-dark.disabled {
+		@apply text-neutralself-100 border-neutralself-50
+	}
+
+	.btn-dark {
+		@apply text-white bg-textself focus:ring-2 focus:ring-white focus:text-textself focus:bg-white focus:border-white focus:border-2 border-textself shadow-self;
+	}
+	.btn-dark:hover {
+		@apply text-textself bg-white shadow-self
+	}
+	.btn-dark.disabled {
+		@apply text-neutralself-100 bg-neutralself-50 border-neutralself-100
+	}
+
+	.btn-secondary {
+	  @apply text-textself bg-secondary-light focus:ring-2 focus:bg-white border-2 border-textself shadow-self;
+	}
+
+	/* intro */
+	.card-white {
+	  @apply w-full h-full flex items-center p-6 bg-white rounded-lg border-2 border-textself shadow-self;
+	}
+
+	/* feature、about */
+	.card-secondary {
+	  @apply w-full lg:w-1/2 h-full flex flex-col px-9 py-12 bg-bgself-light rounded border-2 border-textself shadow-self;
+	}
+	.card-secondary-p0 {
+	  @apply h-full flex flex-col items-center bg-bgself-light rounded border-2 border-textself shadow-self;
+	}
+
+	/* arrow */
+	.card-arrow-bottom, .card-arrow-right, .card-arrow-left {
+    @apply relative before:content-[''] after:content-[''];
+	}
+
+	.card-arrow-bottom:before, .card-arrow-bottom:after {
+		@apply absolute left-1/2 -bottom-[44px] border-[22px] border-x-transparent border-b-transparent border-t-textself;
+	}
+	.card-arrow-bottom:after {
+		@apply -bottom-[40px] border-t-[22px] border-t-bgself-light;
+	}
+
+	.card-arrow-right:before, .card-arrow-right:after {
+		@apply absolute top-[60px] -right-[44px] border-[22px] border-y-transparent border-r-transparent border-l-textself;
+	}
+	.card-arrow-right:after {
+		@apply -right-[40px] border-l-[22px] border-l-bgself-light;
+	}
+		
+	.card-arrow-left:before, .card-arrow-left:after {
+		@apply absolute top-[60px] -left-[44px] border-[22px] border-y-transparent border-l-transparent border-r-textself;
+	}
+	.card-arrow-left:after {
+		@apply -left-[40px] border-r-[22px] border-r-bgself-light;
+	}
+
+	/* form_Input */
+	.form-input {
+	  @apply w-full block bg-white border-2 border-textself text-neutralself-100 rounded-lg focus:text-textself focus:ring-textself focus:border-textself focus:bg-secondary-light px-4
+	}
+
+	/* form_Select */
+	.form-select {
+	  @apply w-full block bg-white border-2 border-textself text-neutralself-100 rounded-lg focus:text-textself focus:ring-secondary-dark focus:border-secondary-light px-4
+	}
+
+	/* form_Qty */
+	.form-qty {
+		@apply inline-flex items-center border-2 border-textself bg-secondary-light focus:text-textself focus:ring-secondary-dark focus:border-secondary-light py-2 px-3
+	}
+
+	/* form_Radio */
+	.form-radio {
+		@apply bg-white border-2 border-textself
+	}
+	.form-radio:checked {
+		@apply bg-secondary-light
+	}
+	.form-radio[disabled] {
+		@apply bg-white border-2 border-neutralself-100
+	}
+	.form-radio[disabled]:checked {
+		@apply bg-neutralself-50 border-2 border-neutralself-100
+	}
+}
