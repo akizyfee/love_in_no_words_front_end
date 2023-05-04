@@ -1,7 +1,9 @@
+import { errorAlert } from '@/utils/toast'
+
 export const catchError = (asFn) => {
   return (param) => {
     return asFn(param).catch((err) => {
-      console.log('catch', err)
+      errorAlert(err.message)
     })
   }
 }
