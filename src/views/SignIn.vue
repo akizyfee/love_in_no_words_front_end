@@ -1,8 +1,11 @@
 <script setup>
+import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
-// import { signInAPI } from '@/apis/user.js'
-// import { setCookieToken } from '@/utils/cookie.js'
-// import { catchError } from '@/utils/catchError'
+import { loginApi } from '@/apis/user.js'
+import { setCookieToken } from '@/utils/cookie.js'
+import { catchError } from '@/utils/catchError.js'
+const router = useRouter()
 
 /**
  * VeeValidate 套件
@@ -13,14 +16,14 @@ const errorsSchema = {
     if (!value) {
       return '欄位必填'
     }
-    if (value.length < 10) {
-      return '內容有誤'
-    }
     return true
   },
   password(value) {
     if (!value) {
       return '欄位必填'
+    }
+    if (value.length <= 7) {
+      return '密碼長度需大於 8 碼'
     }
     return true
   }
@@ -31,6 +34,36 @@ const { errors, useFieldModel } = useForm({
 })
 const phone = useFieldModel('phone')
 const password = useFieldModel('password')
+
+/**
+ * 登入功能
+ */
+const payload = reactive({
+  phone,
+  password
+})
+const signIn = catchError(async () => {
+  const { data } = await loginApi(payload)
+  const { token, titleNo } = data.user
+  switch (titleNo) {
+    case 1:
+      await setCookieToken(token)
+      router.push('/userAdmin')
+      break
+    case 2:
+      await setCookieToken(token)
+      router.push('/userAdmin')
+      break
+    case 3:
+      await setCookieToken(token)
+      router.push('/seat')
+      break
+    default:
+      console.log('非任何職位!')
+      router.push('/')
+      break
+  }
+})
 </script>
 <template>
   <div class="px-8 py-12">
@@ -68,12 +101,14 @@ const password = useFieldModel('password')
             class="form-input"
             placeholder="A0912345678"
             name="password"
-            v-model="password"
+            v-model.trim="password"
             required
           />
           <p class="text-sm text-primary-light mt-2">{{ errors.password }}</p>
         </div>
-        <button type="submit" class="w-full btn btn-outline-dark">登入</button>
+        <button type="submit" class="w-full btn btn-outline-dark" @click.prevent="signIn">
+          登入
+        </button>
       </form>
     </div>
   </div>

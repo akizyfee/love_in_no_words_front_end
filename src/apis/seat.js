@@ -1,41 +1,58 @@
 import axios from '@/plugins/axios'
 
 /**
- * 座位狀態顯示
+ * S-1-1 現場帶位
+ * @param {object} payload 桌位資料
  */
-export const getSeatStatus = () => axios.get('/v1/seats/')
+export const noReservation = (payload) => axios.post('/v1/seats/no-reservation', payload)
 
 /**
- * 修改座位
+ * S-1-2 查詢座位
+ * @param {string} 已使用未使用狀態
+ * @param {string} 訂位日期
+ * @param {string} 訂位時段
+ */
+export const searchReservation = (status, reservationDate, reservationTime) => axios.get(`/v1/seats/reservation?status=${status}&reservationDate=${reservationDate}&reservationTime=${reservationTime}`)
+
+/**
+ * S-1-3 新增訂位
+ * @param {object} payload 桌位資料
+ */
+export const addReservation = (payload) => axios.post('/v1/seats/reservation', payload)
+
+/**
+ * S-1-4 修改訂位
+ * @param {string} 訂位 ID
+ * @param {object} payload 桌位資料
+ */
+export const editReservation = (reservationId, payload) => axios.patch(`/v1/seats/reservation/${reservationId}`, payload)
+
+/**
+ * S-1-5 取消訂位
+ * @param {string} 訂位 ID
+ */
+export const deleteReservation = (reservationId) => axios.delete(`/v1/seats/reservation/${reservationId}`)
+
+/**
+ * O-2-1 查詢座位
+ * @param {string} 頁數
+ */
+export const searchAdminSeat = () => axios.get('/v1/seats/admin')
+
+/**
+ * O-2-4 新增座位/桌號
  * @param {object} payload 座位資訊
  */
-export const editSeatStatus = (tableNo, payload) => axios.patch(`/v1/seats/${tableNo}`, payload)
+export const addAdminSeat = (payload) => axios.post('/v1/seats/admin', payload)
 
 /**
- * 座位人數代碼取得
+ * O-2-2 修改座位
+ * @param {object} payload 座位資訊
  */
-export const getSeatContent = () => axios.get('/v1/seats/tables-code')
+export const editAdminSeat = (tableNo, payload) => axios.patch(`/v1/seats/admin/${tableNo}`, payload)
 
 /**
- * 新增桌號
- * @param {object} payload 桌號名稱資訊
+ * O-2-5 刪除桌號
+ * @param {Number} 桌號
  */
-export const addSeatNum = (payload) => axios.post('/v1/seats', payload)
-
-/**
- * 刪除桌號
- * @param {object} payload 桌號名稱資訊
- */
-export const deleteSeatNum = (tableNo, payload) => axios.delete(`/v1/seat/${tableNo}`, payload)
-
-/**
- * 新增桌號人數上限
- * @param {object} payload 桌號人數資訊
- */
-export const addSeatLimit = (payload) => axios.post('/v1/seats/tables-code', payload)
-
-/**
- * 刪除桌號人數上限
- * @param {object} payload 桌號人數資訊
- */
-export const deleteSeatLimit = (eatsType) => axios.post(`/v1/seats/tables-code/${eatsType}`)
+export const deleteAdminSeat = (tableNo, payload) => axios.delete(`/v1/seats/admin/${tableNo}`, payload)
