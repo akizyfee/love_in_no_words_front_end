@@ -1,4 +1,4 @@
-import { errorAlert } from '@/utils/toast'
+import { errorAlert } from '@/plugins/toast'
 
 export const catchError = (asFn) => {
   return (param) => {
