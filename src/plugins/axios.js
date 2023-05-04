@@ -9,8 +9,8 @@ instance.interceptors.request.use(
   (config) => {
     const token = getCookieToken()
     if (token) {
-      // config.headers.Authorization = `Bearer ${token}`
-      config.headers.Authorization = token
+      config.headers.Authorization = `Bearer ${token}`
+      // config.headers.Authorization = token
     }
     return config
   },
