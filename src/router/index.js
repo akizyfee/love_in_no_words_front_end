@@ -1,4 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getCookieToken } from '@/utils/cookie'
+
+/**
+ * 路由阻擋
+ */
+
+const checkAuth = async (to, from) => {
+  if (!getCookieToken()) {
+    return { path: '/signIn' }
+  } else {
+    return true
+  }
+}
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_PUBLISH_PATH),
@@ -32,52 +45,62 @@ const router = createRouter({
     {
       path: '/seat',
       name: 'seat',
-      component: () => import('@/views/frontEnd/SeatView.vue')
+      component: () => import('@/views/frontEnd/SeatView.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/product',
       name: 'product',
-      component: () => import('@/views/frontEnd/ProductView.vue')
+      component: () => import('@/views/frontEnd/ProductView.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/order',
       name: 'order',
-      component: () => import('@/views/frontEnd/OrderView.vue')
+      component: () => import('@/views/frontEnd/OrderView.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/member',
       name: 'member',
-      component: () => import('@/views/frontEnd/MemberView.vue')
+      component: () => import('@/views/frontEnd/MemberView.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/chef',
       name: 'chef',
-      component: () => import('@/views/frontEnd/ChefView.vue')
+      component: () => import('@/views/frontEnd/ChefView.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/userAdmin',
       name: 'userAdmin',
-      component: () => import('@/views/backEnd/UserAdmin.vue')
+      component: () => import('@/views/backEnd/UserAdmin.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/productAdmin',
       name: 'productAdmin',
-      component: () => import('@/views/backEnd/ProductAdmin.vue')
+      component: () => import('@/views/backEnd/ProductAdmin.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/seatAdmin',
       name: 'seatAdmin',
-      component: () => import('@/views/backEnd/SeatAdmin.vue')
+      component: () => import('@/views/backEnd/SeatAdmin.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/couponAdmin',
       name: 'couponAdmin',
-      component: () => import('@/views/backEnd/CouponAdmin.vue')
+      component: () => import('@/views/backEnd/CouponAdmin.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/reportAdmin',
       name: 'reportAdmin',
-      component: () => import('@/views/backEnd/ReportAdmin.vue')
+      component: () => import('@/views/backEnd/ReportAdmin.vue'),
+      beforeEnter: [checkAuth]
     },
     {
       path: '/:pathMatch(.*)*',
