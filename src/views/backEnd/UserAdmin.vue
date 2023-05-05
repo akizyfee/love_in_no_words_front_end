@@ -1,18 +1,10 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
-// import { getUserProfile, addUser, editUser, deleteUser } from '@/apis/user'
-// import { catchError } from '@/utils/catchError'
+import { ref, reactive, nextTick, onMounted } from 'vue'
+import { getAdminUser } from '@/apis/user'
+import { catchError } from '@/utils/catchError'
 
-// const userProfile = reactive({
-//   id: '',
-//   name: '',
-//   phone: '',
-//   tilteNo: 0,
-//   isdisabled: false,
-//   password: ''
-// })
 /**
  * modal
  * */
@@ -38,18 +30,30 @@ const handleModalClose = () => {
   })
 }
 
+// const userProfile = reactive({
+//   id: '',
+//   name: '',
+//   phone: '',
+//   tilteNo: 0,
+//   isdisabled: false,
+//   password: ''
+// })
+
 /**
  * 取得使用者列表
  */
-// const userList = ref([])
-// const fetchUser = catchError(async () => {
-//   const currentPage = 1
-//   const data = await getUserProfile(currentPage)
-//   userList.value.push(...data)
-// })
-// fetchUser()
-// console.log(userList.value)
+const userList = reactive([])
 
+const fetchUser = catchError(async () => {
+  const currentPage = 1
+  const { data } = await getAdminUser(currentPage)
+  userList.push(...data.usersList)
+  console.log(userList.value)
+})
+
+onMounted(() => {
+  fetchUser()
+})
 /**
  * 新增使用者
  */
@@ -106,29 +110,9 @@ const handleModalClose = () => {
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
-              <td class="py-3">店員</td>
-              <th class="py-3">停用</th>
-              <th class="flex justify-end items-center">
-                <button
-                  @click="handleModalOpen('update')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  修改
-                </button>
-                <button
-                  @click="handleModalOpen('delete')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  刪除
-                </button>
-              </th>
-            </tr>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
+            <tr class="border-b-2 border-black" v-for="users in userList" :key="users._id">
+              <td class="py-3">{{ users.name }}</td>
+              <td class="py-3">{{ users.phone }}</td>
               <td class="py-3">店員</td>
               <th class="py-3">停用</th>
               <th class="flex justify-end items-center">
