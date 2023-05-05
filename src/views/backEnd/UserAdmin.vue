@@ -30,15 +30,6 @@ const handleModalClose = () => {
   })
 }
 
-// const userProfile = reactive({
-//   id: '',
-//   name: '',
-//   phone: '',
-//   tilteNo: 0,
-//   isdisabled: false,
-//   password: ''
-// })
-
 /**
  * 取得使用者列表
  */
@@ -48,41 +39,52 @@ const fetchUser = catchError(async () => {
   const currentPage = 1
   const { data } = await getAdminUser(currentPage)
   userList.push(...data.usersList)
-  console.log(userList.value)
+  console.log(data.usersList)
 })
 
 onMounted(() => {
   fetchUser()
 })
+
 /**
  * 新增使用者
  */
-// const fetchAddUser = catchError(async () => {
-//   const data = await addUser(userProfile)
-//   return data
+// const userProfile = reactive({
+//   name: '',
+//   phone: '',
+//   tilteNo: '',
+//   isdisabled: false,
+//   password: ''
 // })
-// fetchAddUser()
-// console.log(fetchAddUser)
+
+// const fetchAddUser = catchError(async () => {
+//   const aa = await addAdminUser(userProfile)
+//   console.log('取得資料', aa)
+// })
 
 /**
  * 修改使用者
  */
-// const fetcheditUser = catchError(async () => {
-//   const data = await editUser(userProfile.id, userProfile)
-//   return data
+// const editUserProfile = reactive({
+//   name: '',
+//   phone: '',
+//   tilteNo: '',
+//   isdisabled: false,
+//   password: ''
 // })
-// fetcheditUser()
-// console.log(fetcheditUser)
+
+// const fetcheditUser = catchError(async (uerId) => {
+//   const { data } = await editAdminUser(uerId, editUserProfile)
+//   console.log('編輯資料', data)
+// })
 
 /**
  * 刪除使用者
  */
 // const fetchDeleteUser = catchError(async () => {
-//   const data = await deleteUser(userProfile.id, userProfile.tilteNo)
-//   return data
+//   const { data } = await deleteAdminUser()
+//   console.log(data)
 // })
-// fetchDeleteUser()
-// console.log(fetchDeleteUser)
 </script>
 
 <template>
@@ -167,7 +169,7 @@ onMounted(() => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6 p-3" action="#">
+          <form v-if="isCreate === 'create'" class="space-y-6 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
@@ -176,6 +178,7 @@ onMounted(() => {
                 id="name"
                 class="form-input"
                 placeholder="name"
+                v-model="userProfile.name"
                 required
               />
             </div>
@@ -187,6 +190,7 @@ onMounted(() => {
                 id="phone"
                 class="form-input"
                 placeholder="0900456123"
+                v-model="userProfile.phone"
                 required
               />
             </div>
@@ -198,16 +202,21 @@ onMounted(() => {
                 id="job"
                 class="form-input"
                 placeholder="job"
+                v-model="userProfile.tilteNo"
                 required
               />
             </div>
-            <!-- status -->
             <div>
-              <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_memberStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
-              </select>
+              <label for="password" class="block mb-2 text-xl font-medium text-gray-900">密碼</label>
+              <input
+                type="text"
+                name="password"
+                id="password"
+                class="form-input"
+                placeholder="password"
+                v-model="userProfile.password"
+                required
+              />
             </div>
             <!-- send_btn -->
             <section class="flex">
@@ -218,7 +227,13 @@ onMounted(() => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認新增</button>
+              <button
+                @click="fetchAddUser"
+                type="submit"
+                class="w-full btn btn-dark"
+                >
+                確認新增
+              </button>
             </section>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
@@ -230,6 +245,7 @@ onMounted(() => {
                 id="name"
                 class="form-input"
                 placeholder="name"
+                v-model="editUserProfile.name"
                 required
               />
             </div>
@@ -241,6 +257,7 @@ onMounted(() => {
                 id="phone"
                 class="form-input"
                 placeholder="0900456123"
+                v-model="editUserProfile.phone"
                 required
               />
             </div>
@@ -252,6 +269,7 @@ onMounted(() => {
                 id="job"
                 class="form-input"
                 placeholder="job"
+                v-model="editUserProfile.tilteNo"
                 required
               />
             </div>
@@ -265,6 +283,7 @@ onMounted(() => {
                 id="password"
                 placeholder="••••••••"
                 class="form-input"
+                v-model="editUserProfile.password"
                 required
               />
             </div>
@@ -277,7 +296,7 @@ onMounted(() => {
               </select>
             </div>
             <!-- time -->
-            <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p>
+            <!-- <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p> -->
             <!-- send_btn -->
             <section class="flex">
               <button
@@ -287,7 +306,13 @@ onMounted(() => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認修改</button>
+              <button
+                @click="fetcheditUser('644e8d87b5fd478b1335aee0')"
+                type="submit"
+                class="w-full btn btn-dark"
+              >
+                確認修改
+              </button>
             </section>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
@@ -301,7 +326,13 @@ onMounted(() => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認刪除</button>
+              <button
+                @click="fetchDeleteUser"
+                type="submit"
+                class="w-full btn btn-dark"
+              >
+                確認刪除
+              </button>
             </section>
           </form>
         </div>
