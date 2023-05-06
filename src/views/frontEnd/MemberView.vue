@@ -1,10 +1,22 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, reactive, nextTick, onMounted, watch } from 'vue'
+import { useForm } from 'vee-validate'
+import { searchMember, addMember, editMember, deleteMember } from '@/apis/user.js'
+import { catchError } from '@/utils/catchError.js'
+const searchPhone = ref('')
+const searchPage = ref(1)
+const searchNumber = ref('')
+const memberList = ref([])
+const payload = reactive({
+  name: '',
+  phone: ''
+})
+
 /**
  * modal
- * */
+ **/
 const isCreate = ref(false)
 const childComponentRef = ref()
 
@@ -15,8 +27,15 @@ const handleModalOpen = (checkisCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'update' || isCreate.value === 'delete') {
+      const { name, phone } = item
+      payload.name = name
+      payload.phone = phone
+      searchNumber.value = item._id
+    }
   })
 }
+
 const handleModalClose = () => {
   const childComponent = childComponentRef.value
 
@@ -26,7 +45,94 @@ const handleModalClose = () => {
     }
   })
 }
+
+/**
+ * 查詢會員功能
+ **/
+const getMembers = catchError(async () => {
+  const { data } = await searchMember(searchPhone.value, searchPage.value)
+  const { membersList } = data
+  memberList.value = membersList
+})
+
+onMounted(() => {
+  getMembers()
+})
+
+watch(
+  () => searchPhone.value,
+  () => {
+    getMembers()
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
+
+/**
+ * VeeValidate 套件：新增會員、修改會員
+ */
+const errorsSchema = {
+  name(value) {
+    // 定義驗證後的回傳內容
+    if (!value) {
+      return '欄位必填'
+    }
+    return true
+  },
+  phone(value) {
+    if (!value) {
+      return '欄位必填'
+    }
+    return true
+  }
+}
+
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsSchema
+})
+payload.name = useFieldModel('name')
+payload.phone = useFieldModel('phone')
+
+/**
+ * 新增會員功能
+ **/
+const postMember = catchError(async () => {
+  await addMember(payload)
+  handleModalClose()
+  clear()
+  getMembers()
+})
+
+/**
+ * 修改會員功能
+ **/
+const patchMember = catchError(async () => {
+  await editMember(searchNumber.value, payload)
+  handleModalClose()
+  clear()
+  getMembers()
+})
+
+/**
+ * 刪除會員功能
+ **/
+const delMember = catchError(async () => {
+  await deleteMember(searchNumber.value)
+  handleModalClose()
+  getMembers()
+})
+
+/**
+ * 清空欄位功能
+ **/
+const clear = () => {
+  payload.name = ''
+  payload.phone = ''
+}
 </script>
+
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
@@ -40,59 +146,43 @@ const handleModalClose = () => {
       <div class="flex justify-between items-end mb-6">
         <div class="flex flex-col">
           <label for="searchPhone" class="block mb-2 font-medium">手機號碼</label>
-            <input
-            type="searchPhone"
+          <input
+            type="tel"
             id="searchPhone"
             class="block form-input p-3"
             placeholder="0912345678"
+            v-model="searchPhone"
           />
         </div>
-        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">新增會員</button>
+        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
+          新增會員
+        </button>
       </div>
       <!-- table -->
       <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-5">
         <table class="w-full text-center">
           <thead class="text-xl font-medium text-secondary-light bg-textself">
             <tr class="border-b-2 border-black">
-              <th class="py-3">會員姓名</th>
-              <th class="py-3">聯絡電話</th>
+              <th class="py-3">姓名</th>
+              <th class="py-3">電話</th>
               <th class="py-3">註冊日期</th>
               <th class="py-3"></th>
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
-              <td class="py-3">2023/05/01</td>
+            <tr class="border-b-2 border-black" v-for="member in memberList" :key="member.number">
+              <td class="py-3">{{ member.name }}</td>
+              <td class="py-3">{{ member.phone }}</td>
+              <td class="py-3">{{ member.createdAt }}</td>
               <th class="flex justify-end items-center">
                 <button
-                  @click="handleModalOpen('update')"
+                  @click="handleModalOpen('update', member)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   修改
                 </button>
                 <button
-                  @click="handleModalOpen('delete')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  刪除
-                </button>
-              </th>
-            </tr>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
-              <td class="py-3">2023/05/01</td>
-              <th class="flex justify-end items-center">
-                <button
-                  @click="handleModalOpen('update')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  修改
-                </button>
-                <button
-                  @click="handleModalOpen('delete')"
+                  @click="handleModalOpen('delete', member)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   刪除
@@ -110,9 +200,9 @@ const handleModalClose = () => {
       <div class="relative bg-white border-2 border-textself rounded-lg shadow">
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
-          <p v-if="isCreate === 'create'" class="text-xl font-medium">新增使用者資料</p>
-          <p v-else-if="isCreate === 'update'" class="text-xl font-medium">修改使用者資料</p>
-          <p v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除使用者資料</p>
+          <p v-if="isCreate === 'create'" class="text-xl font-medium">新增會員資料</p>
+          <p v-else-if="isCreate === 'update'" class="text-xl font-medium">修改會員資料</p>
+          <p v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除會員資料</p>
           <button
             @click="handleModalClose()"
             type="button"
@@ -145,30 +235,29 @@ const handleModalClose = () => {
                 id="name"
                 class="form-input"
                 placeholder="name"
+                v-model.trim="payload.name"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
               <input
-                type="text"
+                type="tel"
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
+                placeholder="0912345678"
+                v-model="payload.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
             <section class="flex">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
+              <button type="submit" class="w-full btn btn-dark" @click.prevent="postMember">
+                確認新增
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認新增</button>
             </section>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
@@ -180,52 +269,46 @@ const handleModalClose = () => {
                 id="name"
                 class="form-input"
                 placeholder="name"
+                v-model.trim="payload.name"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
               <input
-                type="text"
+                type="tel"
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
+                placeholder="0912345678"
+                v-model="payload.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
             <section class="flex">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
+              <button type="submit" class="w-full btn btn-dark" @click.prevent="patchMember">
+                確認修改
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認修改</button>
             </section>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
             <div>
               <p class="block mb-2 text-xl font-medium text-gray-900">姓名</p>
-              <p>XXX</p>
+              <p>{{ payload.name }}</p>
             </div>
             <div>
               <p class="block mb-2 text-xl font-medium text-gray-900">電話</p>
-              <p>0908 000 123</p>
+              <p>{{ payload.phone }}</p>
             </div>
-            <p class="text-xl font-semibold text-gray-900">是否要刪除使用者資料?</p>
+            <p class="text-xl font-semibold text-gray-900">是否要刪除會員資料?</p>
             <!-- send_btn -->
             <section class="flex mt-12">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
+              <button type="submit" class="w-full btn btn-dark" @click.prevent="delMember">
+                確認刪除
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認刪除</button>
             </section>
           </form>
         </div>

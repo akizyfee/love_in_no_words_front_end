@@ -29,8 +29,6 @@ export const editAdminCoupon = (couponNo, payload) => axios.patch(`/v1/coupons/a
 /**
  * O-4-5 刪除優惠活動
  * @param {string} 活動種類
- * @param {string} 優惠碼編號 (優惠碼活動)
- * @param {number} 商品編號 (買一送一活動)
- * @param {number} 優惠碼順序 (A加B活動)
+ * @param {string} 優惠碼順序
  */
-export const deleteAdminCoupon = (activity, couponId, productNo, couponNo) => axios.delete(`/v1/coupons/admin?activity=${activity}&couponId=${couponId}&productNo=${productNo}&couponNo=${couponNo}`)
+export const deleteAdminCoupon = (activity, couponNo) => axios.delete(`/v1/coupons/admin?activity=${activity}&couponNo=${couponNo}`)

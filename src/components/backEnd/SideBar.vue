@@ -1,4 +1,17 @@
-<script setup></script>
+<script setup>
+import { useRouter } from 'vue-router'
+import { clearCookieToken } from '@/utils/cookie.js'
+import { catchError } from '@/utils/catchError.js'
+const router = useRouter()
+
+/**
+ * 清除 Cookie 功能
+ */
+const signOut = catchError(async () => {
+  await clearCookieToken()
+  router.push('/')
+})
+</script>
 <template>
   <div class="w-full h-full border-r-2 border-textself">
     <div class="h-full bg-white flex flex-col justify-between">
@@ -58,7 +71,7 @@
         </ul>
       </section>
       <section class="flex items-center">
-        <router-link to="/" class="btn btn-outline-dark m-6 w-full"> 登出 </router-link>
+        <button type="button" class="w-full btn btn-outline-dark m-6" @click="signOut">登出</button>
       </section>
     </div>
   </div>
