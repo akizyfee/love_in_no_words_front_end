@@ -2,8 +2,9 @@
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted } from 'vue'
-import { getAdminUser } from '@/apis/user'
+import { getAdminUser, addAdminUser, editAdminUser } from '@/apis/user'
 import { catchError } from '@/utils/catchError'
+import { successAlert } from '@/plugins/toast'
 
 /**
  * modal
@@ -39,7 +40,7 @@ const fetchUser = catchError(async () => {
   const currentPage = 1
   const { data } = await getAdminUser(currentPage)
   userList.push(...data.usersList)
-  console.log(data.usersList)
+  console.log(data)
 })
 
 onMounted(() => {
@@ -49,34 +50,43 @@ onMounted(() => {
 /**
  * 新增使用者
  */
-// const userProfile = reactive({
-//   name: '',
-//   phone: '',
-//   tilteNo: '',
-//   isdisabled: false,
-//   password: ''
-// })
+const userProfile = reactive({
+  _id: '',
+  name: '',
+  phone: '',
+  titleNo: '',
+  isDisabled: false,
+  password: ''
+})
 
-// const fetchAddUser = catchError(async () => {
-//   const aa = await addAdminUser(userProfile)
-//   console.log('取得資料', aa)
-// })
+const fetchAddUser = catchError(async () => {
+  const { message } = await addAdminUser(userProfile)
+  successAlert(message)
+  userProfile.name = ''
+  userProfile.phone = ''
+  userProfile.titleNo = ''
+  userProfile.isDisabled = ''
+  userProfile.password = ''
+  handleModalClose()
+})
 
 /**
  * 修改使用者
  */
-// const editUserProfile = reactive({
-//   name: '',
-//   phone: '',
-//   tilteNo: '',
-//   isdisabled: false,
-//   password: ''
-// })
+let editUserProfile = reactive()
 
-// const fetcheditUser = catchError(async (uerId) => {
-//   const { data } = await editAdminUser(uerId, editUserProfile)
-//   console.log('編輯資料', data)
-// })
+const editUser = (checkisCreate, item) => {
+  handleModalOpen(checkisCreate)
+  if (checkisCreate === 'update') {
+    console.log(item)
+    editUserProfile = item
+  }
+}
+
+const fetcheditUser = catchError(async () => {
+  const { data } = await editAdminUser(editUserProfile._id, editUserProfile)
+  console.log('編輯資料', data)
+})
 
 /**
  * 刪除使用者
@@ -97,7 +107,9 @@ onMounted(() => {
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
       <div class="flex justify-end mb-6">
-        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">新增使用者</button>
+        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
+          新增使用者
+        </button>
       </div>
       <!-- table -->
       <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-6">
@@ -115,11 +127,11 @@ onMounted(() => {
             <tr class="border-b-2 border-black" v-for="users in userList" :key="users._id">
               <td class="py-3">{{ users.name }}</td>
               <td class="py-3">{{ users.phone }}</td>
-              <td class="py-3">店員</td>
-              <th class="py-3">停用</th>
+              <td class="py-3">{{ users.title }}</td>
+              <th class="py-3">{{ users.isDisabled ? '啟用' : '停用' }}</th>
               <th class="flex justify-end items-center">
                 <button
-                  @click="handleModalOpen('update')"
+                  @click="editUser('update', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   修改
@@ -177,7 +189,6 @@ onMounted(() => {
                 name="name"
                 id="name"
                 class="form-input"
-                placeholder="name"
                 v-model="userProfile.name"
                 required
               />
@@ -189,34 +200,39 @@ onMounted(() => {
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
                 v-model="userProfile.phone"
                 required
               />
             </div>
             <div>
-              <label for="job" class="block mb-2 text-xl font-medium text-gray-900">職位</label>
-              <input
-                type="text"
-                name="job"
-                id="job"
-                class="form-input"
-                placeholder="job"
-                v-model="userProfile.tilteNo"
-                required
-              />
+              <label for="job" class="block mb-2 font-medium">職位</label>
+              <select id="job" class="form-select" v-model="userProfile.title">
+                <option value="1" selected>店長</option>
+                <option value="2">店員</option>
+                <option value="3">廚師</option>
+                <option value="4">會員</option>
+              </select>
             </div>
             <div>
-              <label for="password" class="block mb-2 text-xl font-medium text-gray-900">密碼</label>
+              <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
+                >密碼</label
+              >
               <input
                 type="text"
                 name="password"
                 id="password"
                 class="form-input"
-                placeholder="password"
                 v-model="userProfile.password"
                 required
               />
+            </div>
+            <!-- status -->
+            <div>
+              <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
+              <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
+                <option value="false" selected>停用</option>
+                <option value="true">啟用</option>
+              </select>
             </div>
             <!-- send_btn -->
             <section class="flex">
@@ -227,11 +243,7 @@ onMounted(() => {
               >
                 取消
               </button>
-              <button
-                @click="fetchAddUser"
-                type="submit"
-                class="w-full btn btn-dark"
-                >
+              <button @click.prevent="fetchAddUser" type="submit" class="w-full btn btn-dark">
                 確認新增
               </button>
             </section>
@@ -262,16 +274,13 @@ onMounted(() => {
               />
             </div>
             <div>
-              <label for="job" class="block mb-2 text-xl font-medium text-gray-900">職位</label>
-              <input
-                type="text"
-                name="job"
-                id="job"
-                class="form-input"
-                placeholder="job"
-                v-model="editUserProfile.tilteNo"
-                required
-              />
+              <label for="job" class="block mb-2 font-medium">職位</label>
+              <select id="job" class="form-select" v-model="editUserProfile.title">
+                <option value="1">店長</option>
+                <option value="2">店員</option>
+                <option value="3">廚師</option>
+                <option value="4">會員</option>
+              </select>
             </div>
             <div>
               <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
@@ -290,9 +299,13 @@ onMounted(() => {
             <!-- status -->
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_memberStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select
+                id="form_memberStatus"
+                class="form-select"
+                v-model="editUserProfile.isDisabled"
+              >
+                <option value="false" selected>停用</option>
+                <option value="true">啟用</option>
               </select>
             </div>
             <!-- time -->
@@ -326,11 +339,7 @@ onMounted(() => {
               >
                 取消
               </button>
-              <button
-                @click="fetchDeleteUser"
-                type="submit"
-                class="w-full btn btn-dark"
-              >
+              <button @click="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
                 確認刪除
               </button>
             </section>
