@@ -16,38 +16,43 @@ export const searchType = (productsType) => axios.get(`/v1/products?productsType
 export const searchAdminProduct = (productsType, priceLowerLimit, priceUpperLimit, amountStatus) => axios.get(`/v1/products/admin?productsType=${productsType}&priceLowerLimit=${priceLowerLimit}&priceUpperLimit=${priceUpperLimit}&amountStatus=${amountStatus}`)
 
 /**
- * O-3-2 新增商品
+ * O-3-2 上傳商品圖片
+ */
+export const uploadAdminPhotos = () => axios.post('/v1/products/admin/uploadPhotos')
+
+/**
+ * O-3-3 新增商品
  * @param {object} payload 商品資料
  */
 export const addAdminProduct = (payload) => axios.post('/v1/products/admin', payload)
 
 /**
- * O-3-3 修改商品
+ * O-3-4 修改商品
  * @param {Number} 商品 ID
  * @param {object} payload 商品資料
  */
 export const editAdminProduct = (productNo, payload) => axios.patch(`/v1/products/admin/${productNo}`, payload)
 
 /**
- * O-3-4 刪除商品
+ * O-3-5 刪除商品
  * @param {Number} 商品 ID
  */
 export const deleteAdminProduct = (productNo) => axios.delete(`/v1/products/admin/${productNo}`)
 
 /**
- * O-3-5 取得商品種類代碼
+ * O-3-6 取得商品種類代碼
  * @param {string} 頁數
  */
-export const getAdminType = (page) => axios.get('/v1/dessertcodes')
+export const getType = (page) => axios.get('/v1/dessertcodes')
 
 /**
- * O-3-6 新增分類
+ * O-3-7 新增分類
  * @param {object} payload 商品分類資料
  */
 export const addAdminType = (payload) => axios.post('/v1/dessertcodes/admin', payload)
 
 /**
- * O-3-7 刪除分類
+ * O-3-8 刪除分類
  * @param {Number} 商品分類編號
  */
 export const deleteAdminType = (productsType) => axios.delete(`/v1/dessertcodes/admin/${productsType}`)

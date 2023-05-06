@@ -3,9 +3,9 @@ import { useCookies } from '@vueuse/integrations/useCookies'
 const cookieToken = useCookies(['posSystemToken'])
 
 /**
- * 清除使用者資訊
+ * 清除 cookie 的 token
  */
-export const clearUserInfo = () => {
+export const clearCookieToken = () => {
   cookieToken.remove('posSystemToken')
 }
 

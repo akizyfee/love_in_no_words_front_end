@@ -7,12 +7,6 @@ import axios from '@/plugins/axios'
 export const loginApi = (payload) => axios.post('/v1/users/login', payload)
 
 /**
- * P-2 登出
- * @param {string} 使用者 ID
- */
-export const logoutApi = (userId) => axios.post('/v1/logout', userId)
-
-/**
  * S-4-2 查詢會員
  * @param {string} 會員電話
  * @param {number} 頁碼
