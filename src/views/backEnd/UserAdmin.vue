@@ -1,7 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted, watch } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { useForm } from 'vee-validate'
 import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
 import { catchError } from '@/utils/catchError'
@@ -20,16 +20,6 @@ const fetchUser = catchError(async () => {
 })
 onMounted(() => {
   fetchUser()
-})
-
-/**
- * 重新設置使用者資料
- */
-const resetUserList = ref(false)
-
-watch(resetUserList, () => {
-  fetchUser()
-  resetUserList.value = false
 })
 
 /**
@@ -55,8 +45,7 @@ const fetchAddUser = catchError(async () => {
   const { message } = await addAdminUser(userProfile.value)
   successAlert(message)
   handleModalClose()
-  userProfile.value = {}
-  resetUserList.value = true
+  fetchUser()
 })
 
 /**
@@ -66,8 +55,7 @@ const fetcheditUser = catchError(async () => {
   const { message } = await editAdminUser(userProfile.value._id, userProfile.value)
   handleModalClose()
   successAlert(message)
-  userProfile.value = {}
-  resetUserList.value = true
+  fetchUser()
 })
 
 /**
@@ -77,8 +65,7 @@ const fetchDeleteUser = catchError(async () => {
   const { message } = await deleteAdminUser(userProfile.value._id, userProfile.value.titleNo)
   handleModalClose()
   successAlert(message)
-  userProfile.value = {}
-  resetUserList.value = true
+  fetchUser()
 })
 
 /**
@@ -95,9 +82,12 @@ const handleModalOpen = (checkisCreate, item) => {
       childComponent.openModal()
     }
     if (isCreate.value === 'update' || isCreate.value === 'delete') {
-      const { name, phone, password } = item
+      const { _id, name, phone, password, titleNo, isDisabled } = item
+      userProfile.value._id = _id
       userProfile.value.name = name
       userProfile.value.phone = phone
+      userProfile.value.titleNo = titleNo
+      userProfile.value.isDisabled = isDisabled
       userProfile.value.password = password
     }
   })
