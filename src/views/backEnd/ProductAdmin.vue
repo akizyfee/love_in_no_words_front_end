@@ -2,18 +2,60 @@
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, reactive } from 'vue'
-import { uploadAdminPhotos, addAdminProduct, searchAdminProduct } from '@/apis/product'
 import { catchError } from '@/utils/catchError'
+import { successAlert } from '@/plugins/toast'
+import {
+  uploadAdminPhotos,
+  addAdminProduct,
+  searchAdminProduct,
+  addAdminDessertType,
+  getAdminDessertType,
+  deleteAdminDessertType
+} from '@/apis/product'
 
+/**
+ * 新增商品分類
+ */
+const dessertType = reactive({
+  productsTypeName: ''
+})
+
+const fetchAddDessertcodes = catchError(async () => {
+  const { message } = await addAdminDessertType(dessertType)
+  successAlert(message)
+  fetchGetDessertTypeList()
+})
+
+/**
+ * 取得產品分類列表
+ */
+const dessertTypeList = ref([])
+const fetchGetDessertTypeList = catchError(async () => {
+  const { data } = await getAdminDessertType()
+  dessertTypeList.value = data
+})
+
+onMounted(() => {
+  fetchGetDessertTypeList()
+})
+
+/**
+ * 刪除商品分類
+ */
+const fetchDeleteAdminDessertType = catchError(async (productsType) => {
+  const { message } = await deleteAdminDessertType(productsType)
+  successAlert(message)
+  fetchGetDessertTypeList()
+})
 /**
  * 設置商品列表
  */
 const ProductList = ref([])
 const searchFilterProduct = reactive({
-  productsType: 1,
+  productsType: 0,
   priceLowerLimit: 0,
   priceUpperLimit: 100,
-  amountStatus: 'zero'
+  amountStatus: 'safe'
 })
 const fetchProduct = catchError(async () => {
   const { data } = await searchAdminProduct(
@@ -33,12 +75,13 @@ onMounted(() => {
  * 圖片上傳
  */
 const imgFile = ref()
+const imgUrl = ref('')
 const uploadFile = catchError(async () => {
   const file = imgFile.value.files[0]
   const formData = new FormData()
   formData.append('file-to-upload', file)
-  const message = await uploadAdminPhotos(formData)
-  console.log(message)
+  const { data } = await uploadAdminPhotos(formData)
+  imgUrl.value = data.photoUrl
 })
 
 /**
@@ -50,8 +93,7 @@ const uploadFile = catchError(async () => {
 
 const productCard = ref({
   productName: '檸檬千層蛋糕',
-  photoUrl:
-    'https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60',
+  photoUrl: imgUrl.value,
   price: 300,
   inStockAmount: 20,
   safeStockAmount: 5,
@@ -508,21 +550,27 @@ const theme = ref('white')
               <label for="form_selectStatus" class="block mb-2 font-medium"
                 >菜單分類 (點擊紅色按鈕，即刻刪除該分類)
               </label>
-              <input type="text" id="form_selectStatus" class="form-input mr-2" />
+              <input
+                type="text"
+                id="form_selectStatus"
+                class="form-input mr-2"
+                v-model="dessertType.productsTypeName"
+              />
               <div class="mt-3">
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >蛋糕</span
-                >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >馬卡龍</span
-                >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >聖代</span
-                >
+                <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
+                  <button
+                    @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
+                    class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
+                  >
+                    {{ dessertList.productsTypeName }}
+                  </button>
+                </template>
               </div>
             </div>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確定新增</button>
+            <button @click.prevent="fetchAddDessertcodes" type="submit" class="w-full btn btn-dark">
+              確定新增
+            </button>
           </form>
         </div>
       </div>
