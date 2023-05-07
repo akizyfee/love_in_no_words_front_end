@@ -1,9 +1,33 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
-import { uploadAdminPhotos, addAdminProduct } from '@/apis/product'
+import { ref, nextTick, onMounted, reactive } from 'vue'
+import { uploadAdminPhotos, addAdminProduct, searchAdminProduct } from '@/apis/product'
 import { catchError } from '@/utils/catchError'
+
+/**
+ * 設置商品列表
+ */
+const ProductList = ref([])
+const searchFilterProduct = reactive({
+  productsType: 1,
+  priceLowerLimit: 0,
+  priceUpperLimit: 100,
+  amountStatus: 'zero'
+})
+const fetchProduct = catchError(async () => {
+  const { data } = await searchAdminProduct(
+    searchFilterProduct.productsType,
+    searchFilterProduct.priceLowerLimit,
+    searchFilterProduct.priceUpperLimit,
+    searchFilterProduct.amountStatus
+  )
+  ProductList.value = data
+  console.log(ProductList.value)
+})
+onMounted(() => {
+  fetchProduct()
+})
 
 /**
  * 圖片上傳
@@ -18,8 +42,12 @@ const uploadFile = catchError(async () => {
 })
 
 /**
- * 新增商品
+ * 商品表單 和驗證
  */
+// const { errors, useFieldModel } = useForm({
+//   validationSchema: errorsFormSchema
+// })
+
 const productCard = ref({
   productName: '檸檬千層蛋糕',
   photoUrl:
@@ -32,10 +60,15 @@ const productCard = ref({
   isDisabled: false,
   description: '祥做的好吃蛋糕'
 })
+
+/**
+ * 新增商品
+ */
 const fetchAddProduct = catchError(async () => {
   const { data } = await addAdminProduct(productCard)
   console.log(data)
 })
+
 /**
  * modal
  * */
@@ -49,6 +82,15 @@ const handleModalOpen = (checkIsNew, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    // if (isCreate.value === 'updateProduct' || isCreate.value === 'updateCategory') {
+    //   const { _id, name, phone, password, titleNo, isDisabled } = item
+    //   userProfile.value._id = _id
+    //   userProfile.value.name = name
+    //   userProfile.value.phone = phone
+    //   userProfile.value.titleNo = titleNo
+    //   userProfile.value.isDisabled = isDisabled
+    //   userProfile.value.password = password
+    // }
   })
 }
 const handleModalClose = () => {
@@ -136,7 +178,7 @@ const theme = ref('white')
         <li
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
-          <a href="#" @click="handleModalOpen('updateProduct')">
+          <a href="#" @click="handleModalOpen('updateProduct', products)">
             <img
               class="rounded-t-lg object-cover w-full h-[184px]"
               src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
@@ -480,7 +522,7 @@ const theme = ref('white')
               </div>
             </div>
             <!-- send_btn -->
-            <button type="submit" class="w-full ml-1 btn btn-dark">確定新增</button>
+            <button type="submit" class="w-full btn btn-dark">確定新增</button>
           </form>
         </div>
       </div>
