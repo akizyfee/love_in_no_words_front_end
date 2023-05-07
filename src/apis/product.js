@@ -18,7 +18,7 @@ export const searchAdminProduct = (productsType, priceLowerLimit, priceUpperLimi
 /**
  * O-3-2 上傳商品圖片
  */
-export const uploadAdminPhotos = () => axios.post('/v1/products/admin/uploadPhotos')
+export const uploadAdminPhotos = (formData) => axios.post('/v1/products/admin/uploadPhotos', formData)
 
 /**
  * O-3-3 新增商品
@@ -43,16 +43,16 @@ export const deleteAdminProduct = (productNo) => axios.delete(`/v1/products/admi
  * O-3-6 取得商品種類代碼
  * @param {string} 頁數
  */
-export const getType = (page) => axios.get('/v1/dessertcodes')
+export const getAdminDessertType = () => axios.get('/v1/products/dessertcodes')
 
 /**
  * O-3-7 新增分類
  * @param {object} payload 商品分類資料
  */
-export const addAdminType = (payload) => axios.post('/v1/dessertcodes/admin', payload)
+export const addAdminDessertType = (payload) => axios.post('/v1/products/admin/dessertcodes', payload)
 
 /**
  * O-3-8 刪除分類
  * @param {Number} 商品分類編號
  */
-export const deleteAdminType = (productsType) => axios.delete(`/v1/dessertcodes/admin/${productsType}`)
+export const deleteAdminDessertType = (productsType) => axios.delete(`/v1/products/admin/dessertcodes/${productsType}`)

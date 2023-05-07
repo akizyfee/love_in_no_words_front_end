@@ -1,7 +1,116 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, reactive } from 'vue'
+import { catchError } from '@/utils/catchError'
+import { successAlert } from '@/plugins/toast'
+import {
+  uploadAdminPhotos,
+  addAdminProduct,
+  searchAdminProduct,
+  addAdminDessertType,
+  getAdminDessertType,
+  deleteAdminDessertType
+} from '@/apis/product'
+
+/**
+ * 新增商品分類
+ */
+const dessertType = reactive({
+  productsTypeName: ''
+})
+
+const fetchAddDessertcodes = catchError(async () => {
+  const { message } = await addAdminDessertType(dessertType)
+  successAlert(message)
+  fetchGetDessertTypeList()
+})
+
+/**
+ * 取得產品分類列表
+ */
+const dessertTypeList = ref([])
+const fetchGetDessertTypeList = catchError(async () => {
+  const { data } = await getAdminDessertType()
+  dessertTypeList.value = data
+})
+
+onMounted(() => {
+  fetchGetDessertTypeList()
+})
+
+/**
+ * 刪除商品分類
+ */
+const fetchDeleteAdminDessertType = catchError(async (productsType) => {
+  const { message } = await deleteAdminDessertType(productsType)
+  successAlert(message)
+  fetchGetDessertTypeList()
+})
+/**
+ * 設置商品列表
+ */
+const ProductList = ref([])
+const searchFilterProduct = reactive({
+  productsType: 0,
+  priceLowerLimit: 0,
+  priceUpperLimit: 100,
+  amountStatus: 'safe'
+})
+const fetchProduct = catchError(async () => {
+  const { data } = await searchAdminProduct(
+    searchFilterProduct.productsType,
+    searchFilterProduct.priceLowerLimit,
+    searchFilterProduct.priceUpperLimit,
+    searchFilterProduct.amountStatus
+  )
+  ProductList.value = data
+  console.log(ProductList.value)
+})
+onMounted(() => {
+  fetchProduct()
+})
+
+/**
+ * 圖片上傳
+ */
+const imgFile = ref()
+const imgUrl = ref('')
+const uploadFile = catchError(async () => {
+  const file = imgFile.value.files[0]
+  const formData = new FormData()
+  formData.append('file-to-upload', file)
+  const { data } = await uploadAdminPhotos(formData)
+  imgUrl.value = data.photoUrl
+})
+
+/**
+ * 商品表單 和驗證
+ */
+// const { errors, useFieldModel } = useForm({
+//   validationSchema: errorsFormSchema
+// })
+
+const productCard = ref({
+  productName: '檸檬千層蛋糕',
+  photoUrl: imgUrl.value,
+  price: 300,
+  inStockAmount: 20,
+  safeStockAmount: 5,
+  productsType: 1,
+  productionTime: 15,
+  isDisabled: false,
+  description: '祥做的好吃蛋糕'
+})
+
+/**
+ * 新增商品
+ */
+const fetchAddProduct = catchError(async () => {
+  const { data } = await addAdminProduct(productCard)
+  console.log(data)
+})
+
 /**
  * modal
  * */
@@ -15,6 +124,15 @@ const handleModalOpen = (checkIsNew, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    // if (isCreate.value === 'updateProduct' || isCreate.value === 'updateCategory') {
+    //   const { _id, name, phone, password, titleNo, isDisabled } = item
+    //   userProfile.value._id = _id
+    //   userProfile.value.name = name
+    //   userProfile.value.phone = phone
+    //   userProfile.value.titleNo = titleNo
+    //   userProfile.value.isDisabled = isDisabled
+    //   userProfile.value.password = password
+    // }
   })
 }
 const handleModalClose = () => {
@@ -45,7 +163,9 @@ const theme = ref('white')
         <div class="flex items-end gap-4 mb-3">
           <!-- category -->
           <section class="flex-col items-center">
-            <label for="filterCategory" class="block mb-1 mr-3 font-medium whitespace-nowrap">商品分類</label>
+            <label for="filterCategory" class="block mb-1 mr-3 font-medium whitespace-nowrap"
+              >商品分類</label
+            >
             <select id="filterCategory" class="form-select py-3">
               <option value="蛋糕" selected>蛋糕000</option>
               <option value="蛋糕1">蛋糕111</option>
@@ -54,7 +174,9 @@ const theme = ref('white')
           </section>
           <!-- status -->
           <section class="flex-col items-center">
-            <label for="filterStatus" class="block mb-1 mr-3 font-medium whitespace-nowrap">狀態</label>
+            <label for="filterStatus" class="block mb-1 mr-3 font-medium whitespace-nowrap"
+              >狀態</label
+            >
             <select id="filterStatus" class="form-select py-3">
               <option value="安全" selected>安全</option>
               <option value="危險">危險</option>
@@ -64,9 +186,21 @@ const theme = ref('white')
           <!-- price -->
           <section class="flex">
             <div class="flex items-center mr-3">
-              <input type="text" id="filterPrice" class="form-select py-3 max-w-[120px] xl:max-w-[200px]" placeholder="0" required />
+              <input
+                type="text"
+                id="filterPrice"
+                class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
+                placeholder="0"
+                required
+              />
               <div class="text-2xl align-middle mx-3">~</div>
-              <input type="text" id="filterPrice" class="form-select py-3 max-w-[120px] xl:max-w-[200px]" placeholder="2000" required />
+              <input
+                type="text"
+                id="filterPrice"
+                class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
+                placeholder="2000"
+                required
+              />
             </div>
             <button type="button" class="btn btn-outline-dark whitespace-nowrap">搜尋</button>
           </section>
@@ -86,7 +220,7 @@ const theme = ref('white')
         <li
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
-          <a href="#" @click="handleModalOpen('updateProduct')">
+          <a href="#" @click="handleModalOpen('updateProduct', products)">
             <img
               class="rounded-t-lg object-cover w-full h-[184px]"
               src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
@@ -201,81 +335,128 @@ const theme = ref('white')
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg p-3">
-          <form v-if="isCreate === 'create'" class="space-y-6">
+          <form v-if="isCreate === 'create'">
             <section class="grid grid-cols-2 gap-4">
               <section class="col-span-1">
                 <!-- name -->
                 <div>
                   <label for="form_productName" class="block mb-2 font-medium">商品名稱</label>
-                  <input type="text" id="form_productName" class="form-input mr-2" />
-                </div>
-                <!-- img -->
-                <div>
-                  <label for="form_productImg" class="block mb-2 font-medium">商品圖片</label>
-                  <div class="flex">
-                    <input type="text" id="form_productImg" class="form-input mr-2" />
-                    <button type="button" class="btn btn-dark whitespace-nowrap py-2 px-3">
-                      上傳圖片
-                    </button>
-                  </div>
+                  <input
+                    type="text"
+                    id="form_productName"
+                    class="form-input mr-2"
+                    v-model="productCard.productName"
+                  />
                 </div>
                 <!-- price -->
                 <div>
                   <label for="form_productPrice" class="block mb-2 font-medium">商品訂價</label>
-                  <input type="text" id="form_productPrice" class="form-input mr-2" />
+                  <input
+                    type="text"
+                    id="form_productPrice"
+                    class="form-input mr-2"
+                    v-model="productCard.price"
+                  />
                 </div>
-                <!-- stock -->
-                <div>
-                  <label for="form_Stock" class="block mb-2 font-medium">商品庫存數量</label>
-                  <input type="text" id="form_Stock" class="form-input mr-2" />
-                </div>
-                <!-- safe_stock -->
-                <div>
-                  <label for="form_SafeStock" class="block mb-2 font-medium">安全庫存量</label>
-                  <input type="text" id="form_SafeStock" class="form-input mr-2" />
-                </div>
-              </section>
-              <section class="col-span-1">
                 <!-- category -->
                 <div>
                   <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
                     >菜單分類</label
                   >
-                  <select id="selectStatus" class="form-select">
-                    <option value="蛋糕" selected>蛋糕</option>
-                    <option value="汽水">汽水</option>
-                    <option value="馬卡龍">馬卡龍</option>
+                  <select id="selectStatus" class="form-select" v-model="productCard.productsType">
+                    <option :value="1" selected>蛋糕</option>
+                    <option :value="2">汽水</option>
+                    <option :value="3">馬卡龍</option>
                   </select>
+                </div>
+                <!-- img -->
+                <div>
+                  <label for="form_productImg" class="block mb-2 font-medium">商品圖片</label>
+                  <div class="flex flex-col">
+                    <input
+                      id="form_productImg"
+                      ref="imgFile"
+                      type="file"
+                      class="form-input mr-2"
+                      @change="uploadFile"
+                    />
+                    <div class="my-5">
+                      <img
+                        src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+                        alt="user"
+                        class="rounded-lg object-cover w-full h-[184px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <section class="col-span-1">
+                <!-- stock -->
+                <div>
+                  <label for="form_Stock" class="block mb-2 font-medium">商品庫存數量</label>
+                  <input
+                    type="text"
+                    id="form_Stock"
+                    class="form-input mr-2"
+                    v-model="productCard.inStockAmount"
+                  />
+                </div>
+                <!-- safe_stock -->
+                <div>
+                  <label for="form_SafeStock" class="block mb-2 font-medium">安全庫存量</label>
+                  <input
+                    type="text"
+                    id="form_SafeStock"
+                    class="form-input mr-2"
+                    v-model="productCard.safeStockAmount"
+                  />
                 </div>
                 <!-- time -->
                 <div>
                   <label for="form_Stock" class="block mb-2 font-medium">製作時間</label>
                   <div class="flex items-center">
-                    <input type="text" id="form_Stock" class="form-input mr-2" />
+                    <input
+                      type="text"
+                      id="form_Stock"
+                      class="form-input mr-2"
+                      v-model="productCard.productionTime"
+                    />
                     <p class="whitespace-nowrap">分鐘</p>
                   </div>
                 </div>
                 <!-- status -->
                 <div>
-                  <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
-                    >狀態</label
+                  <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
+                  <select
+                    id="form_memberStatus"
+                    class="form-select"
+                    v-model="productCard.isDisabled"
                   >
-                  <select id="selectStatus" class="form-select">
-                    <option value="安全" selected>安全</option>
-                    <option value="危險">危險</option>
-                    <option value="無庫存">無庫存</option>
+                    <option :value="false" selected>停用</option>
+                    <option :value="true">啟用</option>
                   </select>
                 </div>
                 <!-- content -->
                 <div>
                   <label for="form_content" class="block mb-2 font-medium">商品描述</label>
-                  <textarea id="form_content" rows="5" class="form-input"></textarea>
+                  <textarea
+                    id="form_content"
+                    rows="5"
+                    class="form-input"
+                    v-model="productCard.description"
+                  ></textarea>
                 </div>
               </section>
             </section>
             <!-- send_btn -->
             <div class="flex">
-              <button type="submit" class="w-full mr-1 btn btn-outline-dark">確定新增</button>
+              <button
+                @click.prevent="fetchAddProduct"
+                type="submit"
+                class="w-full mr-1 btn btn-dark"
+              >
+                確定新增
+              </button>
             </div>
           </form>
           <form v-if="isCreate === 'updateProduct'" class="space-y-6">
@@ -359,7 +540,7 @@ const theme = ref('white')
               >
                 刪除
               </button>
-              <button @click="handleModalClose()" type="submit" class="w-full btn btn-outline-dark">
+              <button @click="handleModalClose()" type="submit" class="w-full btn btn-dark">
                 確定修改
               </button>
             </div>
@@ -369,30 +550,27 @@ const theme = ref('white')
               <label for="form_selectStatus" class="block mb-2 font-medium"
                 >菜單分類 (點擊紅色按鈕，即刻刪除該分類)
               </label>
-              <input type="text" id="form_selectStatus" class="form-input mr-2" />
+              <input
+                type="text"
+                id="form_selectStatus"
+                class="form-input mr-2"
+                v-model="dessertType.productsTypeName"
+              />
               <div class="mt-3">
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >蛋糕</span
-                >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >馬卡龍</span
-                >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >聖代</span
-                >
+                <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
+                  <button
+                    @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
+                    class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
+                  >
+                    {{ dessertList.productsTypeName }}
+                  </button>
+                </template>
               </div>
             </div>
             <!-- send_btn -->
-            <div class="flex">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-1 btn btn-outline-dark"
-              >
-                取消
-              </button>
-              <button type="submit" class="w-full ml-1 btn btn-dark">確定新增</button>
-            </div>
+            <button @click.prevent="fetchAddDessertcodes" type="submit" class="w-full btn btn-dark">
+              確定新增
+            </button>
           </form>
         </div>
       </div>
