@@ -233,10 +233,10 @@ const handleModalClose = () => {
             <div>
               <label for="job" class="block mb-2 font-medium">職位</label>
               <select id="job" class="form-select" v-model="userProfile.titleNo">
-                <option value="1" selected>店長</option>
-                <option value="2">店員</option>
-                <option value="3">廚師</option>
-                <option value="4">會員</option>
+                <option :value="1" selected>店長</option>
+                <option :value="2">店員</option>
+                <option :value="3">廚師</option>
+                <option :value="4">會員</option>
               </select>
             </div>
             <div>
@@ -257,8 +257,8 @@ const handleModalClose = () => {
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
               <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
-                <option value="false" selected>停用</option>
-                <option value="true">啟用</option>
+                <option :value="false" selected>停用</option>
+                <option :value="true">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
@@ -302,10 +302,10 @@ const handleModalClose = () => {
             <div>
               <label for="job" class="block mb-2 font-medium">職位</label>
               <select id="job" class="form-select" v-model="userProfile.titleNo">
-                <option value="1">店長</option>
-                <option value="2">店員</option>
-                <option value="3">廚師</option>
-                <option value="4">會員</option>
+                <option :value="1">店長</option>
+                <option :value="2">店員</option>
+                <option :value="3">廚師</option>
+                <option :value="4">會員</option>
               </select>
             </div>
             <div>
@@ -325,8 +325,8 @@ const handleModalClose = () => {
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
               <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
-                <option value="false" selected>停用</option>
-                <option value="true">啟用</option>
+                <option :value="false" selected>停用</option>
+                <option :value="true">啟用</option>
               </select>
             </div>
             <!-- time -->
