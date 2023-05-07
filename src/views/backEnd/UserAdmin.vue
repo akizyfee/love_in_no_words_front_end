@@ -245,18 +245,9 @@ const handleModalClose = () => {
               </select>
             </div>
             <!-- send_btn -->
-            <section class="flex">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
-              </button>
-              <button @click.prevent="fetchAddUser" type="submit" class="w-full btn btn-dark">
-                確認新增
-              </button>
-            </section>
+            <button @click.prevent="fetchAddUser" type="submit" class="w-full btn btn-dark">
+              確認新增
+            </button>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
             <div>
@@ -317,18 +308,9 @@ const handleModalClose = () => {
             <!-- time -->
             <!-- <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p> -->
             <!-- send_btn -->
-            <section class="flex">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
-              </button>
-              <button @click.prevent="fetcheditUser" type="submit" class="w-full btn btn-dark">
-                確認修改
-              </button>
-            </section>
+            <button @click.prevent="fetcheditUser" type="submit" class="w-full btn btn-dark">
+              確認修改
+            </button>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
             <p class="text-xl font-semibold text-gray-900">
@@ -337,18 +319,13 @@ const handleModalClose = () => {
               資料?
             </p>
             <!-- send_btn -->
-            <section class="flex mt-12">
-              <button
-                @click="handleModalClose()"
-                type="button"
-                class="w-full mr-3 btn btn-outline-dark"
-              >
-                取消
-              </button>
-              <button @click.prevent="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
-                確認刪除
-              </button>
-            </section>
+            <button
+              @click.prevent="fetchDeleteUser"
+              type="submit"
+              class="w-full btn btn-dark mt-12"
+            >
+              確認刪除
+            </button>
           </form>
         </div>
       </div>
