@@ -62,13 +62,6 @@ const fetchAddUser = catchError(async () => {
 /**
  * 修改使用者
  */
-const editUser = (checkisCreate, item) => {
-  handleModalOpen(checkisCreate)
-  if (checkisCreate === 'update') {
-    userProfile.value = item
-  }
-}
-
 const fetcheditUser = catchError(async () => {
   const { message } = await editAdminUser(userProfile.value._id, userProfile.value)
   handleModalClose()
@@ -80,13 +73,6 @@ const fetcheditUser = catchError(async () => {
 /**
  * 刪除使用者
  */
-const deletetUser = (checkisCreate, item) => {
-  handleModalOpen(checkisCreate)
-  if (checkisCreate === 'delete') {
-    userProfile.value = item
-  }
-}
-
 const fetchDeleteUser = catchError(async () => {
   const { message } = await deleteAdminUser(userProfile.value._id, userProfile.value.titleNo)
   handleModalClose()
@@ -108,6 +94,12 @@ const handleModalOpen = (checkisCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'update' || isCreate.value === 'delete') {
+      const { name, phone, password } = item
+      userProfile.value.name = name
+      userProfile.value.phone = phone
+      userProfile.value.password = password
+    }
   })
 }
 const handleModalClose = () => {
@@ -116,6 +108,7 @@ const handleModalClose = () => {
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      userProfile.value = {}
     }
   })
 }
@@ -155,13 +148,13 @@ const handleModalClose = () => {
               <th class="py-3">{{ users.isDisabled ? '啟用' : '停用' }}</th>
               <th class="flex justify-end items-center">
                 <button
-                  @click.prevent="editUser('update', users)"
+                  @click.prevent="handleModalOpen('update', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   修改
                 </button>
                 <button
-                  @click.prevent="deletetUser('delete', users)"
+                  @click.prevent="handleModalOpen('delete', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   刪除
@@ -286,6 +279,7 @@ const handleModalClose = () => {
                 v-model="userProfile.name"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
@@ -297,7 +291,7 @@ const handleModalClose = () => {
                 v-model="userProfile.phone"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">{{ errors.editPhone }}</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <div>
               <label for="job" class="block mb-2 font-medium">職位</label>
@@ -320,6 +314,7 @@ const handleModalClose = () => {
                 v-model="userProfile.password"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.password }}</p>
             </div>
             <!-- status -->
             <div>
