@@ -1,10 +1,99 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, reactive, nextTick, onMounted } from 'vue'
-import { getAdminUser, addAdminUser, editAdminUser } from '@/apis/user'
+import { ref, nextTick, onMounted, watch } from 'vue'
+import { useForm } from 'vee-validate'
+import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
 import { catchError } from '@/utils/catchError'
 import { successAlert } from '@/plugins/toast'
+import { errorsFormSchema } from '@/utils/formValidate'
+
+/**
+ * 設置使用者列表
+ */
+const userList = ref([])
+
+const fetchUser = catchError(async () => {
+  const currentPage = 1
+  const { data } = await getAdminUser(currentPage)
+  userList.value = data.usersList
+})
+onMounted(() => {
+  fetchUser()
+})
+
+/**
+ * 重新設置使用者資料
+ */
+const resetUserList = ref(false)
+
+watch(resetUserList, () => {
+  fetchUser()
+  resetUserList.value = false
+})
+
+/**
+ * 表單和 validate
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
+const userProfile = ref({
+  _id: '',
+  name: useFieldModel('name'),
+  phone: useFieldModel('phone'),
+  titleNo: '1',
+  isDisabled: false,
+  password: useFieldModel('password')
+})
+
+/**
+ * 新增使用者
+ */
+const fetchAddUser = catchError(async () => {
+  const { message } = await addAdminUser(userProfile.value)
+  successAlert(message)
+  handleModalClose()
+  userProfile.value = {}
+  resetUserList.value = true
+})
+
+/**
+ * 修改使用者
+ */
+const editUser = (checkisCreate, item) => {
+  handleModalOpen(checkisCreate)
+  if (checkisCreate === 'update') {
+    userProfile.value = item
+  }
+}
+
+const fetcheditUser = catchError(async () => {
+  const { message } = await editAdminUser(userProfile.value._id, userProfile.value)
+  handleModalClose()
+  successAlert(message)
+  userProfile.value = {}
+  resetUserList.value = true
+})
+
+/**
+ * 刪除使用者
+ */
+const deletetUser = (checkisCreate, item) => {
+  handleModalOpen(checkisCreate)
+  if (checkisCreate === 'delete') {
+    userProfile.value = item
+  }
+}
+
+const fetchDeleteUser = catchError(async () => {
+  const { message } = await deleteAdminUser(userProfile.value._id, userProfile.value.titleNo)
+  handleModalClose()
+  successAlert(message)
+  userProfile.value = {}
+  resetUserList.value = true
+})
 
 /**
  * modal
@@ -30,71 +119,6 @@ const handleModalClose = () => {
     }
   })
 }
-
-/**
- * 取得使用者列表
- */
-const userList = reactive([])
-
-const fetchUser = catchError(async () => {
-  const currentPage = 1
-  const { data } = await getAdminUser(currentPage)
-  userList.push(...data.usersList)
-  console.log(data)
-})
-
-onMounted(() => {
-  fetchUser()
-})
-
-/**
- * 新增使用者
- */
-const userProfile = reactive({
-  _id: '',
-  name: '',
-  phone: '',
-  titleNo: '',
-  isDisabled: false,
-  password: ''
-})
-
-const fetchAddUser = catchError(async () => {
-  const { message } = await addAdminUser(userProfile)
-  successAlert(message)
-  userProfile.name = ''
-  userProfile.phone = ''
-  userProfile.titleNo = ''
-  userProfile.isDisabled = ''
-  userProfile.password = ''
-  handleModalClose()
-})
-
-/**
- * 修改使用者
- */
-let editUserProfile = reactive()
-
-const editUser = (checkisCreate, item) => {
-  handleModalOpen(checkisCreate)
-  if (checkisCreate === 'update') {
-    console.log(item)
-    editUserProfile = item
-  }
-}
-
-const fetcheditUser = catchError(async () => {
-  const { data } = await editAdminUser(editUserProfile._id, editUserProfile)
-  console.log('編輯資料', data)
-})
-
-/**
- * 刪除使用者
- */
-// const fetchDeleteUser = catchError(async () => {
-//   const { data } = await deleteAdminUser()
-//   console.log(data)
-// })
 </script>
 
 <template>
@@ -107,7 +131,7 @@ const fetcheditUser = catchError(async () => {
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
       <div class="flex justify-end mb-6">
-        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
+        <button @click.prevent="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
           新增使用者
         </button>
       </div>
@@ -131,13 +155,13 @@ const fetcheditUser = catchError(async () => {
               <th class="py-3">{{ users.isDisabled ? '啟用' : '停用' }}</th>
               <th class="flex justify-end items-center">
                 <button
-                  @click="editUser('update', users)"
+                  @click.prevent="editUser('update', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   修改
                 </button>
                 <button
-                  @click="handleModalOpen('delete')"
+                  @click.prevent="deletetUser('delete', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   刪除
@@ -192,6 +216,7 @@ const fetcheditUser = catchError(async () => {
                 v-model="userProfile.name"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
@@ -203,10 +228,11 @@ const fetcheditUser = catchError(async () => {
                 v-model="userProfile.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <div>
               <label for="job" class="block mb-2 font-medium">職位</label>
-              <select id="job" class="form-select" v-model="userProfile.title">
+              <select id="job" class="form-select" v-model="userProfile.titleNo">
                 <option value="1" selected>店長</option>
                 <option value="2">店員</option>
                 <option value="3">廚師</option>
@@ -225,6 +251,7 @@ const fetcheditUser = catchError(async () => {
                 v-model="userProfile.password"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.password }}</p>
             </div>
             <!-- status -->
             <div>
@@ -256,8 +283,7 @@ const fetcheditUser = catchError(async () => {
                 name="name"
                 id="name"
                 class="form-input"
-                placeholder="name"
-                v-model="editUserProfile.name"
+                v-model="userProfile.name"
                 required
               />
             </div>
@@ -268,14 +294,14 @@ const fetcheditUser = catchError(async () => {
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
-                v-model="editUserProfile.phone"
+                v-model="userProfile.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.editPhone }}</p>
             </div>
             <div>
               <label for="job" class="block mb-2 font-medium">職位</label>
-              <select id="job" class="form-select" v-model="editUserProfile.title">
+              <select id="job" class="form-select" v-model="userProfile.titleNo">
                 <option value="1">店長</option>
                 <option value="2">店員</option>
                 <option value="3">廚師</option>
@@ -290,20 +316,15 @@ const fetcheditUser = catchError(async () => {
                 type="password"
                 name="password"
                 id="password"
-                placeholder="••••••••"
                 class="form-input"
-                v-model="editUserProfile.password"
+                v-model="userProfile.password"
                 required
               />
             </div>
             <!-- status -->
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
-              <select
-                id="form_memberStatus"
-                class="form-select"
-                v-model="editUserProfile.isDisabled"
-              >
+              <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
                 <option value="false" selected>停用</option>
                 <option value="true">啟用</option>
               </select>
@@ -319,17 +340,17 @@ const fetcheditUser = catchError(async () => {
               >
                 取消
               </button>
-              <button
-                @click="fetcheditUser('644e8d87b5fd478b1335aee0')"
-                type="submit"
-                class="w-full btn btn-dark"
-              >
+              <button @click.prevent="fetcheditUser" type="submit" class="w-full btn btn-dark">
                 確認修改
               </button>
             </section>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
-            <p class="text-xl font-semibold text-gray-900">是否要刪除使用者資料?</p>
+            <p class="text-xl font-semibold text-gray-900">
+              是否要刪除
+              <span class="text-primary">{{ userProfile.name }}</span>
+              資料?
+            </p>
             <!-- send_btn -->
             <section class="flex mt-12">
               <button
@@ -339,7 +360,7 @@ const fetcheditUser = catchError(async () => {
               >
                 取消
               </button>
-              <button @click="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
+              <button @click.prevent="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
                 確認刪除
               </button>
             </section>

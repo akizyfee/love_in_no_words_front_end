@@ -54,6 +54,6 @@ export const editAdminUser = (userId, payload) => axios.patch(`/v1/users/admin/$
 /**
  * O-1-4 刪除使用者
  * @param {string} 使用者 ID
- * @param {number} 職位代碼
+ * @param {string} 職位代碼
  */
-export const deleteAdminUser = (userId, titleNo) => axios.post(`/v1/users/admin/${userId}/${titleNo}`)
+export const deleteAdminUser = (userId, titleNo) => axios.delete(`/v1/users/admin/${userId}/${titleNo}`)
