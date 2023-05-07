@@ -16,6 +16,9 @@ export const errorsFormSchema = {
     if (!value) {
       return '密碼必填'
     }
+    if (value.length <= 7) {
+      return '密碼長度需大於 8 碼'
+    }
     return true
   }
 }
