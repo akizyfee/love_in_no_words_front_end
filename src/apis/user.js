@@ -49,11 +49,11 @@ export const addAdminUser = (payload) => axios.post('/v1/users/admin', payload)
  * @param {string} 使用者 ID
  * @param {object} payload 使用者資料
  */
-export const editAdminUser = (userId, payload) => axios.post(`/v1/users/admin/${userId}`, payload)
+export const editAdminUser = (userId, payload) => axios.patch(`/v1/users/admin/${userId}`, payload)
 
 /**
  * O-1-4 刪除使用者
  * @param {string} 使用者 ID
- * @param {number} 職位代碼
+ * @param {string} 職位代碼
  */
-export const deleteAdminUser = (userId, titleNo) => axios.post(`/v1/users/admin/${userId}/${titleNo}`)
+export const deleteAdminUser = (userId, titleNo) => axios.delete(`/v1/users/admin/${userId}/${titleNo}`)

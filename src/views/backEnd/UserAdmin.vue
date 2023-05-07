@@ -1,18 +1,100 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
-// import { getUserProfile, addUser, editUser, deleteUser } from '@/apis/user'
-// import { catchError } from '@/utils/catchError'
+import { ref, nextTick, onMounted, watch } from 'vue'
+import { useForm } from 'vee-validate'
+import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
+import { catchError } from '@/utils/catchError'
+import { successAlert } from '@/plugins/toast'
+import { errorsFormSchema } from '@/utils/formValidate'
 
-// const userProfile = reactive({
-//   id: '',
-//   name: '',
-//   phone: '',
-//   tilteNo: 0,
-//   isdisabled: false,
-//   password: ''
-// })
+/**
+ * 設置使用者列表
+ */
+const userList = ref([])
+
+const fetchUser = catchError(async () => {
+  const currentPage = 1
+  const { data } = await getAdminUser(currentPage)
+  userList.value = data.usersList
+})
+onMounted(() => {
+  fetchUser()
+})
+
+/**
+ * 重新設置使用者資料
+ */
+const resetUserList = ref(false)
+
+watch(resetUserList, () => {
+  fetchUser()
+  resetUserList.value = false
+})
+
+/**
+ * 表單和 validate
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
+const userProfile = ref({
+  _id: '',
+  name: useFieldModel('name'),
+  phone: useFieldModel('phone'),
+  titleNo: '1',
+  isDisabled: false,
+  password: useFieldModel('password')
+})
+
+/**
+ * 新增使用者
+ */
+const fetchAddUser = catchError(async () => {
+  const { message } = await addAdminUser(userProfile.value)
+  successAlert(message)
+  handleModalClose()
+  userProfile.value = {}
+  resetUserList.value = true
+})
+
+/**
+ * 修改使用者
+ */
+const editUser = (checkisCreate, item) => {
+  handleModalOpen(checkisCreate)
+  if (checkisCreate === 'update') {
+    userProfile.value = item
+  }
+}
+
+const fetcheditUser = catchError(async () => {
+  const { message } = await editAdminUser(userProfile.value._id, userProfile.value)
+  handleModalClose()
+  successAlert(message)
+  userProfile.value = {}
+  resetUserList.value = true
+})
+
+/**
+ * 刪除使用者
+ */
+const deletetUser = (checkisCreate, item) => {
+  handleModalOpen(checkisCreate)
+  if (checkisCreate === 'delete') {
+    userProfile.value = item
+  }
+}
+
+const fetchDeleteUser = catchError(async () => {
+  const { message } = await deleteAdminUser(userProfile.value._id, userProfile.value.titleNo)
+  handleModalClose()
+  successAlert(message)
+  userProfile.value = {}
+  resetUserList.value = true
+})
+
 /**
  * modal
  * */
@@ -37,48 +119,6 @@ const handleModalClose = () => {
     }
   })
 }
-
-/**
- * 取得使用者列表
- */
-// const userList = ref([])
-// const fetchUser = catchError(async () => {
-//   const currentPage = 1
-//   const data = await getUserProfile(currentPage)
-//   userList.value.push(...data)
-// })
-// fetchUser()
-// console.log(userList.value)
-
-/**
- * 新增使用者
- */
-// const fetchAddUser = catchError(async () => {
-//   const data = await addUser(userProfile)
-//   return data
-// })
-// fetchAddUser()
-// console.log(fetchAddUser)
-
-/**
- * 修改使用者
- */
-// const fetcheditUser = catchError(async () => {
-//   const data = await editUser(userProfile.id, userProfile)
-//   return data
-// })
-// fetcheditUser()
-// console.log(fetcheditUser)
-
-/**
- * 刪除使用者
- */
-// const fetchDeleteUser = catchError(async () => {
-//   const data = await deleteUser(userProfile.id, userProfile.tilteNo)
-//   return data
-// })
-// fetchDeleteUser()
-// console.log(fetchDeleteUser)
 </script>
 
 <template>
@@ -91,7 +131,9 @@ const handleModalClose = () => {
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
       <div class="flex justify-end mb-6">
-        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">新增使用者</button>
+        <button @click.prevent="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
+          新增使用者
+        </button>
       </div>
       <!-- table -->
       <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-6">
@@ -106,40 +148,20 @@ const handleModalClose = () => {
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
-              <td class="py-3">店員</td>
-              <th class="py-3">停用</th>
+            <tr class="border-b-2 border-black" v-for="users in userList" :key="users._id">
+              <td class="py-3">{{ users.name }}</td>
+              <td class="py-3">{{ users.phone }}</td>
+              <td class="py-3">{{ users.title }}</td>
+              <th class="py-3">{{ users.isDisabled ? '啟用' : '停用' }}</th>
               <th class="flex justify-end items-center">
                 <button
-                  @click="handleModalOpen('update')"
+                  @click.prevent="editUser('update', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   修改
                 </button>
                 <button
-                  @click="handleModalOpen('delete')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  刪除
-                </button>
-              </th>
-            </tr>
-            <tr class="border-b-2 border-black">
-              <td class="py-3">來亂的</td>
-              <td class="py-3">0900456123</td>
-              <td class="py-3">店員</td>
-              <th class="py-3">停用</th>
-              <th class="flex justify-end items-center">
-                <button
-                  @click="handleModalOpen('update')"
-                  class="btn btn-outline-dark w-auto mx-1 my-2"
-                >
-                  修改
-                </button>
-                <button
-                  @click="handleModalOpen('delete')"
+                  @click.prevent="deletetUser('delete', users)"
                   class="btn btn-outline-dark w-auto mx-1 my-2"
                 >
                   刪除
@@ -183,7 +205,7 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6 p-3" action="#">
+          <form v-if="isCreate === 'create'" class="space-y-6 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
@@ -191,9 +213,10 @@ const handleModalClose = () => {
                 name="name"
                 id="name"
                 class="form-input"
-                placeholder="name"
+                v-model="userProfile.name"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
@@ -202,27 +225,40 @@ const handleModalClose = () => {
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
+                v-model="userProfile.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <div>
-              <label for="job" class="block mb-2 text-xl font-medium text-gray-900">職位</label>
+              <label for="job" class="block mb-2 font-medium">職位</label>
+              <select id="job" class="form-select" v-model="userProfile.titleNo">
+                <option value="1" selected>店長</option>
+                <option value="2">店員</option>
+                <option value="3">廚師</option>
+                <option value="4">會員</option>
+              </select>
+            </div>
+            <div>
+              <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
+                >密碼</label
+              >
               <input
                 type="text"
-                name="job"
-                id="job"
+                name="password"
+                id="password"
                 class="form-input"
-                placeholder="job"
+                v-model="userProfile.password"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.password }}</p>
             </div>
             <!-- status -->
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_memberStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
+                <option value="false" selected>停用</option>
+                <option value="true">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
@@ -234,7 +270,9 @@ const handleModalClose = () => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認新增</button>
+              <button @click.prevent="fetchAddUser" type="submit" class="w-full btn btn-dark">
+                確認新增
+              </button>
             </section>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
@@ -245,7 +283,7 @@ const handleModalClose = () => {
                 name="name"
                 id="name"
                 class="form-input"
-                placeholder="name"
+                v-model="userProfile.name"
                 required
               />
             </div>
@@ -256,20 +294,19 @@ const handleModalClose = () => {
                 name="phone"
                 id="phone"
                 class="form-input"
-                placeholder="0900456123"
+                v-model="userProfile.phone"
                 required
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.editPhone }}</p>
             </div>
             <div>
-              <label for="job" class="block mb-2 text-xl font-medium text-gray-900">職位</label>
-              <input
-                type="text"
-                name="job"
-                id="job"
-                class="form-input"
-                placeholder="job"
-                required
-              />
+              <label for="job" class="block mb-2 font-medium">職位</label>
+              <select id="job" class="form-select" v-model="userProfile.titleNo">
+                <option value="1">店長</option>
+                <option value="2">店員</option>
+                <option value="3">廚師</option>
+                <option value="4">會員</option>
+              </select>
             </div>
             <div>
               <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
@@ -279,21 +316,21 @@ const handleModalClose = () => {
                 type="password"
                 name="password"
                 id="password"
-                placeholder="••••••••"
                 class="form-input"
+                v-model="userProfile.password"
                 required
               />
             </div>
             <!-- status -->
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_memberStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
+                <option value="false" selected>停用</option>
+                <option value="true">啟用</option>
               </select>
             </div>
             <!-- time -->
-            <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p>
+            <!-- <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p> -->
             <!-- send_btn -->
             <section class="flex">
               <button
@@ -303,11 +340,17 @@ const handleModalClose = () => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認修改</button>
+              <button @click.prevent="fetcheditUser" type="submit" class="w-full btn btn-dark">
+                確認修改
+              </button>
             </section>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
-            <p class="text-xl font-semibold text-gray-900">是否要刪除使用者資料?</p>
+            <p class="text-xl font-semibold text-gray-900">
+              是否要刪除
+              <span class="text-primary">{{ userProfile.name }}</span>
+              資料?
+            </p>
             <!-- send_btn -->
             <section class="flex mt-12">
               <button
@@ -317,7 +360,9 @@ const handleModalClose = () => {
               >
                 取消
               </button>
-              <button type="submit" class="w-full btn btn-dark">確認刪除</button>
+              <button @click.prevent="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
+                確認刪除
+              </button>
             </section>
           </form>
         </div>
