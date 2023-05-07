@@ -1,49 +1,29 @@
 <script setup>
-import { reactive } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { loginApi } from '@/apis/user.js'
 import { setCookieToken } from '@/utils/cookie.js'
 import { catchError } from '@/utils/catchError.js'
+import { errorsFormSchema } from '@/utils/formValidate'
 const router = useRouter()
 
 /**
  * VeeValidate 套件
  */
-const errorsSchema = {
-  phone(value) {
-    // 定義驗證後的回傳內容
-    if (!value) {
-      return '欄位必填'
-    }
-    return true
-  },
-  password(value) {
-    if (!value) {
-      return '欄位必填'
-    }
-    if (value.length <= 7) {
-      return '密碼長度需大於 8 碼'
-    }
-    return true
-  }
-}
-
 const { errors, useFieldModel } = useForm({
-  validationSchema: errorsSchema
+  validationSchema: errorsFormSchema
 })
-const phone = useFieldModel('phone')
-const password = useFieldModel('password')
+const loginForm = ref({
+  phone: useFieldModel('phone'),
+  password: useFieldModel('password')
+})
 
 /**
  * 登入功能
  */
-const payload = reactive({
-  phone,
-  password
-})
 const signIn = catchError(async () => {
-  const { data } = await loginApi(payload)
+  const { data } = await loginApi(loginForm.value)
   const { token, titleNo } = data.user
   switch (titleNo) {
     case 1:
@@ -88,7 +68,7 @@ const signIn = catchError(async () => {
             class="form-input"
             placeholder="0912345678"
             name="phone"
-            v-model="phone"
+            v-model="loginForm.phone"
             required
           />
           <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
@@ -101,7 +81,7 @@ const signIn = catchError(async () => {
             class="form-input"
             placeholder="A0912345678"
             name="password"
-            v-model.trim="password"
+            v-model.trim="loginForm.password"
             required
           />
           <p class="text-sm text-primary-light mt-2">{{ errors.password }}</p>

@@ -1,50 +1,15 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, reactive, nextTick, onMounted, watch } from 'vue'
+import { ref, nextTick, onMounted, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { searchMember, addMember, editMember, deleteMember } from '@/apis/user.js'
+import { warningAlert, successAlert } from '@/plugins/toast'
 import { catchError } from '@/utils/catchError.js'
+import { errorsFormSchema } from '@/utils/formValidate'
 const searchPhone = ref('')
 const searchPage = ref(1)
-const searchNumber = ref('')
 const memberList = ref([])
-const payload = reactive({
-  name: '',
-  phone: ''
-})
-
-/**
- * modal
- **/
-const isCreate = ref(false)
-const childComponentRef = ref()
-
-const handleModalOpen = (checkisCreate, item) => {
-  isCreate.value = checkisCreate
-  const childComponent = childComponentRef.value
-  nextTick(() => {
-    if (childComponent) {
-      childComponent.openModal()
-    }
-    if (isCreate.value === 'update' || isCreate.value === 'delete') {
-      const { name, phone } = item
-      payload.name = name
-      payload.phone = phone
-      searchNumber.value = item._id
-    }
-  })
-}
-
-const handleModalClose = () => {
-  const childComponent = childComponentRef.value
-
-  nextTick(() => {
-    if (childComponent) {
-      childComponent.closeModal()
-    }
-  })
-}
 
 /**
  * 查詢會員功能
@@ -52,6 +17,9 @@ const handleModalClose = () => {
 const getMembers = catchError(async () => {
   const { data } = await searchMember(searchPhone.value, searchPage.value)
   const { membersList } = data
+  if (membersList.length === 0) {
+    warningAlert('沒有符合的會員資料')
+  }
   memberList.value = membersList
 })
 
@@ -71,37 +39,24 @@ watch(
 )
 
 /**
- * VeeValidate 套件：新增會員、修改會員
+ * VeeValidate 套件
  */
-const errorsSchema = {
-  name(value) {
-    // 定義驗證後的回傳內容
-    if (!value) {
-      return '欄位必填'
-    }
-    return true
-  },
-  phone(value) {
-    if (!value) {
-      return '欄位必填'
-    }
-    return true
-  }
-}
-
 const { errors, useFieldModel } = useForm({
-  validationSchema: errorsSchema
+  validationSchema: errorsFormSchema
 })
-payload.name = useFieldModel('name')
-payload.phone = useFieldModel('phone')
+const memberForm = ref({
+  _id: '',
+  name: useFieldModel('name'),
+  phone: useFieldModel('phone')
+})
 
 /**
  * 新增會員功能
  **/
 const postMember = catchError(async () => {
-  await addMember(payload)
+  const { message } = await addMember(memberForm.value)
   handleModalClose()
-  clear()
+  successAlert(message)
   getMembers()
 })
 
@@ -109,9 +64,9 @@ const postMember = catchError(async () => {
  * 修改會員功能
  **/
 const patchMember = catchError(async () => {
-  await editMember(searchNumber.value, payload)
+  const { message } = await editMember(memberForm.value._id, memberForm.value)
   handleModalClose()
-  clear()
+  successAlert(message)
   getMembers()
 })
 
@@ -119,17 +74,46 @@ const patchMember = catchError(async () => {
  * 刪除會員功能
  **/
 const delMember = catchError(async () => {
-  await deleteMember(searchNumber.value)
+  const { message } = await deleteMember(memberForm.value._id)
   handleModalClose()
+  successAlert(message)
   getMembers()
 })
 
 /**
- * 清空欄位功能
+ * modal
  **/
-const clear = () => {
-  payload.name = ''
-  payload.phone = ''
+const isCreate = ref(false)
+const childComponentRef = ref()
+
+const handleModalOpen = (checkisCreate, item) => {
+  isCreate.value = checkisCreate
+  const childComponent = childComponentRef.value
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.openModal()
+    }
+    if (isCreate.value === 'update' || isCreate.value === 'delete') {
+      const { _id, name, phone } = item
+      memberForm.value._id = _id
+      memberForm.value.name = name
+      memberForm.value.phone = phone
+    }
+  })
+}
+
+const handleModalClose = () => {
+  const childComponent = childComponentRef.value
+
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      memberForm.value = {}
+    }
+  })
 }
 </script>
 
@@ -235,7 +219,7 @@ const clear = () => {
                 id="name"
                 class="form-input"
                 placeholder="name"
-                v-model.trim="payload.name"
+                v-model.trim="memberForm.name"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
@@ -248,7 +232,7 @@ const clear = () => {
                 id="phone"
                 class="form-input"
                 placeholder="0912345678"
-                v-model="payload.phone"
+                v-model="memberForm.phone"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
@@ -269,7 +253,7 @@ const clear = () => {
                 id="name"
                 class="form-input"
                 placeholder="name"
-                v-model.trim="payload.name"
+                v-model.trim="memberForm.name"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
@@ -282,7 +266,7 @@ const clear = () => {
                 id="phone"
                 class="form-input"
                 placeholder="0912345678"
-                v-model="payload.phone"
+                v-model="memberForm.phone"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
@@ -297,11 +281,11 @@ const clear = () => {
           <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
             <div>
               <p class="block mb-2 text-xl font-medium text-gray-900">姓名</p>
-              <p>{{ payload.name }}</p>
+              <p>{{ memberForm.name }}</p>
             </div>
             <div>
               <p class="block mb-2 text-xl font-medium text-gray-900">電話</p>
-              <p>{{ payload.phone }}</p>
+              <p>{{ memberForm.phone }}</p>
             </div>
             <p class="text-xl font-semibold text-gray-900">是否要刪除會員資料?</p>
             <!-- send_btn -->
