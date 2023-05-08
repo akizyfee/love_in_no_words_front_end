@@ -1,23 +1,32 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted, reactive } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { catchError } from '@/utils/catchError'
 import { successAlert } from '@/plugins/toast'
+import { errorsFormSchema } from '@/utils/formValidate'
+import { useForm } from 'vee-validate'
 import {
   uploadAdminPhotos,
   addAdminProduct,
-  searchAdminProduct,
+  searchAdminProductAll,
   addAdminDessertType,
   getAdminDessertType,
   deleteAdminDessertType
 } from '@/apis/product'
 
 /**
+ * 載入驗證
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
+/**
  * 新增商品分類
  */
-const dessertType = reactive({
-  productsTypeName: ''
+const dessertType = ref({
+  productsTypeName: useFieldModel('dessertCategory')
 })
 
 const fetchAddDessertcodes = catchError(async () => {
@@ -30,9 +39,11 @@ const fetchAddDessertcodes = catchError(async () => {
  * 取得產品分類列表
  */
 const dessertTypeList = ref([])
+const dessertTypeNumber = ref(0)
 const fetchGetDessertTypeList = catchError(async () => {
   const { data } = await getAdminDessertType()
   dessertTypeList.value = data
+  dessertTypeNumber.value = dessertTypeList.value[0].productsType
 })
 
 onMounted(() => {
@@ -47,26 +58,26 @@ const fetchDeleteAdminDessertType = catchError(async (productsType) => {
   successAlert(message)
   fetchGetDessertTypeList()
 })
+
 /**
  * 設置商品列表
  */
-const ProductList = ref([])
-const searchFilterProduct = reactive({
-  productsType: 0,
+const productList = ref([])
+const searchFilterProduct = ref({
+  productsType: dessertTypeNumber,
   priceLowerLimit: 0,
-  priceUpperLimit: 100,
+  priceUpperLimit: 2000,
   amountStatus: 'safe'
 })
 const fetchProduct = catchError(async () => {
-  const { data } = await searchAdminProduct(
-    searchFilterProduct.productsType,
-    searchFilterProduct.priceLowerLimit,
-    searchFilterProduct.priceUpperLimit,
-    searchFilterProduct.amountStatus
-  )
-  ProductList.value = data
-  console.log(ProductList.value)
+  const { data } = await searchAdminProductAll()
+  // searchFilterProduct.value.productsType,
+  // searchFilterProduct.value.priceLowerLimit,
+  // searchFilterProduct.value.priceUpperLimit,
+  // searchFilterProduct.value.amountStatus
+  productList.value = data
 })
+
 onMounted(() => {
   fetchProduct()
 })
@@ -85,19 +96,15 @@ const uploadFile = catchError(async () => {
 })
 
 /**
- * 商品表單 和驗證
+ * 商品表單
  */
-// const { errors, useFieldModel } = useForm({
-//   validationSchema: errorsFormSchema
-// })
-
 const productCard = ref({
   productName: '檸檬千層蛋糕',
-  photoUrl: imgUrl.value,
+  photoUrl: imgUrl,
   price: 300,
-  inStockAmount: 20,
-  safeStockAmount: 5,
-  productsType: 1,
+  inStockAmount: 0,
+  safeStockAmount: 50,
+  productsType: 7,
   productionTime: 15,
   isDisabled: false,
   description: '祥做的好吃蛋糕'
@@ -107,8 +114,10 @@ const productCard = ref({
  * 新增商品
  */
 const fetchAddProduct = catchError(async () => {
-  const { data } = await addAdminProduct(productCard)
-  console.log(data)
+  const { message } = await addAdminProduct(productCard.value)
+  successAlert(message)
+  handleModalClose()
+  productCard.value = {}
 })
 
 /**
@@ -144,10 +153,6 @@ const handleModalClose = () => {
     }
   })
 }
-/**
- * 變色卡
- * */
-const theme = ref('white')
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
@@ -167,9 +172,11 @@ const theme = ref('white')
               >商品分類</label
             >
             <select id="filterCategory" class="form-select py-3">
-              <option value="蛋糕" selected>蛋糕000</option>
-              <option value="蛋糕1">蛋糕111</option>
-              <option value="蛋糕2">蛋糕222</option>
+              <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
+                <option :value="dessertList.productsType">
+                  {{ dessertList.productsTypeName }}
+                </option>
+              </template>
             </select>
           </section>
           <!-- status -->
@@ -177,10 +184,14 @@ const theme = ref('white')
             <label for="filterStatus" class="block mb-1 mr-3 font-medium whitespace-nowrap"
               >狀態</label
             >
-            <select id="filterStatus" class="form-select py-3">
-              <option value="安全" selected>安全</option>
-              <option value="危險">危險</option>
-              <option value="無庫存">無庫存</option>
+            <select
+              id="filterStatus"
+              class="form-select py-3"
+              v-model="searchFilterProduct.amountStatus"
+            >
+              <option value="safe" selected>安全</option>
+              <option value="danger">危險</option>
+              <option value="zero">無庫存</option>
             </select>
           </section>
           <!-- price -->
@@ -190,16 +201,16 @@ const theme = ref('white')
                 type="text"
                 id="filterPrice"
                 class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
-                placeholder="0"
                 required
+                v-model="searchFilterProduct.priceLowerLimit"
               />
               <div class="text-2xl align-middle mx-3">~</div>
               <input
                 type="text"
                 id="filterPrice"
                 class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
-                placeholder="2000"
                 required
+                v-model="searchFilterProduct.priceUpperLimit"
               />
             </div>
             <button type="button" class="btn btn-outline-dark whitespace-nowrap">搜尋</button>
@@ -218,58 +229,56 @@ const theme = ref('white')
       <!-- product -->
       <ul class="grid grid-cols-12 gap-4">
         <li
+          v-for="itemProductList in productList"
+          :key="itemProductList.productNo"
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
           <a href="#" @click="handleModalOpen('updateProduct', products)">
             <img
               class="rounded-t-lg object-cover w-full h-[184px]"
-              src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
-              alt="ImgProduct"
+              :src="itemProductList.photoUrl"
+              :alt="itemProductList.productName"
             />
             <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
-              甜點
+              {{ itemProductList.productsTypeName }}
             </p>
           </a>
           <div
             :class="[
               'transition-all duration-500 p-6 rounded-bl-lg rounded-br-lg',
-              theme === 'white' && 'bg-white',
-              theme === 'danger' && 'bg-[#F31F1F1A]'
+              itemProductList.amountStatus === 'safe' && 'bg-white',
+              itemProductList.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
             ]"
           >
-            <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+            <h2 class="text-2xl font-medium mb-3">{{ itemProductList.productName }}</h2>
             <div class="flex justify-between items-center">
-              <p class="text-primary-light text-[32px] font-bold">$80</p>
+              <p class="text-primary-light text-[32px] font-bold">${{ itemProductList.price }}</p>
               <div class="flex flex-col items-end">
-                <p v-if="theme == 'white'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'safe'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;20份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p
-                  v-else-if="theme === 'danger'"
+                  v-else-if="itemProductList.amountStatus === 'danger'"
                   class="flex items-center text-primary-light font-normal"
                 >
                   <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
-                  <span>剩餘</span>
-                  &emsp;08份
-                </p>
-                <p v-else-if="theme === 'over'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
-                <p v-else-if="theme === 'stop'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'zero'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p class="font-normal">
                   <span class="text-neutralself-200">製作時間</span>
-                  &emsp;20分
+                  &emsp;{{ itemProductList.productionTime }}分
                 </p>
               </div>
             </div>
           </div>
           <section
-            v-if="theme === 'over'"
+            v-if="itemProductList.isDisabled === true"
             class="absolute top-0 bottom-0 left-0 right-0"
             style="background: rgba(8, 8, 8, 0.5)"
           >
@@ -280,7 +289,7 @@ const theme = ref('white')
             </div>
           </section>
           <section
-            v-else-if="theme === 'stop'"
+            v-else-if="itemProductList.amountStatus === 'zero'"
             class="absolute top-0 bottom-0 left-0 right-0"
             style="background: rgba(8, 8, 8, 0.5)"
           >
@@ -292,12 +301,6 @@ const theme = ref('white')
           </section>
         </li>
       </ul>
-      <section class="flex">
-        <button @click="theme = 'white'" class="p-1 m-1 bg-gray-200 rounded">預設</button>
-        <button @click="theme = 'danger'" class="p-1 m-1 bg-gray-200 rounded">低於10</button>
-        <button @click="theme = 'over'" class="p-1 m-1 bg-gray-200 rounded">已售完</button>
-        <button @click="theme = 'stop'" class="p-1 m-1 bg-gray-200 rounded">已停用</button>
-      </section>
     </main>
   </div>
   <Modal ref="childComponentRef">
@@ -363,10 +366,15 @@ const theme = ref('white')
                   <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
                     >菜單分類</label
                   >
-                  <select id="selectStatus" class="form-select" v-model="productCard.productsType">
-                    <option :value="1" selected>蛋糕</option>
-                    <option :value="2">汽水</option>
-                    <option :value="3">馬卡龍</option>
+                  <select id="filterCategory" class="form-select py-3">
+                    <template
+                      v-for="dessertList in dessertTypeList"
+                      :key="dessertList.productsType"
+                    >
+                      <option :value="dessertList.productsType">
+                        {{ dessertList.productsTypeName }}
+                      </option>
+                    </template>
                   </select>
                 </div>
                 <!-- img -->
@@ -413,11 +421,11 @@ const theme = ref('white')
                 </div>
                 <!-- time -->
                 <div>
-                  <label for="form_Stock" class="block mb-2 font-medium">製作時間</label>
+                  <label for="form_time" class="block mb-2 font-medium">製作時間</label>
                   <div class="flex items-center">
                     <input
                       type="text"
-                      id="form_Stock"
+                      id="form_time"
                       class="form-input mr-2"
                       v-model="productCard.productionTime"
                     />
@@ -556,6 +564,7 @@ const theme = ref('white')
                 class="form-input mr-2"
                 v-model="dessertType.productsTypeName"
               />
+              <p class="text-sm text-primary-light mt-2">{{ errors.dessertCategory }}</p>
               <div class="mt-3">
                 <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
                   <button
