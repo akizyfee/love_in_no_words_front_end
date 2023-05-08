@@ -1,7 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, reactive } from 'vue'
 import { getAdminSeat, addAdminSeat, editAdminSeat, deleteAdminSeat } from '@/apis/seat'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
@@ -32,7 +32,7 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
-const seatForm = ref({
+const seatForm = reactive({
   _id: '',
   tableNo: 1,
   tableName: useFieldModel('tableName'),
@@ -46,7 +46,7 @@ const seatForm = ref({
  * 新增座位功能
  **/
 const postSeat = catchError(async () => {
-  const { message } = await addAdminSeat(seatForm.value)
+  const { message } = await addAdminSeat(seatForm)
   handleModalClose()
   successAlert(message === '成功' ? '新增成功' : message)
   getSeats()
@@ -56,7 +56,7 @@ const postSeat = catchError(async () => {
  * 修改座位功能
  **/
 const patchSeat = catchError(async (tableNo) => {
-  const { message } = await editAdminSeat(tableNo, seatForm.value)
+  const { message } = await editAdminSeat(tableNo, seatForm)
   handleModalClose()
   successAlert(message)
   getSeats()
@@ -87,11 +87,11 @@ const handleModalOpen = (checkIsCreate, item) => {
     }
     if (isCreate.value === 'update') {
       const { tableNo, tableName, seats, isWindowSeat, isDisabled } = item
-      seatForm.value.tableNo = tableNo
-      seatForm.value.tableName = tableName
-      seatForm.value.seats = seats
-      seatForm.value.isWindowSeat = isWindowSeat
-      seatForm.value.isDisabled = isDisabled
+      seatForm.tableNo = tableNo
+      seatForm.tableName = tableName
+      seatForm.seats = seats
+      seatForm.isWindowSeat = isWindowSeat
+      seatForm.isDisabled = isDisabled
     }
   })
 }
@@ -105,7 +105,7 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
-      seatForm.value = {}
+      seatForm.tableName = ''
     }
   })
 }
