@@ -2,18 +2,19 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, watch } from 'vue'
-import { useForm } from 'vee-validate'
 import { searchMember, addMember, editMember, deleteMember } from '@/apis/user.js'
 import { warningAlert, successAlert } from '@/plugins/toast'
 import { catchError } from '@/utils/catchError.js'
+import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
-const searchPhone = ref('')
-const searchPage = ref(1)
-const memberList = ref([])
 
 /**
  * 查詢會員功能
  **/
+const searchPhone = ref('')
+const searchPage = ref(1)
+const memberList = ref([])
+
 const getMembers = catchError(async () => {
   const { data } = await searchMember(searchPhone.value, searchPage.value)
   const { membersList } = data

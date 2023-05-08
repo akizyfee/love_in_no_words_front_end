@@ -20,5 +20,11 @@ export const errorsFormSchema = {
       return '密碼長度需大於 8 碼'
     }
     return true
+  },
+  tableName(value) {
+    if (!value) {
+      return '桌號必填'
+    }
+    return true
   }
 }

@@ -1,7 +1,77 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
+import { getAdminSeat, addAdminSeat, editAdminSeat, deleteAdminSeat } from '@/apis/seat'
+import { catchError } from '@/utils/catchError'
+import { warningAlert, successAlert } from '@/plugins/toast'
+import { dayFormat } from '@/plugins/day'
+import { useForm } from 'vee-validate'
+import { errorsFormSchema } from '@/utils/formValidate'
+
+/**
+ * 取得座位列表
+ **/
+const seatList = ref([])
+
+const getSeats = catchError(async () => {
+  const { data } = await getAdminSeat()
+  if (data.length === 0) {
+    warningAlert('尚未建立座位的資料')
+  }
+  seatList.value = data
+})
+
+onMounted(() => {
+  getSeats()
+})
+
+/**
+ * VeeValidate 套件
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+const seatForm = ref({
+  _id: '',
+  tableNo: 1,
+  tableName: useFieldModel('tableName'),
+  seats: 1,
+  isWindowSeat: false,
+  isDisabled: false,
+  createdAt: ''
+})
+
+/**
+ * 新增座位功能
+ **/
+const postSeat = catchError(async () => {
+  const { message } = await addAdminSeat(seatForm.value)
+  handleModalClose()
+  successAlert(message === '成功' ? '新增成功' : message)
+  getSeats()
+})
+
+/**
+ * 修改座位功能
+ **/
+const patchSeat = catchError(async (tableNo) => {
+  const { message } = await editAdminSeat(tableNo, seatForm.value)
+  handleModalClose()
+  successAlert(message)
+  getSeats()
+})
+
+/**
+ * 刪除座位功能
+ **/
+const delSeat = catchError(async (tableNo) => {
+  const { message } = await deleteAdminSeat(tableNo)
+  handleModalClose()
+  successAlert(message)
+  getSeats()
+})
+
 /**
  * modal
  * */
@@ -15,14 +85,27 @@ const handleModalOpen = (checkIsCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'update') {
+      const { tableNo, tableName, seats, isWindowSeat, isDisabled } = item
+      seatForm.value.tableNo = tableNo
+      seatForm.value.tableName = tableName
+      seatForm.value.seats = seats
+      seatForm.value.isWindowSeat = isWindowSeat
+      seatForm.value.isDisabled = isDisabled
+    }
   })
 }
+
 const handleModalClose = () => {
   const childComponent = childComponentRef.value
 
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      seatForm.value = {}
     }
   })
 }
@@ -37,109 +120,52 @@ const handleModalClose = () => {
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
       <div class="flex justify-end mb-6">
-        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">編輯桌號</button>
+        <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
+          編輯桌號
+        </button>
       </div>
       <!-- table -->
       <ul class="grid grid-cols-12 gap-4">
         <li
           class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
+          v-for="seat in seatList"
+          :key="seat._id"
         >
           <div class="flex justify-between items-center border-b-2 border-textself px-4">
             <p class="font-medium mb-5">
               桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2 t">1</span>
+              <span class="text-white bg-primary-light rounded py-1 px-2 t">{{
+                seat.tableName
+              }}</span>
             </p>
             <p class="font-medium mb-5">
               人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
+              <span class="text-white bg-textself rounded py-1 px-2">{{ seat.seats }}</span>
             </p>
           </div>
           <div class="pl-4 pr-3 mt-4">
             <p class="font-medium">
               是否靠窗：
-              <span class="ml-2">是</span>
+              <span class="ml-2">{{ seat.isWindowSeat ? '是' : '否' }}</span>
             </p>
             <p class="font-medium">
               啟用日期：
-              <span class="ml-2">20230101</span>
+              <span class="ml-2">{{ dayFormat(seat.createdAt) }}</span>
             </p>
             <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">已啟用</p>
+              <p
+                class="rounded py-1 px-2"
+                :class="
+                  seat.isDisabled
+                    ? 'bg-secondary-light text-textself'
+                    : 'bg-neutralself-100 text-white'
+                "
+              >
+                {{ seat.isDisabled ? '已啟用' : '已停用' }}
+              </p>
               <div class="flex justify-between items-center">
                 <button
-                  @click="handleModalOpen('update')"
-                  type="button"
-                  class="btn btn-outline-dark mx-1"
-                >
-                  修改
-                </button>
-              </div>
-            </div>
-          </div>
-        </li>
-        <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
-        >
-          <div class="flex justify-between items-center border-b-2 border-textself px-4">
-            <p class="font-medium mb-5">
-              桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2 t">1</span>
-            </p>
-            <p class="font-medium mb-5">
-              人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
-            </p>
-          </div>
-          <div class="pl-4 pr-3 mt-4">
-            <p class="font-medium">
-              是否靠窗：
-              <span class="ml-2">是</span>
-            </p>
-            <p class="font-medium">
-              啟用日期：
-              <span class="ml-2">20230101</span>
-            </p>
-            <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">已啟用</p>
-              <div class="flex justify-between items-center">
-                <button
-                  @click="handleModalOpen('update')"
-                  type="button"
-                  class="btn btn-outline-dark mx-1"
-                >
-                  修改
-                </button>
-              </div>
-            </div>
-          </div>
-        </li>
-        <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
-        >
-          <div class="flex justify-between items-center border-b-2 border-textself px-4">
-            <p class="font-medium mb-5">
-              桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2 t">1</span>
-            </p>
-            <p class="font-medium mb-5">
-              人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
-            </p>
-          </div>
-          <div class="pl-4 pr-3 mt-4">
-            <p class="font-medium">
-              是否靠窗：
-              <span class="ml-2">是</span>
-            </p>
-            <p class="font-medium">
-              啟用日期：
-              <span class="ml-2">20230101</span>
-            </p>
-            <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">已啟用</p>
-              <div class="flex justify-between items-center">
-                <button
-                  @click="handleModalOpen('update')"
+                  @click="handleModalOpen('update', seat)"
                   type="button"
                   class="btn btn-outline-dark mx-1"
                 >
@@ -188,61 +214,67 @@ const handleModalClose = () => {
               <label for="form_seatNumber" class="block mb-2 font-medium"
                 >桌號 (點擊紅色按鈕，即刻刪除該桌號資料)
               </label>
-              <input type="text" id="form_seatNumber" class="form-input mr-2" />
-              <div class="mt-3">
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >1</span
+              <input
+                type="number"
+                name="tableName"
+                id="form_seatNumber"
+                class="form-input"
+                placeholder="請輸入桌號"
+                v-model.number="seatForm.tableName"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.tableName }}</p>
+              <div class="d-flex flex-wrap mt-3">
+                <button
+                  type="submit"
+                  class="btn btn-primary font-medium mr-2 px-3 py-1"
+                  v-for="seat in seatList"
+                  :key="seat._id"
+                  @click.prevent="delSeat(seat.tableNo)"
                 >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >2</span
-                >
-                <span class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
-                  >3</span
-                >
+                  {{ seat.tableName }}
+                </button>
               </div>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="button" class="w-full mr-1 btn btn-outline-dark">取消</button>
-              <button type="submit" class="w-full ml-1 btn btn-dark">確定新增</button>
+              <button type="submit" class="w-full ml-1 btn btn-dark" @click.prevent="postSeat">
+                確定新增
+              </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6">
+          <form v-else-if="isCreate === 'update'" class="space-y-6" action="#">
             <section class="flex justify-between items-center bg-bgself-light p-3 mb-3">
               <p class="font-medium">
                 桌號
-                <span class="text-white bg-primary-light rounded py-1 px-2 t">1</span>
+                <span class="text-white bg-primary-light rounded py-1 px-2">{{ seatForm.tableName }}</span>
               </p>
               <div class="flex items-center">
                 <label for="form_seatPeopleLimit" class="block font-medium whitespace-nowrap mr-1"
                   >人數</label
                 >
-                <select id="form_seatPeopleLimit" class="form-select py-1 rounded">
-                  <option value="2" selected>2</option>
-                  <option value="4">4</option>
-                  <option value="4">6</option>
-                  <option value="4">8</option>
+                <select id="form_seatPeopleLimit" class="form-select py-1 rounded" v-model="seatForm.seats">
+                  <option v-for="index in 20" :key="index" :value="index">{{ index }}</option>
                 </select>
               </div>
             </section>
             <div>
               <label for="form_seatWindow" class="block mb-2 font-medium">是否靠窗</label>
-              <select id="form_seatWindow" class="form-select">
-                <option value="是" selected>是</option>
-                <option value="否">否</option>
+              <select id="form_seatWindow" class="form-select" v-model="seatForm.isWindowSeat">
+                <option :value="false" selected>否</option>
+                <option :value="true">是</option>
               </select>
             </div>
             <div>
               <label for="form_seatStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_seatStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select id="form_seatStatus" class="form-select" v-model="seatForm.isDisabled">
+                <option :value="false" selected>停用</option>
+                <option :value="true">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="button" class="w-full mr-1 btn btn-outline-dark">取消</button>
-              <button type="submit" class="w-full ml-1 btn btn-dark">確定</button>
+              <button type="submit" class="w-full ml-1 btn btn-dark" @click.prevent="patchSeat(seatForm.tableNo)">確認修改</button>
             </div>
           </form>
         </div>

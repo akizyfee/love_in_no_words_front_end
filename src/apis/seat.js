@@ -34,10 +34,10 @@ export const editReservation = (reservationId, payload) => axios.patch(`/v1/seat
 export const deleteReservation = (reservationId) => axios.delete(`/v1/seats/reservation/${reservationId}`)
 
 /**
- * O-2-1 查詢座位
+ * O-2-1 取得座位列表
  * @param {string} 頁數
  */
-export const searchAdminSeat = () => axios.get('/v1/seats/admin')
+export const getAdminSeat = () => axios.get('/v1/seats/admin')
 
 /**
  * O-2-4 新增座位/桌號
@@ -52,7 +52,7 @@ export const addAdminSeat = (payload) => axios.post('/v1/seats/admin', payload)
 export const editAdminSeat = (tableNo, payload) => axios.patch(`/v1/seats/admin/${tableNo}`, payload)
 
 /**
- * O-2-5 刪除桌號
+ * O-2-5 刪除座位/桌號
  * @param {Number} 桌號
  */
 export const deleteAdminSeat = (tableNo, payload) => axios.delete(`/v1/seats/admin/${tableNo}`, payload)
