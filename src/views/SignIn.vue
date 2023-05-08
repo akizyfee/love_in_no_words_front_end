@@ -32,11 +32,11 @@ const signIn = catchError(async () => {
       break
     case 2:
       await setCookieToken(token)
-      router.push('/userAdmin')
+      router.push('/seat')
       break
     case 3:
       await setCookieToken(token)
-      router.push('/seat')
+      router.push('/chef')
       break
     default:
       console.log('非任何職位!')
