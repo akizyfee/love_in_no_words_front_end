@@ -1,7 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, reactive } from 'vue'
 import { useForm } from 'vee-validate'
 import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
 import { catchError } from '@/utils/catchError'
@@ -28,8 +28,13 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
+const initUserProfile = reactive({
+  name: '',
+  phone: '',
+  password: ''
+})
 
-const userProfile = ref({
+const userProfile = reactive({
   _id: '',
   name: useFieldModel('name'),
   phone: useFieldModel('phone'),
@@ -42,7 +47,7 @@ const userProfile = ref({
  * 新增使用者
  */
 const fetchAddUser = catchError(async () => {
-  const { message } = await addAdminUser(userProfile.value)
+  const { message } = await addAdminUser(userProfile)
   successAlert(message)
   handleModalClose()
   fetchUser()
@@ -52,7 +57,7 @@ const fetchAddUser = catchError(async () => {
  * 修改使用者
  */
 const fetcheditUser = catchError(async () => {
-  const { message } = await editAdminUser(userProfile.value._id, userProfile.value)
+  const { message } = await editAdminUser(userProfile._id, userProfile)
   handleModalClose()
   successAlert(message)
   fetchUser()
@@ -62,7 +67,7 @@ const fetcheditUser = catchError(async () => {
  * 刪除使用者
  */
 const fetchDeleteUser = catchError(async () => {
-  const { message } = await deleteAdminUser(userProfile.value._id, userProfile.value.titleNo)
+  const { message } = await deleteAdminUser(userProfile._id, userProfile.titleNo)
   handleModalClose()
   successAlert(message)
   fetchUser()
@@ -83,12 +88,12 @@ const handleModalOpen = (checkisCreate, item) => {
     }
     if (isCreate.value === 'update' || isCreate.value === 'delete') {
       const { _id, name, phone, password, titleNo, isDisabled } = item
-      userProfile.value._id = _id
-      userProfile.value.name = name
-      userProfile.value.phone = phone
-      userProfile.value.titleNo = titleNo
-      userProfile.value.isDisabled = isDisabled
-      userProfile.value.password = password
+      userProfile._id = _id
+      userProfile.name = name
+      userProfile.phone = phone
+      userProfile.titleNo = titleNo
+      userProfile.isDisabled = isDisabled
+      userProfile.password = password
     }
   })
 }
@@ -98,7 +103,7 @@ const handleModalClose = () => {
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
-      userProfile.value = {}
+      Object.assign(userProfile, initUserProfile)
     }
   })
 }
@@ -135,7 +140,7 @@ const handleModalClose = () => {
               <td class="py-3">{{ users.name }}</td>
               <td class="py-3">{{ users.phone }}</td>
               <td class="py-3">{{ users.title }}</td>
-              <th class="py-3">{{ users.isDisabled ? '啟用' : '停用' }}</th>
+              <th class="py-3">{{ users.isDisabled ? '停用' : '啟用' }}</th>
               <th class="flex justify-end items-center">
                 <button
                   @click.prevent="handleModalOpen('update', users)"
@@ -240,8 +245,8 @@ const handleModalClose = () => {
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
               <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
-                <option :value="false" selected>停用</option>
-                <option :value="true">啟用</option>
+                <option :value="true" selected>停用</option>
+                <option :value="false">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
@@ -283,7 +288,7 @@ const handleModalClose = () => {
                 <option :value="4">會員</option>
               </select>
             </div>
-            <div>
+            <div v-if="userProfile.titleNo !== 4">
               <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
                 >密碼</label
               >
@@ -301,8 +306,8 @@ const handleModalClose = () => {
             <div>
               <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
               <select id="form_memberStatus" class="form-select" v-model="userProfile.isDisabled">
-                <option :value="false" selected>停用</option>
-                <option :value="true">啟用</option>
+                <option :value="true" selected>停用</option>
+                <option :value="false">啟用</option>
               </select>
             </div>
             <!-- time -->

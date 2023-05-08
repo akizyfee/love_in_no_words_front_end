@@ -26,5 +26,11 @@ export const errorsFormSchema = {
       return '桌號必填'
     }
     return true
+  },
+  dessertCategory(value) {
+    if (!value) {
+      return '商品分類必填'
+    }
+    return true
   }
 }
