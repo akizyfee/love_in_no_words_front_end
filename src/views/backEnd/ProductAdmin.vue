@@ -4,7 +4,7 @@ import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, reactive } from 'vue'
 import { catchError } from '@/utils/catchError'
 import { successAlert } from '@/plugins/toast'
-import { errorsFormSchema } from '@/utils/formValidate'
+import { errorProductSchema } from '@/utils/formValidate'
 import { useForm } from 'vee-validate'
 import {
   uploadAdminPhotos,
@@ -22,7 +22,7 @@ import {
  * 載入驗證
  */
 const { errors, useFieldModel } = useForm({
-  validationSchema: errorsFormSchema
+  validationSchema: errorProductSchema
 })
 
 /**
@@ -81,20 +81,19 @@ onMounted(() => {
  * 圖片上傳
  */
 const imgFile = ref()
-const imgUrl = ref('')
 const uploadFile = catchError(async () => {
   const file = imgFile.value.files[0]
   const formData = new FormData()
   formData.append('file-to-upload', file)
   const { data } = await uploadAdminPhotos(formData)
-  imgUrl.value = data.photoUrl
+  productCard.photoUrl = data.photoUrl
 })
 
 /**
  * 商品表單
  */
 const initProductCard = reactive({
-  productNo: '',
+  productNo: 0,
   productName: '',
   photoUrl: '',
   price: 0,
@@ -109,14 +108,14 @@ const initProductCard = reactive({
 
 const productCard = reactive({
   productNo: 0,
-  productName: '',
-  photoUrl: '',
-  price: 0,
-  inStockAmount: 0,
-  safeStockAmount: 0,
+  productName: useFieldModel('productName'),
+  photoUrl: useFieldModel('photoUrl'),
+  price: useFieldModel('price'),
+  inStockAmount: useFieldModel('inStockAmount'),
+  safeStockAmount: useFieldModel('safeStockAmount'),
   amountStatus: 'safe',
   productsType: 0,
-  productionTime: 0,
+  productionTime: useFieldModel('productionTime'),
   isDisabled: false,
   description: ''
 })
@@ -157,7 +156,6 @@ const fetchEditProduct = catchError(async () => {
   const { message } = await editAdminProduct(productCard.productNo, productCard)
   successAlert(message)
   handleModalClose()
-  console.log(message)
 })
 
 /**
@@ -167,7 +165,6 @@ const fetchDeleteProduct = catchError(async () => {
   const { message } = await deleteAdminProduct(productCard.productNo)
   successAlert(message)
   handleModalClose()
-  console.log(message)
 })
 
 /**
@@ -183,7 +180,7 @@ const handleModalOpen = (checkIsNew, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
-    if (isCreate.value === 'updateProduct' || isCreate.value === 'updateCategory') {
+    if (isCreate.value === 'updateProduct') {
       const {
         productNo,
         productName,
@@ -417,6 +414,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.productName"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.productName}}</p>
                 </div>
                 <!-- price -->
                 <div>
@@ -427,13 +425,14 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.price"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.price}}</p>
                 </div>
                 <!-- category -->
                 <div>
                   <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
                     >菜單分類</label
                   >
-                  <select id="filterCategory" class="form-select py-3">
+                  <select id="filterCategory" class="form-select py-2">
                     <template
                       v-for="dessertList in dessertTypeList"
                       :key="dessertList.productsType"
@@ -446,7 +445,7 @@ const handleModalClose = () => {
                 </div>
                 <!-- img -->
                 <div>
-                  <label for="form_productImg" class="block mb-2 font-medium">商品圖片</label>
+                  <label for="form_productImg" class="block mt-2 mb-2 font-medium">商品圖片</label>
                   <div class="flex flex-col">
                     <input
                       id="form_productImg"
@@ -455,12 +454,13 @@ const handleModalClose = () => {
                       class="form-input mr-2"
                       @change="uploadFile"
                     />
-                    <div class="my-5">
+                    <div class="mt-8 mb-5">
                       <img
-                        src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
-                        alt="user"
+                        :src="productCard.photoUrl? productCard.photoUrl: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'"
+                        :alt="productCard.productName"
                         class="rounded-lg object-cover w-full h-[184px]"
                       />
+                      <p class="text-sm text-primary-light mt-2">{{errors.photoUrl}}</p>
                     </div>
                   </div>
                 </div>
@@ -475,6 +475,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.inStockAmount"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.inStockAmount}}</p>
                 </div>
                 <!-- safe_stock -->
                 <div>
@@ -485,6 +486,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.safeStockAmount"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.safeStockAmount}}</p>
                 </div>
                 <!-- time -->
                 <div>
@@ -498,6 +500,7 @@ const handleModalClose = () => {
                     />
                     <p class="whitespace-nowrap">分鐘</p>
                   </div>
+                  <p class="text-sm text-primary-light mt-2 mb-0">{{errors.productionTime}}</p>
                 </div>
                 <!-- status -->
                 <div>
@@ -546,6 +549,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.productName"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.productName}}</p>
                 </div>
                 <!-- price -->
                 <div>
@@ -556,6 +560,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.price"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.price}}</p>
                 </div>
                 <!-- category -->
                 <div>
@@ -591,6 +596,7 @@ const handleModalClose = () => {
                         class="rounded-lg object-cover w-full h-[184px]"
                       />
                     </div>
+                    <p class="text-sm text-primary-light mt-2">{{errors.photoUrl}}</p>
                   </div>
                 </div>
               </section>
@@ -604,6 +610,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.inStockAmount"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.inStockAmount}}</p>
                 </div>
                 <!-- safe_stock -->
                 <div>
@@ -614,6 +621,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.safeStockAmount"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{errors.safeStockAmount}}</p>
                 </div>
                 <!-- time -->
                 <div>
@@ -627,6 +635,7 @@ const handleModalClose = () => {
                     />
                     <p class="whitespace-nowrap">分鐘</p>
                   </div>
+                  <p class="text-sm text-primary-light mt-2">{{errors.productionTime}}</p>
                 </div>
                 <!-- status -->
                 <div>
