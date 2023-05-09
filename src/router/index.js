@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { getCookieToken } from '@/utils/cookie'
 
 /**
@@ -14,7 +14,7 @@ const checkAuth = async (to, from) => {
 }
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.VITE_PUBLISH_PATH),
+  history: createWebHashHistory(import.meta.env.VITE_PUBLISH_PATH),
   linkActiveClass: 'bg-bgself-light',
   routes: [
     {

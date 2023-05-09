@@ -232,7 +232,7 @@ const handleModalClose = () => {
                 >密碼</label
               >
               <input
-                type="text"
+                type="password"
                 name="password"
                 id="password"
                 class="form-input"
