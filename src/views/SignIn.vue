@@ -2,9 +2,9 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
-import { loginApi } from '@/apis/user.js'
-import { setCookieToken } from '@/utils/cookie.js'
-import { catchError } from '@/utils/catchError.js'
+import { loginApi } from '@/apis/user'
+import { setCookieToken } from '@/utils/cookie'
+import { catchError } from '@/utils/catchError'
 import { errorsFormSchema } from '@/utils/formValidate'
 const router = useRouter()
 

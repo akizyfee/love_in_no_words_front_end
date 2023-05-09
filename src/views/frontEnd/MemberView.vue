@@ -2,9 +2,9 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, watch, reactive } from 'vue'
-import { searchMember, addMember, editMember, deleteMember } from '@/apis/user.js'
+import { searchMember, addMember, editMember, deleteMember } from '@/apis/user'
 import { warningAlert, successAlert } from '@/plugins/toast'
-import { catchError } from '@/utils/catchError.js'
+import { catchError } from '@/utils/catchError'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
