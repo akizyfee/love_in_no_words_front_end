@@ -682,7 +682,7 @@ const handleModalClose = () => {
                 <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
                   <button
                     @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
-                    class="bg-primary-light text-white font-medium mr-2 px-3 py-1 rounded"
+                    class="bg-primary-light text-white font-medium mt-2 mr-2 px-3 py-1 rounded"
                   >
                     {{ dessertList.productsTypeName }}
                   </button>
