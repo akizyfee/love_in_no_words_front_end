@@ -2,6 +2,7 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   noReservation,
   searchReservation,
@@ -14,8 +15,9 @@ import { catchError } from '@/utils/catchError'
 import { dayWeek } from '@/plugins/day'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
+const router = useRouter()
 
-const statusList = ref(['未使用', '使用中', '已預約'])
+const statusList = ref(['', '未使用', '使用中', '已預約'])
 const dateList = ref(dayWeek())
 const timeList = ref(['上午', '下午'])
 const searchForm = reactive({
@@ -53,7 +55,9 @@ const searchSeats = catchError(async () => {
   if (tables.length === 0) {
     warningAlert('沒有符合的座位資料')
   }
-  seatList.value = tables
+  seatList.value = tables.sort(function (a, b) {
+    return a.tableName - b.tableName
+  })
 })
 
 onMounted(() => {
@@ -82,7 +86,7 @@ const initSeatForm = reactive({
   tableNo: 1,
   tableName: '',
   seats: 1,
-  status: statusList.value[2],
+  status: statusList.value[3],
   reservationId: '',
   reservationDate: dateList.value[0],
   reservationTime: timeList.value[0],
@@ -94,7 +98,7 @@ const seatForm = reactive({
   tableNo: 1,
   tableName: '',
   seats: 1,
-  status: statusList.value[2],
+  status: statusList.value[3],
   reservationId: '',
   reservationDate: dateList.value[0],
   reservationTime: timeList.value[0],
@@ -144,6 +148,18 @@ const delReservation = catchError(async (reservationId) => {
   handleModalClose()
   successAlert(message)
   searchSeats()
+})
+
+/**
+ * 跳轉至點餐頁面
+ */
+const toPropduct = catchError(async (tableName) => {
+  router.push({
+    path: '/product',
+    query: {
+      table: `${tableName}`
+    }
+  })
 })
 
 /**
@@ -210,7 +226,7 @@ const handleModalClose = () => {
           <label for="seat_status" class="block mb-2 font-medium">狀態</label>
           <select id="seat_status" class="form-select py-3" v-model="searchForm.status">
             <option v-for="(option, key) in statusList" :value="option" :key="key">
-              {{ option }}
+              {{ option === '' ? '全部' : option }}
             </option>
           </select>
         </li>
@@ -299,14 +315,14 @@ const handleModalClose = () => {
                 >
                   修改
                 </button>
-                <router-link
-                  to="product"
+                <button
+                  @click="toPropduct(seat.tableName)"
                   type="button"
                   class="btn btn-outline-dark mx-1"
                   :class="seat.status === '使用中' ? '' : 'hidden'"
                 >
                   點餐
-                </router-link>
+                </button>
               </div>
             </div>
           </div>
@@ -358,7 +374,6 @@ const handleModalClose = () => {
             </p>
           </div>
           <form class="space-y-6" action="#">
-            {{ seatForm }}
             <div>
               <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
               <select

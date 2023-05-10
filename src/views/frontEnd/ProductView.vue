@@ -2,6 +2,9 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const getTable = ref(`${route.query.table}`)
 
 /**
  * 變色卡
@@ -170,7 +173,7 @@ const cartLength = ref(1)
             <h1 class="text-xl font-medium">確認訂單</h1>
             <p class="text-xl font-medium">
               桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2">2</span>
+              <span class="text-white bg-primary-light rounded py-1 px-2">{{ getTable }}</span>
             </p>
           </div>
           <!-- cartList：圖片 -->
