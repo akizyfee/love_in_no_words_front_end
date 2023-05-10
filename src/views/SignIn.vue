@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
-import { loginApi } from '@/apis/user.js'
-import { setCookieToken } from '@/utils/cookie.js'
-import { catchError } from '@/utils/catchError.js'
+import { loginApi } from '@/apis/user'
+import { setCookieToken } from '@/utils/cookie'
+import { catchError } from '@/utils/catchError'
 import { errorsFormSchema } from '@/utils/formValidate'
 const router = useRouter()
 
@@ -14,7 +14,7 @@ const router = useRouter()
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
-const loginForm = ref({
+const loginForm = reactive({
   phone: useFieldModel('phone'),
   password: useFieldModel('password')
 })
@@ -23,7 +23,7 @@ const loginForm = ref({
  * 登入功能
  */
 const signIn = catchError(async () => {
-  const { data } = await loginApi(loginForm.value)
+  const { data } = await loginApi(loginForm)
   const { token, titleNo } = data.user
   switch (titleNo) {
     case 1:

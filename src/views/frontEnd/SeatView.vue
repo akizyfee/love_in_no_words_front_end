@@ -1,7 +1,151 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, reactive, nextTick, onMounted, watch } from 'vue'
+import {
+  noReservation,
+  searchReservation,
+  addReservation,
+  editReservation,
+  deleteReservation
+} from '@/apis/seat'
+import { warningAlert, successAlert } from '@/plugins/toast'
+import { catchError } from '@/utils/catchError'
+import { dayWeek } from '@/plugins/day'
+import { useForm } from 'vee-validate'
+import { errorsFormSchema } from '@/utils/formValidate'
+
+const statusList = ref(['未使用', '使用中', '已預約'])
+const dateList = ref(dayWeek())
+const timeList = ref(['上午', '下午'])
+const searchForm = reactive({
+  status: statusList.value[0],
+  reservationDate: dateList.value[0],
+  reservationTime: timeList.value[0]
+})
+
+/**
+ * 帶位功能
+ **/
+const haveASeat = catchError(async (tableNo) => {
+  const { reservationDate, reservationTime } = searchForm
+  const { message } = await noReservation({
+    tableNo,
+    reservationDate,
+    reservationTime
+  })
+  successAlert(message === '成功' ? '修改帶位成功' : message)
+  searchSeats()
+})
+
+/**
+ * 查詢座位功能
+ **/
+const seatList = ref([])
+
+const searchSeats = catchError(async () => {
+  const { data } = await searchReservation(
+    searchForm.status,
+    searchForm.reservationDate,
+    searchForm.reservationTime
+  )
+  const { tables } = data
+  if (tables.length === 0) {
+    warningAlert('沒有符合的座位資料')
+  }
+  seatList.value = tables
+})
+
+onMounted(() => {
+  searchSeats()
+})
+
+watch(
+  [() => searchForm.status, () => searchForm.reservationDate, () => searchForm.reservationTime],
+  () => {
+    searchSeats()
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
+
+/**
+ * VeeValidate 套件
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
+const initSeatForm = reactive({
+  tableNo: 1,
+  tableName: '',
+  seats: 1,
+  status: statusList.value[2],
+  reservationId: '',
+  reservationDate: dateList.value[0],
+  reservationTime: timeList.value[0],
+  name: '',
+  phone: ''
+})
+
+const seatForm = reactive({
+  tableNo: 1,
+  tableName: '',
+  seats: 1,
+  status: statusList.value[2],
+  reservationId: '',
+  reservationDate: dateList.value[0],
+  reservationTime: timeList.value[0],
+  name: useFieldModel('name'),
+  phone: useFieldModel('phone')
+})
+
+/**
+ * 新增訂位功能
+ **/
+const postReservation = catchError(async () => {
+  const { tableNo, reservationDate, reservationTime, name, phone } = seatForm
+  const { message } = await addReservation({
+    tableNo,
+    reservationDate,
+    reservationTime,
+    name,
+    phone
+  })
+  handleModalClose()
+  successAlert(message === '成功' ? '新增成功' : message)
+  searchSeats()
+})
+
+/**
+ * 修改訂位功能
+ **/
+const patchReservation = catchError(async () => {
+  const { status, reservationId, reservationDate, reservationTime, name, phone } = seatForm
+  const { message } = await editReservation(reservationId, {
+    status,
+    reservationDate,
+    reservationTime,
+    name,
+    phone
+  })
+  handleModalClose()
+  successAlert(message === '成功' ? '修改成功' : message)
+  searchSeats()
+})
+
+/**
+ * 取消訂位功能
+ **/
+const delReservation = catchError(async (reservationId) => {
+  const { message } = await deleteReservation(reservationId)
+  handleModalClose()
+  successAlert(message)
+  searchSeats()
+})
+
 /**
  * modal
  * */
@@ -15,14 +159,37 @@ const handleModalOpen = (checkIsCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'create') {
+      const { tableNo, tableName, seats } = item
+      seatForm.tableNo = tableNo
+      seatForm.tableName = tableName
+      seatForm.seats = seats
+    }
+    if (isCreate.value === 'update') {
+      const { tableNo, tableName, seats, status, reservation } = item
+      seatForm.tableNo = tableNo
+      seatForm.tableName = tableName
+      seatForm.seats = seats
+      seatForm.status = status
+      seatForm.reservationDate = reservation.reservationDate
+      seatForm.reservationId = reservation.reservationId
+      seatForm.reservationTime = reservation.reservationTime
+      seatForm.name = reservation.name
+      seatForm.phone = reservation.phone
+    }
   })
 }
+
 const handleModalClose = () => {
   const childComponent = childComponentRef.value
 
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      Object.assign(seatForm, initSeatForm)
     }
   })
 }
@@ -41,25 +208,34 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4 items-center mb-6">
         <li class="col-span-3">
           <label for="seat_status" class="block mb-2 font-medium">狀態</label>
-          <select id="seat_status" class="form-select py-3">
-            <option value="未使用" selected>未使用</option>
-            <option value="使用中">使用中</option>
-            <option value="已預約">已預約</option>
+          <select id="seat_status" class="form-select py-3" v-model="searchForm.status">
+            <option v-for="(option, key) in statusList" :value="option" :key="key">
+              {{ option }}
+            </option>
           </select>
         </li>
         <li class="col-span-3">
           <label for="seat_reservationDate" class="block mb-2 font-medium">日期</label>
-          <select id="seat_reservationDate" class="form-select py-3">
-            <option value="2023/04/26" selected>2023/04/26</option>
-            <option value="2023/04/27">2023/04/27</option>
-            <option value="2023/04/28">2023/04/28</option>
+          <select
+            id="seat_reservationDate"
+            class="form-select py-3"
+            v-model="searchForm.reservationDate"
+          >
+            <option v-for="(option, key) in dateList" :value="option" :key="key">
+              {{ option }}
+            </option>
           </select>
         </li>
         <li class="col-span-3">
           <label for="seat_reservationTime" class="block mb-2 font-medium">訂位時段</label>
-          <select id="seat_reservationTime" class="form-select py-3">
-            <option value="上午" selected>上午</option>
-            <option value="下午">下午</option>
+          <select
+            id="seat_reservationTime"
+            class="form-select py-3"
+            v-model="searchForm.reservationTime"
+          >
+            <option v-for="(option, key) in timeList" :value="option" :key="key">
+              {{ option }}
+            </option>
           </select>
         </li>
       </ul>
@@ -67,159 +243,70 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4">
         <li
           class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
+          v-for="seat in seatList"
+          :key="seat._id"
         >
           <div class="flex justify-between items-center border-b-2 border-textself px-4">
             <p class="font-medium mb-5">
               桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2 t">1</span>
+              <span class="text-white bg-primary-light rounded py-1 px-2">{{
+                seat.tableName
+              }}</span>
             </p>
             <p class="font-medium mb-5">
               人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
+              <span class="text-white bg-textself rounded py-1 px-2">{{ seat.seats }}</span>
             </p>
           </div>
           <div class="pl-4 pr-3 mt-4">
             <p class="font-medium">
-              王先生
-              <span class="ml-2">0912-345678</span>
+              {{ seat?.reservation?.name ? seat.reservation.name : '&emsp;' }}
+              <span class="ml-2">{{
+                seat?.reservation?.phone ? seat.reservation.phone : '&emsp;'
+              }}</span>
             </p>
             <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">已預約</p>
+              <p>
+                <span class="bg-secondary-light rounded py-1 px-2 mr-2"> {{ seat.status }}</span>
+                <span
+                  class="rounded py-1 px-2"
+                  :class="seat.isWindowSeat ? 'bg-primary text-white' : 'hidden'"
+                  >{{ seat.isWindowSeat ? '靠窗' : '' }}</span
+                >
+              </p>
               <div class="flex justify-between items-center">
                 <button
-                  @click="handleModalOpen(false)"
+                  @click="haveASeat(seat.tableNo)"
                   type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
+                  class="btn btn-outline-dark mx-1"
+                  :class="seat.status === '未使用' ? '' : 'hidden'"
                 >
                   帶位
                 </button>
                 <button
-                  @click="handleModalOpen(false)"
+                  @click="handleModalOpen('create', seat)"
                   type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
+                  class="btn btn-outline-dark mx-1"
+                  :class="seat.status === '未使用' ? '' : 'hidden'"
                 >
                   預約
                 </button>
                 <button
-                  @click="handleModalOpen(false)"
+                  @click="handleModalOpen('update', seat)"
                   type="button"
                   class="btn btn-outline-dark mx-1"
+                  :class="seat.status === '已預約' ? '' : 'hidden'"
                 >
                   修改
                 </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  點餐
-                </button>
-              </div>
-            </div>
-          </div>
-        </li>
-        <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
-        >
-          <div class="flex justify-between items-center border-b-2 border-textself px-4">
-            <p class="font-medium mb-5">
-              桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2">2</span>
-            </p>
-            <p class="font-medium mb-5">
-              人數
-              <span class="text-white bg-textself rounded py-1 px-2">4</span>
-            </p>
-          </div>
-          <div class="pl-4 pr-3 mt-4">
-            <p class="font-medium">
-              {{ &emsp; }}
-              <span class="ml-2">{{ &emsp; }}</span>
-            </p>
-            <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">使用中</p>
-              <div class="flex justify-between items-center">
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  帶位
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  預約
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  修改
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
+                <router-link
+                  to="product"
                   type="button"
                   class="btn btn-outline-dark mx-1"
+                  :class="seat.status === '使用中' ? '' : 'hidden'"
                 >
                   點餐
-                </button>
-              </div>
-            </div>
-          </div>
-        </li>
-        <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
-        >
-          <div class="flex justify-between items-center border-b-2 border-textself px-4">
-            <p class="font-medium mb-5">
-              桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2">3</span>
-            </p>
-            <p class="font-medium mb-5">
-              人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
-            </p>
-          </div>
-          <div class="pl-4 pr-3 mt-4">
-            <p class="font-medium">
-              {{ &emsp; }}
-              <span class="ml-2">{{ &emsp; }}</span>
-            </p>
-            <div class="flex justify-between items-center mt-4">
-              <p class="bg-secondary-light rounded py-1 px-2">未使用</p>
-              <div class="flex justify-between items-center">
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1"
-                >
-                  帶位
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1"
-                >
-                  預約
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  修改
-                </button>
-                <button
-                  @click="handleModalOpen(false)"
-                  type="button"
-                  class="btn btn-outline-dark mx-1 hidden"
-                >
-                  點餐
-                </button>
+                </router-link>
               </div>
             </div>
           </div>
@@ -233,8 +320,8 @@ const handleModalClose = () => {
       <div class="relative bg-white border-2 border-textself rounded-lg shadow">
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
-          <h2 v-if="isCreate" class="text-xl font-medium">新增訂位</h2>
-          <h2 v-if="!isCreate" class="text-xl font-medium">修改訂位 / 座位</h2>
+          <p v-if="isCreate === 'create'" class="text-xl font-medium">新增訂位</p>
+          <p v-else-if="isCreate === 'update'" class="text-xl font-medium">修改訂位 / 座位</p>
           <button
             @click="handleModalClose()"
             type="button"
@@ -257,118 +344,167 @@ const handleModalClose = () => {
           </button>
         </div>
         <!-- Modal body -->
-        <div class="w-full rounded-lg p-3">
+        <div class="w-full rounded-lg p-3" v-if="isCreate === 'create'">
           <div class="flex justify-between items-center bg-bgself-light p-3 mb-3">
             <p class="font-medium">
               桌號
-              <span class="text-white bg-primary-light rounded py-1 px-2">1</span>
+              <span class="text-white bg-primary-light rounded py-1 px-2">{{
+                seatForm.tableName
+              }}</span>
             </p>
             <p class="font-medium">
               人數
-              <span class="text-white bg-textself rounded py-1 px-2">2</span>
+              <span class="text-white bg-textself rounded py-1 px-2">{{ seatForm.seats }}</span>
             </p>
           </div>
-          <form v-if="isCreate" class="space-y-6" action="#">
+          <form class="space-y-6" action="#">
+            {{ seatForm }}
             <div>
               <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
-              <select id="form_reservationDate" class="form-select">
-                <option value="2023/04/26" selected>2023/04/26</option>
-                <option value="2023/04/27">2023/04/27</option>
-                <option value="2023/04/28">2023/04/28</option>
+              <select
+                id="form_reservationDate"
+                class="form-select py-3"
+                v-model="seatForm.reservationDate"
+              >
+                <option v-for="(option, key) in dateList" :value="option" :key="key">
+                  {{ option }}
+                </option>
               </select>
             </div>
             <div>
               <label for="form_reservationTime" class="block mb-2 font-medium">訂位時段</label>
-              <select id="form_reservationTime" class="form-select">
-                <option value="上午" selected>上午</option>
-                <option value="下午">下午</option>
+              <select
+                id="form_reservationTime"
+                class="form-select py-3"
+                v-model="seatForm.reservationTime"
+              >
+                <option v-for="(option, key) in timeList" :value="option" :key="key">
+                  {{ option }}
+                </option>
               </select>
             </div>
             <div>
               <label for="form_name" class="block mb-2 font-medium">姓名</label>
               <input
                 type="text"
+                name="name"
                 id="form_name"
                 class="form-input"
-                placeholder="0912345678"
+                placeholder="name"
+                v-model.trim="seatForm.name"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
               <input
                 type="tel"
+                name="phone"
                 id="form_tel"
                 class="form-input"
                 placeholder="0912345678"
+                v-model="seatForm.phone"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
-            </div>
-            <div>
-              <label for="seat_status" class="block mb-2 font-medium">狀態</label>
-              <select id="form_status" class="form-select">
-                <option value="未使用" selected>未使用</option>
-                <option value="使用中">使用中</option>
-                <option value="已預約">已預約</option>
-              </select>
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="submit" class="w-full btn btn-dark">新增訂位</button>
+              <button type="submit" class="w-full btn btn-dark" @click.prevent="postReservation">
+                新增訂位
+              </button>
             </div>
           </form>
-          <form v-if="!isCreate" class="space-y-6" action="#">
+        </div>
+        <div class="w-full rounded-lg p-3" v-else-if="isCreate === 'update'">
+          <div class="flex justify-between items-center bg-bgself-light p-3 mb-3">
+            <p class="font-medium">
+              桌號
+              <span class="text-white bg-primary-light rounded py-1 px-2">{{
+                seatForm.tableName
+              }}</span>
+            </p>
+            <p class="font-medium">
+              人數
+              <span class="text-white bg-textself rounded py-1 px-2">{{ seatForm.seats }}</span>
+            </p>
+          </div>
+          <form class="space-y-6" action="#">
             <div>
               <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
-              <select id="form_reservationDate" class="form-select">
-                <option value="2023/04/26" selected>2023/04/26</option>
-                <option value="2023/04/27">2023/04/27</option>
-                <option value="2023/04/28">2023/04/28</option>
+              <select
+                id="form_reservationDate"
+                class="form-select py-3"
+                v-model="seatForm.reservationDate"
+              >
+                <option v-for="(option, key) in dateList" :value="option" :key="key">
+                  {{ option }}
+                </option>
               </select>
             </div>
             <div>
               <label for="form_reservationTime" class="block mb-2 font-medium">訂位時段</label>
-              <select id="form_reservationTime" class="form-select">
-                <option value="上午" selected>上午</option>
-                <option value="下午">下午</option>
+              <select
+                id="form_reservationTime"
+                class="form-select py-3"
+                v-model="seatForm.reservationTime"
+              >
+                <option v-for="(option, key) in timeList" :value="option" :key="key">
+                  {{ option }}
+                </option>
               </select>
             </div>
             <div>
               <label for="form_name" class="block mb-2 font-medium">姓名</label>
               <input
                 type="text"
+                name="name"
                 id="form_name"
                 class="form-input"
-                placeholder="0912345678"
+                placeholder="name"
+                v-model.trim="seatForm.name"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
               <input
                 type="tel"
+                name="phone"
                 id="form_tel"
                 class="form-input"
                 placeholder="0912345678"
+                v-model="seatForm.phone"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <div>
-              <label for="seat_status" class="block mb-2 font-medium">狀態</label>
-              <select id="form_status" class="form-select">
-                <option value="未使用" selected>未使用</option>
-                <option value="使用中">使用中</option>
-                <option value="已預約">已預約</option>
+              <label for="form_status" class="block mb-2 font-medium">狀態</label>
+              <select id="form_status" class="form-select py-3" v-model="seatForm.status">
+                <option v-for="(option, key) in statusList" :value="option" :key="key">
+                  {{ option }}
+                </option>
               </select>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="button" class="w-full mr-1 btn btn-outline-dark">取消預約</button>
-              <button type="submit" class="w-full ml-1 btn btn-dark">確認修改</button>
+              <button
+                type="button"
+                class="w-full mr-1 btn btn-outline-dark"
+                @click.prevent="delReservation(seatForm.reservationId)"
+              >
+                取消預約
+              </button>
+              <button
+                type="submit"
+                class="w-full ml-1 btn btn-dark"
+                @click.prevent="patchReservation"
+              >
+                確認修改
+              </button>
             </div>
           </form>
         </div>

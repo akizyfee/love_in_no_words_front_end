@@ -1,10 +1,10 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted, watch } from 'vue'
-import { searchMember, addMember, editMember, deleteMember } from '@/apis/user.js'
+import { ref, nextTick, onMounted, watch, reactive } from 'vue'
+import { searchMember, addMember, editMember, deleteMember } from '@/apis/user'
 import { warningAlert, successAlert } from '@/plugins/toast'
-import { catchError } from '@/utils/catchError.js'
+import { catchError } from '@/utils/catchError'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
@@ -45,7 +45,7 @@ watch(
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
-const memberForm = ref({
+const memberForm = reactive({
   _id: '',
   name: useFieldModel('name'),
   phone: useFieldModel('phone')
@@ -55,7 +55,7 @@ const memberForm = ref({
  * 新增會員功能
  **/
 const postMember = catchError(async () => {
-  const { message } = await addMember(memberForm.value)
+  const { message } = await addMember(memberForm)
   handleModalClose()
   successAlert(message)
   getMembers()
@@ -65,7 +65,7 @@ const postMember = catchError(async () => {
  * 修改會員功能
  **/
 const patchMember = catchError(async () => {
-  const { message } = await editMember(memberForm.value._id, memberForm.value)
+  const { message } = await editMember(memberForm._id, memberForm)
   handleModalClose()
   successAlert(message)
   getMembers()
@@ -75,7 +75,7 @@ const patchMember = catchError(async () => {
  * 刪除會員功能
  **/
 const delMember = catchError(async () => {
-  const { message } = await deleteMember(memberForm.value._id)
+  const { message } = await deleteMember(memberForm._id)
   handleModalClose()
   successAlert(message)
   getMembers()
@@ -96,9 +96,9 @@ const handleModalOpen = (checkisCreate, item) => {
     }
     if (isCreate.value === 'update' || isCreate.value === 'delete') {
       const { _id, name, phone } = item
-      memberForm.value._id = _id
-      memberForm.value.name = name
-      memberForm.value.phone = phone
+      memberForm._id = _id
+      memberForm.name = name
+      memberForm.phone = phone
     }
   })
 }
@@ -112,7 +112,8 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
-      memberForm.value = {}
+      memberForm.name = ''
+      memberForm.phone = ''
     }
   })
 }
@@ -211,13 +212,14 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6 p-3" action="#">
+          <form v-if="isCreate === 'create'" class="space-y-6 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
                 type="text"
                 name="name"
                 id="name"
+                key="name"
                 class="form-input"
                 placeholder="name"
                 v-model.trim="memberForm.name"
@@ -231,6 +233,7 @@ const handleModalClose = () => {
                 type="tel"
                 name="phone"
                 id="phone"
+                key="phone"
                 class="form-input"
                 placeholder="0912345678"
                 v-model="memberForm.phone"
@@ -245,13 +248,14 @@ const handleModalClose = () => {
               </button>
             </section>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
+          <form v-else-if="isCreate === 'update'" class="space-y-6 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
                 type="text"
                 name="name"
                 id="name"
+                key="name"
                 class="form-input"
                 placeholder="name"
                 v-model.trim="memberForm.name"
@@ -265,6 +269,7 @@ const handleModalClose = () => {
                 type="tel"
                 name="phone"
                 id="phone"
+                key="phone"
                 class="form-input"
                 placeholder="0912345678"
                 v-model="memberForm.phone"
