@@ -9,6 +9,7 @@ import {
   searchAllAdminOrders
 } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
+import { nowYear } from '@/plugins/day'
 import c3 from 'c3'
 
 /**
@@ -65,7 +66,7 @@ const drawChart = () => {
 /**
  * 取得營收資料
  */
-const revenueYear = ref(2023)
+const revenueYear = ref(nowYear)
 const c3RevenueReport = []
 const fetchGetAdminRevenue = catchError(async () => {
   const { data } = await getAdminRevenue(revenueYear)
@@ -104,7 +105,7 @@ onMounted(() => {
 /**
  * 取得賣出數量資料
  */
-const sellQtyYear = ref(2023)
+const sellQtyYear = ref(nowYear)
 const c3SellQtyReport = []
 const fetchGetAdminSellQty = catchError(async () => {
   const { data } = await getAdminSellQty(sellQtyYear)
