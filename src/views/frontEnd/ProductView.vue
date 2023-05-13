@@ -1,15 +1,45 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { catchError } from '@/utils/catchError'
+import { searchTypeAll, getAdminDessertType, searchType } from '@/apis/product'
+
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 
 /**
- * 變色卡
- * */
-const theme = ref('white')
+ * 設置商品列表
+ */
+const typeList = ref([])
+const fetchAllDessertType = catchError(async () => {
+  const { data } = await getAdminDessertType()
+  typeList.value = data
+  console.log(typeList.value)
+})
+
+const productList = ref([])
+const fetchAllProduct = catchError(async () => {
+  const { data } = await searchTypeAll()
+  productList.value = data
+})
+
+onMounted(() => {
+  fetchAllDessertType()
+  fetchAllProduct()
+})
+
+/**
+ * 搜尋分類商品
+ */
+const productLength = ref(0)
+const fetchProduct = catchError(async (dessertType) => {
+  const { data } = await searchType(dessertType)
+  productList.value = data
+  productLength.value = productList.value.length
+  console.log(productLength.value)
+})
 
 /**
  * modal
@@ -35,11 +65,6 @@ const handleModalClose = () => {
     }
   })
 }
-
-/**
- * tailwind 樣式變化
- */
-const cartLength = ref(1)
 </script>
 <template>
   <section>
@@ -49,122 +74,86 @@ const cartLength = ref(1)
     <main class="mx-[315px] bg-secondary-light p-6 min-h-screen">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
-        <li class="mr-2">
+        <li v-for="types in typeList" :key="types._id" class="mr-2">
           <a
+            @click.prevent="fetchProduct(types.productsType)"
             href="#"
             class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active"
-            >馬卡龍</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >泡芙</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >聖代</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >蛋糕</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >氣泡水</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >其他</a
-          >
+            >{{ types.productsTypeName }}
+          </a>
         </li>
       </ul>
       <!-- product -->
       <ul class="grid grid-cols-12 gap-4">
         <li
+          @click="handleModalOpen('updateProduct', itemProductList)"
+          v-for="itemProductList in productList"
+          :key="itemProductList.productNo"
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
-          <a href="#" @click="handleModalOpen('create')">
-            <img
-              class="rounded-t-lg object-cover w-full h-[184px]"
-              src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
-              alt="ImgProduct"
-            />
-            <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
-              甜點
-            </p>
-          </a>
+          <img
+            class="rounded-t-lg object-cover w-full h-[184px]"
+            :src="itemProductList.photoUrl"
+            :alt="itemProductList.productName"
+          />
+          <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+            {{ itemProductList.productsTypeName }}
+          </p>
           <div
             :class="[
               'transition-all duration-500 p-6 rounded-bl-lg rounded-br-lg',
-              theme === 'white' && 'bg-white',
-              theme === 'danger' && 'bg-[#F31F1F1A]'
+              itemProductList.amountStatus === 'safe' && 'bg-white',
+              itemProductList.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
             ]"
           >
-            <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+            <h2 class="text-2xl font-medium mb-3">{{ itemProductList.productName }}</h2>
             <div class="flex justify-between items-center">
-              <p class="text-primary-light text-[32px] font-bold">$80</p>
+              <p class="text-primary-light text-[32px] font-bold">${{ itemProductList.price }}</p>
               <div class="flex flex-col items-end">
-                <p v-if="theme == 'white'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'safe'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;20份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p
-                  v-else-if="theme === 'danger'"
+                  v-else-if="itemProductList.amountStatus === 'danger'"
                   class="flex items-center text-primary-light font-normal"
                 >
                   <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
-                  <span>剩餘</span>
-                  &emsp;08份
-                </p>
-                <p v-else-if="theme === 'over'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
-                <p v-else-if="theme === 'stop'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'zero'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p class="font-normal">
                   <span class="text-neutralself-200">製作時間</span>
-                  &emsp;20分
+                  &emsp;{{ itemProductList.productionTime }}分
                 </p>
               </div>
             </div>
           </div>
           <section
-            v-if="theme === 'over'"
+            v-if="itemProductList.isDisabled === true || itemProductList.inStockAmount === 0"
             class="absolute top-0 bottom-0 left-0 right-0"
             style="background: rgba(8, 8, 8, 0.5)"
           >
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
               <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
-                已售完
-              </p>
-            </div>
-          </section>
-          <section
-            v-else-if="theme === 'stop'"
-            class="absolute top-0 bottom-0 left-0 right-0"
-            style="background: rgba(8, 8, 8, 0.5)"
-          >
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
-                已停用
+                {{ itemProductList.isDisabled === true ? '已停用' : '已售完' }}
               </p>
             </div>
           </section>
         </li>
       </ul>
-      <section class="flex">
-        <button @click="theme = 'white'" class="p-1 m-1 bg-gray-200 rounded">預設</button>
-        <button @click="theme = 'danger'" class="p-1 m-1 bg-gray-200 rounded">低於10</button>
-        <button @click="theme = 'over'" class="p-1 m-1 bg-gray-200 rounded">已售完</button>
-        <button @click="theme = 'stop'" class="p-1 m-1 bg-gray-200 rounded">已停用</button>
-      </section>
+      <div v-if="productLength === 0">
+        <img
+          src="@/assets/img/ImgFeature02.svg"
+          class="object-cover block mx-auto"
+          alt="Feature_Card_Img2"
+        />
+        <p class="font-medium text-4xl text-center">目前的分類還沒有餐點哦！</p>
+      </div>
     </main>
     <aside class="fixed top-0 right-0 z-40 w-[315px] h-screen">
       <div class="w-full h-full border-l-2 border-textself">
@@ -177,7 +166,7 @@ const cartLength = ref(1)
             </p>
           </div>
           <!-- cartList：圖片 -->
-          <div v-if="cartLength === 0" class="text-center">
+          <div v-if="productLength === 0" class="text-center">
             <img src="@/assets/img/ImgFeature02.svg" class="object-cover" alt="Feature_Card_Img2" />
             <p class="font-medium">還沒有點選餐點喔！</p>
           </div>
