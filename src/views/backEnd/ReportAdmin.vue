@@ -1,23 +1,25 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import { getAdminRevenue } from '@/apis/report'
+import { catchError } from '@/utils/catchError'
 import c3 from 'c3'
+
+/**
+ * C3繪製
+ */
 const drawChart = () => {
   c3.generate({
     bindto: '#chart1',
     data: {
-      columns: [
-        ['mouth:1', 220],
-        ['mouth:2', 420],
-        ['mouth:3', 820]
-      ],
+      columns: c3RevenueReport,
       type: 'donut'
     },
     donut: {
       title: '月營收',
       label: {
         format: function (value, ratio, id) {
-          return value // 返回数值作为标签
+          return value
         }
       }
     }
@@ -25,25 +27,38 @@ const drawChart = () => {
   c3.generate({
     bindto: '#chart2',
     data: {
-      columns: [
-        ['mouth:1', 120],
-        ['mouth:2', 120],
-        ['mouth:3', 120]
-      ],
+      columns: [['mouth:1', 120]],
       type: 'donut'
     },
     donut: {
       title: '月訂單量',
       label: {
         format: function (value, ratio, id) {
-          return value // 返回数值作为标签
+          return value
         }
       }
     }
   })
 }
-onMounted(() => {
+
+/**
+ * 取得營收資料
+ */
+const year = ref(2023)
+const c3RevenueReport = []
+const fetchGetAdminRevenue = catchError(async () => {
+  const { data } = await getAdminRevenue(year)
+  const filterReport = data.map((item) => {
+    const month = item.month
+    const total = item.monthTotal
+    return [`mouth:${month}`, total]
+  })
+  c3RevenueReport.push(...filterReport)
   drawChart()
+})
+
+onMounted(() => {
+  fetchGetAdminRevenue()
 })
 </script>
 <template>

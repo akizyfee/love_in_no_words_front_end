@@ -2,9 +2,9 @@ import axios from '@/plugins/axios'
 
 /**
  * O-5-1 取得營收資料
- * @param {number} 報表種類
+ * @param {number} 報表年份
  */
-export const getAdminRevenue = (reportType) => axios.get(`/v1/send/email/admin/revenue/report/${reportType}`)
+export const getAdminRevenue = (params) => axios.get(`/v1/send/email/admin/revenue/report/?${params}`)
 
 /**
  * O-5-2 取得賣出數量資料
