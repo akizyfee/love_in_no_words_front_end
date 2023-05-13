@@ -1,7 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import { onMounted, ref } from 'vue'
-import { getAdminRevenue } from '@/apis/report'
+import { getAdminRevenue, getAdminOrdersQty } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import c3 from 'c3'
 
@@ -27,7 +27,7 @@ const drawChart = () => {
   c3.generate({
     bindto: '#chart2',
     data: {
-      columns: [['mouth:1', 120]],
+      columns: c3OerderQtyReport,
       type: 'donut'
     },
     donut: {
@@ -59,6 +59,24 @@ const fetchGetAdminRevenue = catchError(async () => {
 
 onMounted(() => {
   fetchGetAdminRevenue()
+})
+
+/**
+ * 取得訂單數量資料
+ */
+const c3OerderQtyReport = []
+const fetchGetAdminOrdersQty = catchError(async () => {
+  const { data } = await getAdminOrdersQty()
+  const filterReport = data.map((item) => {
+    const month = item.month
+    const orderNumber = item.orderNumber
+    return [`mouth:${month}`, orderNumber]
+  })
+  c3OerderQtyReport.push(...filterReport)
+})
+
+onMounted(() => {
+  fetchGetAdminOrdersQty()
 })
 </script>
 <template>
