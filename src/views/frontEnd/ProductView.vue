@@ -5,6 +5,7 @@ import { ref, reactive, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { catchError } from '@/utils/catchError'
 import { searchTypeAll, getAdminDessertType, searchType } from '@/apis/product'
+import { calculateTotalPrice } from '@/apis/order'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
@@ -22,7 +23,6 @@ const productList = ref([])
 const fetchAllProduct = catchError(async () => {
   const { data } = await searchTypeAll()
   productList.value = data
-  console.log(productList.value)
 })
 
 onMounted(() => {
@@ -65,6 +65,7 @@ const productCard = reactive({
 })
 
 const tempProduct = ref([])
+const tempProductLength = ref(tempProduct.value.length)
 const addToTempProduct = (item) => {
   const productCardQty = tempProductCardQty.value
   const temp = {
@@ -78,6 +79,7 @@ const addToTempProduct = (item) => {
     tempProduct.value.push(temp)
   }
   tempProductCardQty.value = 0
+  tempProductLength.value = tempProduct.value.length
 }
 const removeTempProduct = (item) => {
   const temp = {
@@ -85,7 +87,29 @@ const removeTempProduct = (item) => {
   }
   const findSame = tempProduct.value.filter((item) => item._id !== temp._id)
   tempProduct.value = findSame
+  tempProductLength.value = tempProduct.value.length
 }
+
+/**
+ * 金額試算
+ */
+const orderProductTotalPrice = ref({
+  tableName: getTable,
+  products: tempProduct,
+  couponNo: ''
+})
+
+const checkProductTotalPrice = ref({
+  orderList: [],
+  tableName: 0,
+  totalPrice: 0,
+  totalTime: ''
+})
+
+const fetchCalculateTotalPrice = catchError(async () => {
+  const { data } = await calculateTotalPrice(orderProductTotalPrice.value)
+  checkProductTotalPrice.value = data
+})
 
 /**
  * modal
@@ -240,10 +264,10 @@ const handleModalClose = () => {
             </p>
           </div>
           <!-- cartList：圖片 -->
-          <!-- <div v-if="productLength === 0" class="text-center">
+          <div v-if="tempProductLength === 0" class="text-center">
             <img src="@/assets/img/ImgFeature02.svg" class="object-cover" alt="Feature_Card_Img2" />
             <p class="font-medium">還沒有點選餐點喔！</p>
-          </div> -->
+          </div>
           <!-- cartList -->
           <ul class="flex flex-col p-3 overflow-scroll">
             <li
@@ -283,7 +307,7 @@ const handleModalClose = () => {
           <ul class="grid grid-cols-2 gap-3 border-y-2 p-3 border-textself">
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('readMember')"
+                @click.prevent="handleModalOpen('readMember')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>查詢會員</span>
@@ -292,7 +316,7 @@ const handleModalClose = () => {
             </li>
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('createMember')"
+                @click.prevent="handleModalOpen('createMember')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>加入會員</span>
@@ -301,7 +325,7 @@ const handleModalClose = () => {
             </li>
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('createActivity')"
+                @click.prevent="handleModalOpen('createActivity')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>選擇活動</span>
@@ -313,7 +337,10 @@ const handleModalClose = () => {
               </button>
             </li>
             <li class="col-span-2 lg:col-span-1">
-              <button class="w-full btn btn-outline-dark flex items-center justify-center">
+              <button
+                @click.prevent="fetchCalculateTotalPrice"
+                class="w-full btn btn-outline-dark flex items-center justify-center"
+              >
                 <span>金額試算</span>
                 <img class="ms-2" src="@/assets/img/IconCashCalculate.png" alt="IconMemberSearch" />
               </button>
@@ -322,7 +349,7 @@ const handleModalClose = () => {
           <div class="flex flex-col px-3 py-4">
             <p class="flex justify-between items-center font-medium">
               <span>製作時間</span>
-              <span>0 分</span>
+              <span>{{ checkProductTotalPrice.totalTime }} 分</span>
             </p>
             <p class="flex justify-between items-center font-medium">
               <span>&emsp;&emsp;餐點</span>
@@ -334,7 +361,7 @@ const handleModalClose = () => {
             </p>
             <p class="flex justify-between items-center font-medium mb-7">
               <span class="text-xl ps-1">&emsp;合計</span>
-              <span class="text-xl text-primary">NT$ 0</span>
+              <span class="text-xl text-primary">NT$ {{ checkProductTotalPrice.totalPrice }}</span>
             </p>
             <router-link to="/" class="btn btn-dark py-2 w-full"> 送出訂單 </router-link>
           </div>
