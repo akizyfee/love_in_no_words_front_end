@@ -2,13 +2,15 @@
 import { defineComponent, ref } from 'vue'
 import CuponCode from '@/components/backEnd/coupon/CouponCode.vue'
 import FreeOne from '@/components/backEnd/coupon/FreeOne.vue'
+import FreebiePlus from '@/components/backEnd/coupon/FreebiePlus.vue'
 import SiderBar from '@/components/backEnd/SideBar.vue'
 
 export default defineComponent({
   components: {
     CuponCode,
     FreeOne,
-    SiderBar
+    SiderBar,
+    FreebiePlus
   },
   setup() {
     const selectedComponent = ref('CuponCode')
@@ -26,9 +28,7 @@ export default defineComponent({
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
       <!-- select -->
-      <label for="selectCoupon" class="block mb-2 font-medium whitespace-nowrap"
-        >活動分類</label
-      >
+      <label for="selectCoupon" class="block mb-2 font-medium whitespace-nowrap">活動分類</label>
       <select
         id="selectCoupon"
         value="cuponCode"
@@ -37,6 +37,7 @@ export default defineComponent({
       >
         <option value="cuponCode">優惠碼</option>
         <option value="freeOne">買一送一</option>
+        <option value="freebiePlus">A+B優惠</option>
       </select>
       <!-- table -->
       <keep-alive>
