@@ -5,7 +5,8 @@ import { ref, reactive, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { catchError } from '@/utils/catchError'
 import { searchTypeAll, getAdminDessertType, searchType } from '@/apis/product'
-import { calculateTotalPrice } from '@/apis/order'
+import { calculateTotalPrice, addOrder } from '@/apis/order'
+import { successAlert } from '@/plugins/toast'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
@@ -80,6 +81,7 @@ const addToTempProduct = (item) => {
   }
   tempProductCardQty.value = 0
   tempProductLength.value = tempProduct.value.length
+  handleModalClose()
 }
 const removeTempProduct = (item) => {
   const temp = {
@@ -109,6 +111,15 @@ const checkProductTotalPrice = ref({
 const fetchCalculateTotalPrice = catchError(async () => {
   const { data } = await calculateTotalPrice(orderProductTotalPrice.value)
   checkProductTotalPrice.value = data
+  tempProduct.value = []
+})
+
+/**
+ * 新增訂單
+ * */
+const fetchAddOreder = catchError(async () => {
+  const { message } = await addOrder(orderProductTotalPrice.value)
+  successAlert(message)
 })
 
 /**
@@ -363,7 +374,7 @@ const handleModalClose = () => {
               <span class="text-xl ps-1">&emsp;合計</span>
               <span class="text-xl text-primary">NT$ {{ checkProductTotalPrice.totalPrice }}</span>
             </p>
-            <router-link to="/" class="btn btn-dark py-2 w-full"> 送出訂單 </router-link>
+            <button @click="fetchAddOreder()" class="btn btn-dark py-2 w-full">送出訂單</button>
           </div>
         </div>
       </div>
