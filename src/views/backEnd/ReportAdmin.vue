@@ -1,5 +1,50 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
+import { onMounted } from 'vue'
+import c3 from 'c3'
+const drawChart = () => {
+  c3.generate({
+    bindto: '#chart1',
+    data: {
+      columns: [
+        ['mouth:1', 220],
+        ['mouth:2', 420],
+        ['mouth:3', 820]
+      ],
+      type: 'donut'
+    },
+    donut: {
+      title: '月營收',
+      label: {
+        format: function (value, ratio, id) {
+          return value // 返回数值作为标签
+        }
+      }
+    }
+  })
+  c3.generate({
+    bindto: '#chart2',
+    data: {
+      columns: [
+        ['mouth:1', 120],
+        ['mouth:2', 120],
+        ['mouth:3', 120]
+      ],
+      type: 'donut'
+    },
+    donut: {
+      title: '月訂單量',
+      label: {
+        format: function (value, ratio, id) {
+          return value // 返回数值作为标签
+        }
+      }
+    }
+  })
+}
+onMounted(() => {
+  drawChart()
+})
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
@@ -13,20 +58,16 @@ import SiderBar from '@/components/backEnd/SideBar.vue'
       <!-- imgReport -->
       <ul class="grid grid-cols-12">
         <li
-          class="col-span-4 max-w-sm p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-6 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
+          <div id="chart1"></div>
           <p class="mb-3 font-medium text-2xl">報表</p>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
         <li
-          class="col-span-4 max-w-sm p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-6 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
-          <p class="mb-3 font-medium text-2xl">報表</p>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
-        </li>
-        <li
-          class="col-span-4 max-w-sm p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
-        >
+          <div id="chart2"></div>
           <p class="mb-3 font-medium text-2xl">報表</p>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
