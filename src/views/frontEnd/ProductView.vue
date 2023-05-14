@@ -1,15 +1,126 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, reactive, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { catchError } from '@/utils/catchError'
+import { searchTypeAll, getAdminDessertType, searchType } from '@/apis/product'
+import { calculateTotalPrice, addOrder } from '@/apis/order'
+import { successAlert } from '@/plugins/toast'
+
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 
 /**
- * 變色卡
+ * 設置商品列表
+ */
+const typeList = ref([])
+const fetchAllDessertType = catchError(async () => {
+  const { data } = await getAdminDessertType()
+  typeList.value = data
+})
+
+const productList = ref([])
+const fetchAllProduct = catchError(async () => {
+  const { data } = await searchTypeAll()
+  productList.value = data
+})
+
+onMounted(() => {
+  fetchAllDessertType()
+  fetchAllProduct()
+})
+
+/**
+ * 搜尋分類商品
+ */
+const fetchProduct = catchError(async (dessertType) => {
+  const { data } = await searchType(dessertType)
+  productList.value = data
+})
+
+/**
+ * 購物車
+ */
+const tempProductCardQty = ref(0)
+const plusProductCount = () => {
+  tempProductCardQty.value++
+}
+const minusProductCount = () => {
+  tempProductCardQty.value--
+}
+
+const productCard = reactive({
+  _id: '',
+  productNo: 0,
+  productName: '',
+  photoUrl: '',
+  price: 0,
+  inStockAmount: 0,
+  safeStockAmount: 0,
+  amountStatus: 'safe',
+  productsType: 0,
+  productionTime: 0,
+  isDisabled: false,
+  description: ''
+})
+
+const tempProduct = ref([])
+const tempProductLength = ref(tempProduct.value.length)
+const addToTempProduct = (item) => {
+  const productCardQty = tempProductCardQty.value
+  const temp = {
+    ...item,
+    qty: productCardQty
+  }
+  const findSame = tempProduct.value.find((item) => item._id === temp._id)
+  if (findSame) {
+    findSame.qty = temp.qty
+  } else {
+    tempProduct.value.push(temp)
+  }
+  tempProductCardQty.value = 0
+  tempProductLength.value = tempProduct.value.length
+  handleModalClose()
+}
+const removeTempProduct = (item) => {
+  const temp = {
+    ...item
+  }
+  const findSame = tempProduct.value.filter((item) => item._id !== temp._id)
+  tempProduct.value = findSame
+  tempProductLength.value = tempProduct.value.length
+}
+
+/**
+ * 金額試算
+ */
+const orderProductTotalPrice = ref({
+  tableName: getTable,
+  products: tempProduct,
+  couponNo: ''
+})
+
+const checkProductTotalPrice = ref({
+  orderList: [],
+  tableName: 0,
+  totalPrice: 0,
+  totalTime: ''
+})
+
+const fetchCalculateTotalPrice = catchError(async () => {
+  const { data } = await calculateTotalPrice(orderProductTotalPrice.value)
+  checkProductTotalPrice.value = data
+  tempProduct.value = []
+})
+
+/**
+ * 新增訂單
  * */
-const theme = ref('white')
+const fetchAddOreder = catchError(async () => {
+  const { message } = await addOrder(orderProductTotalPrice.value)
+  successAlert(message)
+})
 
 /**
  * modal
@@ -24,6 +135,34 @@ const handleModalOpen = (checkIsCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'create' || isCreate.value === 'update' || isCreate.value === 'delete') {
+      const {
+        _id,
+        productNo,
+        productName,
+        photoUrl,
+        price,
+        inStockAmount,
+        safeStockAmount,
+        amountStatus,
+        isDisabled,
+        productionTime,
+        productsType,
+        description
+      } = item
+      productCard._id = _id
+      productCard.productNo = productNo
+      productCard.productName = productName
+      productCard.photoUrl = photoUrl
+      productCard.price = price
+      productCard.inStockAmount = inStockAmount
+      productCard.safeStockAmount = safeStockAmount
+      productCard.amountStatus = amountStatus
+      productCard.isDisabled = isDisabled
+      productCard.productionTime = productionTime
+      productCard.productsType = productsType
+      productCard.description = description
+    }
   })
 }
 const handleModalClose = () => {
@@ -35,11 +174,6 @@ const handleModalClose = () => {
     }
   })
 }
-
-/**
- * tailwind 樣式變化
- */
-const cartLength = ref(1)
 </script>
 <template>
   <section>
@@ -49,122 +183,86 @@ const cartLength = ref(1)
     <main class="mx-[315px] bg-secondary-light p-6 min-h-screen">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
-        <li class="mr-2">
+        <li v-for="types in typeList" :key="types._id" class="mr-2">
           <a
+            @click.prevent="fetchProduct(types.productsType)"
             href="#"
             class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active"
-            >馬卡龍</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >泡芙</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >聖代</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >蛋糕</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >氣泡水</a
-          >
-        </li>
-        <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            >其他</a
-          >
+            >{{ types.productsTypeName }}
+          </a>
         </li>
       </ul>
       <!-- product -->
       <ul class="grid grid-cols-12 gap-4">
         <li
+          @click.prevent="handleModalOpen('create', itemProductList)"
+          v-for="itemProductList in productList"
+          :key="itemProductList.productNo"
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
-          <a href="#" @click="handleModalOpen('create')">
-            <img
-              class="rounded-t-lg object-cover w-full h-[184px]"
-              src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
-              alt="ImgProduct"
-            />
-            <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
-              甜點
-            </p>
-          </a>
+          <img
+            class="rounded-t-lg object-cover w-full h-[184px]"
+            :src="itemProductList.photoUrl"
+            :alt="itemProductList.productName"
+          />
+          <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+            {{ itemProductList.productsType.productsTypeName }}
+          </p>
           <div
             :class="[
               'transition-all duration-500 p-6 rounded-bl-lg rounded-br-lg',
-              theme === 'white' && 'bg-white',
-              theme === 'danger' && 'bg-[#F31F1F1A]'
+              itemProductList.amountStatus === 'safe' && 'bg-white',
+              itemProductList.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
             ]"
           >
-            <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+            <h2 class="text-2xl font-medium mb-3">{{ itemProductList.productName }}</h2>
             <div class="flex justify-between items-center">
-              <p class="text-primary-light text-[32px] font-bold">$80</p>
+              <p class="text-primary-light text-[32px] font-bold">${{ itemProductList.price }}</p>
               <div class="flex flex-col items-end">
-                <p v-if="theme == 'white'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'safe'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;20份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p
-                  v-else-if="theme === 'danger'"
+                  v-else-if="itemProductList.amountStatus === 'danger'"
                   class="flex items-center text-primary-light font-normal"
                 >
                   <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
-                  <span>剩餘</span>
-                  &emsp;08份
-                </p>
-                <p v-else-if="theme === 'over'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
-                <p v-else-if="theme === 'stop'" class="font-normal">
+                <p v-if="itemProductList.amountStatus === 'zero'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
-                  &emsp;00份
+                  &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
                 <p class="font-normal">
                   <span class="text-neutralself-200">製作時間</span>
-                  &emsp;20分
+                  &emsp;{{ itemProductList.productionTime }}分
                 </p>
               </div>
             </div>
           </div>
           <section
-            v-if="theme === 'over'"
+            v-if="itemProductList.isDisabled === true || itemProductList.inStockAmount === 0"
             class="absolute top-0 bottom-0 left-0 right-0"
             style="background: rgba(8, 8, 8, 0.5)"
           >
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
               <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
-                已售完
-              </p>
-            </div>
-          </section>
-          <section
-            v-else-if="theme === 'stop'"
-            class="absolute top-0 bottom-0 left-0 right-0"
-            style="background: rgba(8, 8, 8, 0.5)"
-          >
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
-                已停用
+                {{ itemProductList.isDisabled === true ? '已停用' : '已售完' }}
               </p>
             </div>
           </section>
         </li>
       </ul>
-      <section class="flex">
-        <button @click="theme = 'white'" class="p-1 m-1 bg-gray-200 rounded">預設</button>
-        <button @click="theme = 'danger'" class="p-1 m-1 bg-gray-200 rounded">低於10</button>
-        <button @click="theme = 'over'" class="p-1 m-1 bg-gray-200 rounded">已售完</button>
-        <button @click="theme = 'stop'" class="p-1 m-1 bg-gray-200 rounded">已停用</button>
-      </section>
+      <!-- <div v-if="productList.value.length === 0">
+        <img
+          src="@/assets/img/ImgFeature02.svg"
+          class="object-cover block mx-auto"
+          alt="Feature_Card_Img2"
+        />
+        <p class="font-medium text-4xl text-center">目前的分類還沒有餐點哦！</p>
+      </div> -->
     </main>
     <aside class="fixed top-0 right-0 z-40 w-[315px] h-screen">
       <div class="w-full h-full border-l-2 border-textself">
@@ -177,19 +275,23 @@ const cartLength = ref(1)
             </p>
           </div>
           <!-- cartList：圖片 -->
-          <div v-if="cartLength === 0" class="text-center">
+          <div v-if="tempProductLength === 0" class="text-center">
             <img src="@/assets/img/ImgFeature02.svg" class="object-cover" alt="Feature_Card_Img2" />
             <p class="font-medium">還沒有點選餐點喔！</p>
           </div>
           <!-- cartList -->
-          <ul v-else class="flex flex-col p-3 overflow-scroll">
-            <li class="flex justify-between items-center border-b border-textself pb-4">
+          <ul class="flex flex-col p-3 overflow-scroll">
+            <li
+              v-for="tempProducts in tempProduct"
+              :key="tempProducts._id"
+              class="flex justify-between items-center border-b border-textself pb-4"
+            >
               <div>
                 <h2 class="font-medium text-xl">
-                  <span>香草鮮奶酪</span>
-                  <span>&emsp;x1</span>
+                  <span>{{ tempProducts.productName }}</span>
+                  <span>&emsp;x{{ tempProducts.qty }}</span>
                 </h2>
-                <p class="font-medium text-xl text-primary-light my-2">$80</p>
+                <p class="font-medium text-xl text-primary-light my-2">${{ tempProducts.price }}</p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
                 >
@@ -198,62 +300,15 @@ const cartLength = ref(1)
               </div>
               <div class="flex flex-col">
                 <button
-                  @click="handleModalOpen('update')"
+                  @click="handleModalOpen('update', tempProducts)"
                   class="btn btn-outline-dark py-2 px-3 mb-2"
                 >
                   修改
                 </button>
-                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
-                  刪除
-                </button>
-              </div>
-            </li>
-            <li class="flex justify-between items-center border-b border-textself py-4">
-              <div>
-                <h2 class="font-medium text-xl">
-                  <span>巧克力糖霜甜甜圈</span>
-                  <span>&emsp;x2</span>
-                </h2>
-                <p class="font-medium text-xl text-primary-light my-2">$300</p>
-                <p
-                  class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
-                >
-                  已符合買一送一
-                </p>
-              </div>
-              <div class="flex flex-col">
                 <button
-                  @click="handleModalOpen('update')"
-                  class="btn btn-outline-dark py-2 px-3 mb-2"
+                  @click="handleModalOpen('delete', tempProducts)"
+                  class="btn btn-outline-dark py-2 px-3"
                 >
-                  修改
-                </button>
-                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
-                  刪除
-                </button>
-              </div>
-            </li>
-            <li class="flex justify-between items-center border-b border-textself py-4">
-              <div>
-                <h2 class="font-medium text-xl">
-                  <span>香草鮮奶酪</span>
-                  <span>&emsp;x1</span>
-                </h2>
-                <p class="font-medium text-xl text-primary-light my-2">$80</p>
-                <p
-                  class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
-                >
-                  已符合 A + B
-                </p>
-              </div>
-              <div class="flex flex-col">
-                <button
-                  @click="handleModalOpen('update')"
-                  class="btn btn-outline-dark py-2 px-3 mb-2"
-                >
-                  修改
-                </button>
-                <button @click="handleModalOpen('delete')" class="btn btn-outline-dark py-2 px-3">
                   刪除
                 </button>
               </div>
@@ -263,7 +318,7 @@ const cartLength = ref(1)
           <ul class="grid grid-cols-2 gap-3 border-y-2 p-3 border-textself">
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('readMember')"
+                @click.prevent="handleModalOpen('readMember')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>查詢會員</span>
@@ -272,7 +327,7 @@ const cartLength = ref(1)
             </li>
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('createMember')"
+                @click.prevent="handleModalOpen('createMember')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>加入會員</span>
@@ -281,7 +336,7 @@ const cartLength = ref(1)
             </li>
             <li class="col-span-2 lg:col-span-1">
               <button
-                @click="handleModalOpen('createActivity')"
+                @click.prevent="handleModalOpen('createActivity')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
                 <span>選擇活動</span>
@@ -293,7 +348,10 @@ const cartLength = ref(1)
               </button>
             </li>
             <li class="col-span-2 lg:col-span-1">
-              <button class="w-full btn btn-outline-dark flex items-center justify-center">
+              <button
+                @click.prevent="fetchCalculateTotalPrice"
+                class="w-full btn btn-outline-dark flex items-center justify-center"
+              >
                 <span>金額試算</span>
                 <img class="ms-2" src="@/assets/img/IconCashCalculate.png" alt="IconMemberSearch" />
               </button>
@@ -302,7 +360,7 @@ const cartLength = ref(1)
           <div class="flex flex-col px-3 py-4">
             <p class="flex justify-between items-center font-medium">
               <span>製作時間</span>
-              <span>0 分</span>
+              <span>{{ checkProductTotalPrice.totalTime }} 分</span>
             </p>
             <p class="flex justify-between items-center font-medium">
               <span>&emsp;&emsp;餐點</span>
@@ -314,9 +372,9 @@ const cartLength = ref(1)
             </p>
             <p class="flex justify-between items-center font-medium mb-7">
               <span class="text-xl ps-1">&emsp;合計</span>
-              <span class="text-xl text-primary">NT$ 0</span>
+              <span class="text-xl text-primary">NT$ {{ checkProductTotalPrice.totalPrice }}</span>
             </p>
-            <router-link to="/" class="btn btn-dark py-2 w-full"> 送出訂單 </router-link>
+            <button @click="fetchAddOreder()" class="btn btn-dark py-2 w-full">送出訂單</button>
           </div>
         </div>
       </div>
@@ -363,38 +421,24 @@ const cartLength = ref(1)
             <div class="relative">
               <img
                 class="object-cover w-full h-[184px] border-b-2 border-textself"
-                src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+                :src="productCard.photoUrl"
                 alt="ImgProduct"
               />
               <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
-                甜點
+                {{ productCard.productsType.productsTypeName }}
               </p>
-              <div
-                :class="[
-                  'transition-all duration-500 p-3',
-                  theme === 'white' && 'bg-white',
-                  theme === 'danger' && 'bg-white'
-                ]"
-              >
-                <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+              <div class="transition-all duration-500 p-3">
+                <h2 class="text-2xl font-medium mb-3">{{ productCard.productName }}</h2>
                 <div class="flex justify-between items-center">
-                  <p class="text-primary-light text-[32px] font-bold">$80</p>
+                  <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
-                    <p v-if="theme == 'white'" class="font-normal">
+                    <p class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
-                      &emsp;20份
-                    </p>
-                    <p
-                      v-else-if="theme === 'danger'"
-                      class="flex items-center text-primary-light font-normal"
-                    >
-                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
-                      <span>剩餘</span>
-                      &emsp;08份
+                      &emsp;{{ productCard.inStockAmount }}份
                     </p>
                     <p class="font-normal">
                       <span class="text-neutralself-200">製作時間</span>
-                      &emsp;20分
+                      &emsp;{{ productCard.productionTime }}分
                     </p>
                   </div>
                 </div>
@@ -402,17 +446,30 @@ const cartLength = ref(1)
             </div>
             <div class="px-3">
               <div class="flex">
-                <button type="button" class="form-qty border-r-0 rounded-l-lg">－</button>
+                <button
+                  @click.prevent="minusProductCount"
+                  type="button"
+                  class="form-qty border-r-0 rounded-l-lg"
+                >
+                  －
+                </button>
                 <input
                   type="text"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
                   placeholder="1"
                   required
+                  min="0"
+                  v-model="tempProductCardQty"
                 />
-                <button type="button" class="form-qty border-l-0 rounded-r-lg">＋</button>
+                <button
+                  @click.prevent="plusProductCount"
+                  type="button"
+                  class="form-qty border-l-0 rounded-r-lg"
+                >
+                  ＋
+                </button>
               </div>
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
             </div>
             <div class="px-3">
               <textarea
@@ -420,49 +477,42 @@ const cartLength = ref(1)
                 rows="4"
                 class="form-input"
                 placeholder="請輸入客製化內容，例如：飲料去冰、加料"
+                v-model="productCard.description"
               ></textarea>
             </div>
             <!-- send_btn -->
             <div class="flex p-3">
-              <button type="submit" class="w-full btn btn-dark">確認新增</button>
+              <button
+                @click.prevent="addToTempProduct(productCard)"
+                type="submit"
+                class="w-full btn btn-dark"
+              >
+                確認新增
+              </button>
             </div>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-6" action="#">
             <div class="relative">
               <img
                 class="object-cover w-full h-[184px] border-b-2 border-textself"
-                src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60"
+                :src="productCard.photoUrl"
                 alt="ImgProduct"
               />
               <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
-                甜點
+                {{ productCard.productsType.productsTypeName }}
               </p>
-              <div
-                :class="[
-                  'transition-all duration-500 p-3',
-                  theme === 'white' && 'bg-white',
-                  theme === 'danger' && 'bg-white'
-                ]"
-              >
-                <h2 class="text-2xl font-medium mb-3">香草鮮奶酪</h2>
+              <div class="transition-all duration-500 p-3">
+                <h2 class="text-2xl font-medium mb-3">{{ productCard.productName }}</h2>
                 <div class="flex justify-between items-center">
-                  <p class="text-primary-light text-[32px] font-bold">$80</p>
+                  <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
-                    <p v-if="theme == 'white'" class="font-normal">
+                    <p class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
-                      &emsp;20份
-                    </p>
-                    <p
-                      v-else-if="theme === 'danger'"
-                      class="flex items-center text-primary-light font-normal"
-                    >
-                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
-                      <span>剩餘</span>
-                      &emsp;08份
+                      &emsp;{{ productCard.inStockAmount }}份
                     </p>
                     <p class="font-normal">
                       <span class="text-neutralself-200">製作時間</span>
-                      &emsp;20分
+                      &emsp;{{ productCard.productionTime }}分
                     </p>
                   </div>
                 </div>
@@ -470,17 +520,30 @@ const cartLength = ref(1)
             </div>
             <div class="px-3">
               <div class="flex">
-                <button type="button" class="form-qty border-r-0 rounded-l-lg">－</button>
+                <button
+                  @click.prevent="minusProductCount"
+                  type="button"
+                  class="form-qty border-r-0 rounded-l-lg"
+                >
+                  －
+                </button>
                 <input
                   type="text"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
                   placeholder="1"
                   required
+                  min="0"
+                  v-model="tempProductCardQty"
                 />
-                <button type="button" class="form-qty border-l-0 rounded-r-lg">＋</button>
+                <button
+                  @click.prevent="plusProductCount"
+                  type="button"
+                  class="form-qty border-l-0 rounded-r-lg"
+                >
+                  ＋
+                </button>
               </div>
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
             </div>
             <div class="px-3">
               <textarea
@@ -488,22 +551,35 @@ const cartLength = ref(1)
                 rows="4"
                 class="form-input"
                 placeholder="請輸入客製化內容，例如：飲料去冰、加料"
+                v-model="productCard.description"
               ></textarea>
             </div>
             <!-- send_btn -->
             <div class="flex p-3">
-              <button type="submit" class="w-full btn btn-dark">確認修改</button>
+              <button
+                @click.prevent="addToTempProduct(productCard)"
+                type="submit"
+                class="w-full btn btn-dark"
+              >
+                確認修改
+              </button>
             </div>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-6" action="#">
             <div class="flex flex-col">
               <h3 class="text-xl text-center font-medium p-3 pb-0">
                 請確認是否刪除
-                <span class="text-primary-light">巧克力糖霜甜甜圈</span> ?
+                <span class="text-primary-light">{{ productCard.productName }}</span> ?
               </h3>
               <!-- send_btn -->
               <div class="flex m-3">
-                <button type="submit" class="w-full ml-1 btn btn-dark">確認刪除</button>
+                <button
+                  @click.prevent="removeTempProduct(productCard)"
+                  type="submit"
+                  class="w-full ml-1 btn btn-dark"
+                >
+                  確認刪除
+                </button>
               </div>
             </div>
           </form>
