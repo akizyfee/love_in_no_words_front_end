@@ -229,8 +229,8 @@ const handleModalClose = () => {
       <h1 class="flex items-center text-[36px] font-bold">商品管理</h1>
     </nav>
     <main class="bg-secondary-light min-h-screen p-6">
+      <!-- select -->
       <div class="flex-col xl:flex xl:flex-row items-end justify-between mb-3">
-        <!-- select -->
         <div class="flex items-end gap-4 mb-3">
           <!-- category -->
           <section class="flex-col items-center">
@@ -414,7 +414,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.productName"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.productName}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.productName }}</p>
                 </div>
                 <!-- price -->
                 <div>
@@ -425,7 +425,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.price"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.price}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
                 </div>
                 <!-- category -->
                 <div>
@@ -456,11 +456,15 @@ const handleModalClose = () => {
                     />
                     <div class="mt-8 mb-5">
                       <img
-                        :src="productCard.photoUrl? productCard.photoUrl: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'"
+                        :src="
+                          productCard.photoUrl
+                            ? productCard.photoUrl
+                            : 'https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'
+                        "
                         :alt="productCard.productName"
                         class="rounded-lg object-cover w-full h-[184px]"
                       />
-                      <p class="text-sm text-primary-light mt-2">{{errors.photoUrl}}</p>
+                      <p class="text-sm text-primary-light mt-2">{{ errors.photoUrl }}</p>
                     </div>
                   </div>
                 </div>
@@ -475,7 +479,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.inStockAmount"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.inStockAmount}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.inStockAmount }}</p>
                 </div>
                 <!-- safe_stock -->
                 <div>
@@ -486,7 +490,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.safeStockAmount"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.safeStockAmount}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.safeStockAmount }}</p>
                 </div>
                 <!-- time -->
                 <div>
@@ -500,7 +504,7 @@ const handleModalClose = () => {
                     />
                     <p class="whitespace-nowrap">分鐘</p>
                   </div>
-                  <p class="text-sm text-primary-light mt-2 mb-0">{{errors.productionTime}}</p>
+                  <p class="text-sm text-primary-light mt-2 mb-0">{{ errors.productionTime }}</p>
                 </div>
                 <!-- status -->
                 <div>
@@ -549,7 +553,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.productName"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.productName}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.productName }}</p>
                 </div>
                 <!-- price -->
                 <div>
@@ -560,7 +564,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.price"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.price}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
                 </div>
                 <!-- category -->
                 <div>
@@ -596,7 +600,7 @@ const handleModalClose = () => {
                         class="rounded-lg object-cover w-full h-[184px]"
                       />
                     </div>
-                    <p class="text-sm text-primary-light mt-2">{{errors.photoUrl}}</p>
+                    <p class="text-sm text-primary-light mt-2">{{ errors.photoUrl }}</p>
                   </div>
                 </div>
               </section>
@@ -610,7 +614,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.inStockAmount"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.inStockAmount}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.inStockAmount }}</p>
                 </div>
                 <!-- safe_stock -->
                 <div>
@@ -621,7 +625,7 @@ const handleModalClose = () => {
                     class="form-input mr-2"
                     v-model="productCard.safeStockAmount"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{errors.safeStockAmount}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.safeStockAmount }}</p>
                 </div>
                 <!-- time -->
                 <div>
@@ -635,7 +639,7 @@ const handleModalClose = () => {
                     />
                     <p class="whitespace-nowrap">分鐘</p>
                   </div>
-                  <p class="text-sm text-primary-light mt-2">{{errors.productionTime}}</p>
+                  <p class="text-sm text-primary-light mt-2">{{ errors.productionTime }}</p>
                 </div>
                 <!-- status -->
                 <div>

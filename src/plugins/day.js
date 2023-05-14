@@ -22,3 +22,5 @@ export const dayWeek = (date, format = 'YYYY-MM-DD') => {
   }
   return result
 }
+
+export const nowYear = dayjs().year()

@@ -2,14 +2,15 @@ import axios from '@/plugins/axios'
 
 /**
  * O-5-1 取得營收資料
- * @param {number} 報表種類
+ * @param {number} 報表年份
  */
-export const getAdminRevenue = (reportType) => axios.get(`/v1/send/email/admin/revenue/report/${reportType}`)
+export const getAdminRevenue = (params) => axios.get(`/v1/send/email/admin/revenue/report/?${params}`)
 
 /**
  * O-5-2 取得賣出數量資料
+ * @param {number} 報表年份
  */
-export const getAdminSellQty = () => axios.get('/v1/send/email/admin/sell-quantity/report')
+export const getAdminSellQty = (params) => axios.get(`/v1/send/email/admin/sell-quantity/report?${params}`)
 
 /**
  * O-5-3 取得訂單數量資料
@@ -27,6 +28,7 @@ export const sendAdminReport = (reportType, payload) => axios.post(`/v1/send/ema
  * @param {number} 月份
  * @param {number} 單頁筆數
  */
+export const searchAllAdminOrders = () => axios.get('/v1/reports/admin/orders')
 export const searchAdminOrders = (month, number) => axios.get(`/v1/reports/admin/orders?month=${month}&number=${number}`)
 
 /**
