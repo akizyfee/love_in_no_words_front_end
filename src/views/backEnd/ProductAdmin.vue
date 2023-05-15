@@ -119,6 +119,7 @@ const fetchAllProduct = catchError(async () => {
 onMounted(() => {
   fetchAllProduct()
 })
+
 /**
  * 搜尋商品
  */
