@@ -12,6 +12,12 @@ export const errorsFormSchema = {
     }
     return true
   },
+  email(value) {
+    if (!value) {
+      return '信箱必填'
+    }
+    return true
+  },
   password(value) {
     if (!value) {
       return '密碼必填'

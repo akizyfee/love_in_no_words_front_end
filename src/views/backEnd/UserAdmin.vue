@@ -31,7 +31,8 @@ const { errors, useFieldModel } = useForm({
 const initUserProfile = reactive({
   name: '',
   phone: '',
-  password: ''
+  password: '',
+  email: ''
 })
 
 const userProfile = reactive({
@@ -40,7 +41,8 @@ const userProfile = reactive({
   phone: useFieldModel('phone'),
   titleNo: '1',
   isDisabled: false,
-  password: useFieldModel('password')
+  password: useFieldModel('password'),
+  email: useFieldModel('email')
 })
 
 /**
@@ -227,7 +229,19 @@ const handleModalClose = () => {
                 <option :value="4">會員</option>
               </select>
             </div>
-            <div>
+            <div v-if="userProfile.titleNo === 1">
+              <label for="email" class="block mb-2 text-xl font-medium text-gray-900">信箱</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="form-input"
+                v-model="userProfile.email"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
+            </div>
+            <div v-if="userProfile.titleNo !== 4">
               <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
                 >密碼</label
               >
@@ -287,6 +301,18 @@ const handleModalClose = () => {
                 <option :value="3">廚師</option>
                 <option :value="4">會員</option>
               </select>
+            </div>
+            <div v-if="userProfile.titleNo === 1">
+              <label for="email" class="block mb-2 text-xl font-medium text-gray-900">信箱</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="form-input"
+                v-model="userProfile.email"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
             </div>
             <div v-if="userProfile.titleNo !== 4">
               <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
