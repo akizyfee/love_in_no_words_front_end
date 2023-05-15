@@ -1,7 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick, onMounted, reactive } from 'vue'
+import { ref, nextTick, onMounted, reactive, watch } from 'vue'
 import { catchError } from '@/utils/catchError'
 import { successAlert } from '@/plugins/toast'
 import { errorProductSchema } from '@/utils/formValidate'
@@ -38,6 +38,7 @@ const dessertType = reactive({
 const fetchAddDessertcodes = catchError(async () => {
   const { message } = await addAdminDessertType(dessertType)
   successAlert(message)
+  Object.assign(dessertType, initDessertType)
   fetchGetDessertTypeList()
 })
 
@@ -61,20 +62,6 @@ const fetchDeleteAdminDessertType = catchError(async (productsType) => {
   const { message } = await deleteAdminDessertType(productsType)
   successAlert(message)
   fetchGetDessertTypeList()
-})
-
-/**
- * 設置商品列表
- */
-const productList = ref([])
-
-const fetchProduct = catchError(async () => {
-  const { data } = await searchAdminProductAll()
-  productList.value = data
-})
-
-onMounted(() => {
-  fetchProduct()
 })
 
 /**
@@ -121,13 +108,25 @@ const productCard = reactive({
 })
 
 /**
+ * 設置商品列表
+ */
+const productList = ref([])
+const fetchAllProduct = catchError(async () => {
+  const { data } = await searchAdminProductAll()
+  productList.value = data
+})
+
+onMounted(() => {
+  fetchAllProduct()
+})
+/**
  * 搜尋商品
  */
 const searchFilterProduct = reactive({
-  productsType: 7,
-  priceLowerLimit: 0,
-  priceUpperLimit: 0,
-  amountStatus: 'safe'
+  productsType: '',
+  priceLowerLimit: '',
+  priceUpperLimit: '',
+  amountStatus: ''
 })
 const fetchSearchProduct = catchError(async () => {
   const { data, message } = await searchAdminProduct(
@@ -140,13 +139,25 @@ const fetchSearchProduct = catchError(async () => {
   successAlert(message)
 })
 
+watch(
+  [() => searchFilterProduct.productsType, () => searchFilterProduct.amountStatus],
+  () => {
+    fetchSearchProduct()
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
+
 /**
  * 新增商品
  */
 const fetchAddProduct = catchError(async () => {
-  const { message } = await addAdminProduct(productCard.value)
+  const { message } = await addAdminProduct(productCard)
   successAlert(message)
   handleModalClose()
+  fetchAllProduct()
 })
 
 /**
@@ -156,6 +167,7 @@ const fetchEditProduct = catchError(async () => {
   const { message } = await editAdminProduct(productCard.productNo, productCard)
   successAlert(message)
   handleModalClose()
+  fetchAllProduct()
 })
 
 /**
@@ -165,6 +177,7 @@ const fetchDeleteProduct = catchError(async () => {
   const { message } = await deleteAdminProduct(productCard.productNo)
   successAlert(message)
   handleModalClose()
+  fetchAllProduct()
 })
 
 /**
@@ -365,6 +378,15 @@ const handleModalClose = () => {
           </section>
         </li>
       </ul>
+      <!-- productList img -->
+      <div v-if="productList.length === 0" class="text-center">
+        <img
+          src="@/assets/img/ImgFeature02.svg"
+          class="object-cover block mx-auto"
+          alt="Feature_Card_Img2"
+        />
+        <p class="font-medium">沒有相關條件的餐點喔！</p>
+      </div>
     </main>
   </div>
   <Modal ref="childComponentRef">
@@ -425,6 +447,27 @@ const handleModalClose = () => {
                     class="form-input my-2"
                     v-model.number="productCard.price"
                   />
+                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
+                </div>
+                <!-- category -->
+                <div>
+                  <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
+                    >菜單分類</label
+                  >
+                  <select
+                    id="filterCategory"
+                    class="form-select py-2"
+                    v-model="productCard.productsType"
+                  >
+                    <template
+                      v-for="dessertList in dessertTypeList"
+                      :key="dessertList.productsType"
+                    >
+                      <option :value="dessertList.productsType">
+                        {{ dessertList.productsTypeName }}
+                      </option>
+                    </template>
+                  </select>
                   <p class="text-sm text-primary-light">{{ errors.price }}</p>
                 </div>
                 <!-- img -->
