@@ -26,6 +26,15 @@ export const errorsFormSchema = {
       return '桌號必填'
     }
     return true
+  },
+  qty(value) {
+    if (!value) {
+      return '購買數量必填'
+    }
+    if (value <= 0) {
+      return '數量需要大於 0，請重新填寫'
+    }
+    return true
   }
 }
 

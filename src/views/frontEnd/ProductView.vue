@@ -4,52 +4,79 @@ import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { catchError } from '@/utils/catchError'
-import { searchTypeAll, getAdminDessertType, searchType } from '@/apis/product'
+import { getAdminDessertType, searchType } from '@/apis/product'
+import { searchMember, addMember } from '@/apis/user'
 import { calculateTotalPrice, addOrder } from '@/apis/order'
-import { successAlert } from '@/plugins/toast'
+import { warningAlert, successAlert } from '@/plugins/toast'
+import { useForm } from 'vee-validate'
+import { errorsFormSchema } from '@/utils/formValidate'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 
 /**
- * 設置商品列表
- */
+ * 取得商品種類代碼、查詢商品類別
+ **/
 const typeList = ref([])
-const fetchAllDessertType = catchError(async () => {
+const currentIndex = ref(0)
+const productList = ref([])
+
+const fetchAllDessertType = catchError(async (index) => {
   const { data } = await getAdminDessertType()
   typeList.value = data
+  currentIndex.value = data[0].productsType
+  fetchProduct(data[0].productsType)
 })
 
-const productList = ref([])
-const fetchAllProduct = catchError(async () => {
-  const { data } = await searchTypeAll()
+const fetchProduct = catchError(async (dessertType) => {
+  const { data } = await searchType(dessertType)
+  if (data.length === 0) {
+    warningAlert('沒有符合的商品資料')
+  }
   productList.value = data
+  currentIndex.value = dessertType
 })
 
 onMounted(() => {
   fetchAllDessertType()
-  fetchAllProduct()
 })
 
 /**
- * 搜尋分類商品
+ * VeeValidate 套件
  */
-const fetchProduct = catchError(async (dessertType) => {
-  const { data } = await searchType(dessertType)
-  productList.value = data
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
+const memberForm = reactive({
+  name: useFieldModel('name'),
+  phone: useFieldModel('phone')
+})
+
+/**
+ * 查詢會員
+ **/
+const searchPhone = ref('0912000000')
+const memberList = ref([])
+
+const getMembers = catchError(async () => {
+  const { data } = await searchMember(searchPhone.value, 1)
+  const { membersList } = data
+  memberList.value = membersList
+})
+
+/**
+ * 新增會員
+ **/
+const postMember = catchError(async () => {
+  const { message } = await addMember(memberForm)
+  handleModalClose()
+  successAlert(message)
 })
 
 /**
  * 購物車
  */
-const tempProductCardQty = ref(0)
-const plusProductCount = () => {
-  tempProductCardQty.value++
-}
-const minusProductCount = () => {
-  tempProductCardQty.value--
-}
-
 const productCard = reactive({
   _id: '',
   productNo: 0,
@@ -57,39 +84,55 @@ const productCard = reactive({
   photoUrl: '',
   price: 0,
   inStockAmount: 0,
-  safeStockAmount: 0,
   amountStatus: 'safe',
   productsType: 0,
   productionTime: 0,
-  isDisabled: false,
-  description: ''
+  qty: useFieldModel('qty'),
+  description: '',
+  note: ''
 })
 
+// const tempProductCardQty = ref(1)
 const tempProduct = ref([])
-const tempProductLength = ref(tempProduct.value.length)
+
+const plusProductCount = () => {
+  // tempProductCardQty.value += 1
+  // productCard.qty = tempProductCardQty.value
+  console.log('+', productCard.qty)
+}
+const minusProductCount = () => {
+  // tempProductCardQty.value -= 1
+  // productCard.qty = tempProductCardQty.value
+  console.log('-', productCard.qty)
+}
+
 const addToTempProduct = (item) => {
-  const productCardQty = tempProductCardQty.value
   const temp = {
     ...item,
-    qty: productCardQty
+    qty: productCard.qty,
+    note: productCard.note
   }
   const findSame = tempProduct.value.find((item) => item._id === temp._id)
   if (findSame) {
     findSame.qty = temp.qty
+    findSame.note = temp.note
   } else {
     tempProduct.value.push(temp)
   }
-  tempProductCardQty.value = 0
-  tempProductLength.value = tempProduct.value.length
+  productCard.qty = 1
+  productCard.note = ''
+  successAlert('編輯成功')
   handleModalClose()
 }
+
 const removeTempProduct = (item) => {
   const temp = {
     ...item
   }
   const findSame = tempProduct.value.filter((item) => item._id !== temp._id)
   tempProduct.value = findSame
-  tempProductLength.value = tempProduct.value.length
+  successAlert('刪除成功')
+  handleModalClose()
 }
 
 /**
@@ -143,7 +186,6 @@ const handleModalOpen = (checkIsCreate, item) => {
         photoUrl,
         price,
         inStockAmount,
-        safeStockAmount,
         amountStatus,
         isDisabled,
         productionTime,
@@ -156,7 +198,6 @@ const handleModalOpen = (checkIsCreate, item) => {
       productCard.photoUrl = photoUrl
       productCard.price = price
       productCard.inStockAmount = inStockAmount
-      productCard.safeStockAmount = safeStockAmount
       productCard.amountStatus = amountStatus
       productCard.isDisabled = isDisabled
       productCard.productionTime = productionTime
@@ -171,6 +212,11 @@ const handleModalClose = () => {
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      searchPhone.value = '0912000000'
+      memberList.value = []
     }
   })
 }
@@ -183,11 +229,12 @@ const handleModalClose = () => {
     <main class="mx-[315px] bg-secondary-light p-6 min-h-screen">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
-        <li v-for="types in typeList" :key="types._id" class="mr-2">
+        <li class="mr-2" v-for="types in typeList" :key="types._id">
           <a
             @click.prevent="fetchProduct(types.productsType)"
             href="#"
-            class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active"
+            class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            :class="{ 'tabbar-active': currentIndex === types.productsType }"
             >{{ types.productsTypeName }}
           </a>
         </li>
@@ -231,7 +278,7 @@ const handleModalClose = () => {
                   <span class="text-neutralself-200">剩餘</span>
                   &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
-                <p v-if="itemProductList.amountStatus === 'zero'" class="font-normal">
+                <p v-else-if="itemProductList.amountStatus === 'zero'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
                   &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
@@ -255,14 +302,6 @@ const handleModalClose = () => {
           </section>
         </li>
       </ul>
-      <!-- <div v-if="productList.value.length === 0">
-        <img
-          src="@/assets/img/ImgFeature02.svg"
-          class="object-cover block mx-auto"
-          alt="Feature_Card_Img2"
-        />
-        <p class="font-medium text-4xl text-center">目前的分類還沒有餐點哦！</p>
-      </div> -->
     </main>
     <aside class="fixed top-0 right-0 z-40 w-[315px] h-screen">
       <div class="w-full h-full border-l-2 border-textself">
@@ -275,7 +314,7 @@ const handleModalClose = () => {
             </p>
           </div>
           <!-- cartList：圖片 -->
-          <div v-if="tempProductLength === 0" class="text-center">
+          <div v-if="tempProduct.length === 0" class="text-center">
             <img src="@/assets/img/ImgFeature02.svg" class="object-cover" alt="Feature_Card_Img2" />
             <p class="font-medium">還沒有點選餐點喔！</p>
           </div>
@@ -284,12 +323,12 @@ const handleModalClose = () => {
             <li
               v-for="tempProducts in tempProduct"
               :key="tempProducts._id"
-              class="flex justify-between items-center border-b border-textself pb-4"
+              class="flex justify-between items-center border-b border-textself py-4"
             >
               <div>
                 <h2 class="font-medium text-xl">
                   <span>{{ tempProducts.productName }}</span>
-                  <span>&emsp;x{{ tempProducts.qty }}</span>
+                  <span>&emsp;{{ tempProducts.qty }}份</span>
                 </h2>
                 <p class="font-medium text-xl text-primary-light my-2">${{ tempProducts.price }}</p>
                 <p
@@ -422,23 +461,44 @@ const handleModalClose = () => {
               <img
                 class="object-cover w-full h-[184px] border-b-2 border-textself"
                 :src="productCard.photoUrl"
-                alt="ImgProduct"
+                :alt="productCard.productName"
               />
               <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
                 {{ productCard.productsType.productsTypeName }}
               </p>
-              <div class="transition-all duration-500 p-3">
-                <h2 class="text-2xl font-medium mb-3">{{ productCard.productName }}</h2>
+              <div
+                :class="[
+                  'transition-all duration-500 p-6',
+                  productCard.amountStatus === 'safe' && 'bg-white',
+                  productCard.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
+                ]"
+              >
+                <h2 class="text-2xl font-medium mb-1">{{ productCard.productName }}</h2>
+                <h3 class="text-neutralself-100 text-sm font-light mb-3">
+                  {{ productCard.description }}
+                </h3>
                 <div class="flex justify-between items-center">
                   <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
-                    <p class="font-normal">
+                    <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
-                      &emsp;{{ productCard.inStockAmount }}份
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
+                    </p>
+                    <p
+                      v-else-if="productCard.amountStatus === 'danger'"
+                      class="flex items-center text-primary-light font-normal"
+                    >
+                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
+                      <span>剩餘</span>
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
+                    </p>
+                    <p v-else-if="productCard.amountStatus === 'zero'" class="font-normal">
+                      <span class="text-neutralself-200">剩餘</span>
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
                     </p>
                     <p class="font-normal">
                       <span class="text-neutralself-200">製作時間</span>
-                      &emsp;{{ productCard.productionTime }}分
+                      {{ `&emsp;${productCard.productionTime}分` }}
                     </p>
                   </div>
                 </div>
@@ -447,27 +507,30 @@ const handleModalClose = () => {
             <div class="px-3">
               <div class="flex">
                 <button
-                  @click.prevent="minusProductCount"
+                  @click="minusProductCount"
+                  :disabled="productCard.qty <= 1"
                   type="button"
                   class="form-qty border-r-0 rounded-l-lg"
                 >
                   －
                 </button>
                 <input
-                  type="text"
+                  type="number"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
                   placeholder="1"
                   required
-                  min="0"
-                  v-model="tempProductCardQty"
+                  min="1"
+                  :max="productCard.inStockAmount"
+                  v-model.number="productCard.qty"
                 />
                 <button
-                  @click.prevent="plusProductCount"
+                  @click="plusProductCount"
+                  :disabled="productCard.qty >= productCard.inStockAmount"
                   type="button"
                   class="form-qty border-l-0 rounded-r-lg"
                 >
-                  ＋
+                  +
                 </button>
               </div>
             </div>
@@ -477,7 +540,7 @@ const handleModalClose = () => {
                 rows="4"
                 class="form-input"
                 placeholder="請輸入客製化內容，例如：飲料去冰、加料"
-                v-model="productCard.description"
+                v-model.trim="productCard.note"
               ></textarea>
             </div>
             <!-- send_btn -->
@@ -522,24 +585,27 @@ const handleModalClose = () => {
               <div class="flex">
                 <button
                   @click.prevent="minusProductCount"
+                  :disabled="productCard.qty <= 1"
                   type="button"
                   class="form-qty border-r-0 rounded-l-lg"
                 >
                   －
                 </button>
                 <input
-                  type="text"
+                  type="number"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
                   placeholder="1"
                   required
                   min="0"
-                  v-model="tempProductCardQty"
+                  :max="productCard.inStockAmount"
+                  v-model.number="productCard.qty"
                 />
                 <button
                   @click.prevent="plusProductCount"
                   type="button"
                   class="form-qty border-l-0 rounded-r-lg"
+                  :disabled="productCard.qty >= productCard.inStockAmount"
                 >
                   ＋
                 </button>
@@ -551,7 +617,7 @@ const handleModalClose = () => {
                 rows="4"
                 class="form-input"
                 placeholder="請輸入客製化內容，例如：飲料去冰、加料"
-                v-model="productCard.description"
+                v-model.trim="productCard.note"
               ></textarea>
             </div>
             <!-- send_btn -->
@@ -589,15 +655,20 @@ const handleModalClose = () => {
               <input
                 type="tel"
                 id="form_tel"
-                class="form-input"
-                placeholder="0912345678"
-                required
+                class="block form-input p-3"
+                placeholder="0912000000"
+                v-model="searchPhone"
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
             </div>
             <div class="bg-bgself-light p-4">
               <h3 class="mb-2 font-medium">查詢結果</h3>
-              <div class="flex items-center">
+              <p v-if="memberList.length === 0" class="text-primary-light">沒有符合的會員資料</p>
+              <div
+                v-else
+                class="flex items-center"
+                v-for="member in memberList"
+                :key="member.number"
+              >
                 <input
                   checked
                   id="form_readmember_radio"
@@ -606,35 +677,50 @@ const handleModalClose = () => {
                   name="form-radio"
                   class="form-radio"
                 />
-                <label for="form_readmember_radio" class="ml-2 text-xl font-medium">王小美</label>
+                <label for="form_readmember_radio" class="ml-2 text-xl font-medium">{{
+                  member.name
+                }}</label>
               </div>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="submit" class="w-full mr-1 btn btn-outline-dark">重新查詢</button>
-              <button type="button" class="w-full ml-1 btn btn-dark">確認</button>
+              <button type="submit" class="w-full btn btn-dark" @click.prevent="getMembers">
+                查詢
+              </button>
             </div>
           </form>
           <form v-else-if="isCreate === 'createMember'" class="space-y-6 p-3" action="#">
             <div>
               <label for="form_name" class="block mb-2 font-medium">姓名</label>
-              <input type="text" id="form_name" class="form-input" placeholder="王小美" required />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+              <input
+                type="text"
+                name="name"
+                id="form_name"
+                class="form-input"
+                placeholder="name"
+                v-model.trim="memberForm.name"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
               <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
               <input
                 type="tel"
+                name="phone"
                 id="form_tel"
                 class="form-input"
                 placeholder="0912345678"
+                v-model="memberForm.phone"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="submit" class="w-full ml-1 btn btn-dark">確認加入</button>
+              <button type="submit" class="w-full ml-1 btn btn-dark" @click.prevent="postMember">
+                確認新增
+              </button>
             </div>
           </form>
           <form v-else-if="isCreate === 'createActivity'" class="space-y-4 p-3" action="#">

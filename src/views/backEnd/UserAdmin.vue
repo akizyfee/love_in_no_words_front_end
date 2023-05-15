@@ -201,7 +201,7 @@ const handleModalClose = () => {
                 name="name"
                 id="name"
                 class="form-input"
-                v-model="userProfile.name"
+                v-model.trim="userProfile.name"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
@@ -262,7 +262,7 @@ const handleModalClose = () => {
                 name="name"
                 id="name"
                 class="form-input"
-                v-model="userProfile.name"
+                v-model.trim="userProfile.name"
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>

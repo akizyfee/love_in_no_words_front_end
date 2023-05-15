@@ -341,7 +341,7 @@ const handleModalClose = () => {
                   <span class="text-neutralself-200">剩餘</span>
                   &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
-                <p v-if="itemProductList.amountStatus === 'zero'" class="font-normal">
+                <p v-else-if="itemProductList.amountStatus === 'zero'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
                   &emsp;{{ itemProductList.inStockAmount }}份
                 </p>
@@ -406,33 +406,90 @@ const handleModalClose = () => {
             <section class="grid grid-cols-2 gap-4">
               <section class="col-span-1">
                 <!-- name -->
-                <div>
-                  <label for="form_productName" class="block mb-2 font-medium">商品名稱</label>
+                <div class="mb-2">
+                  <label for="form_productName" class="block font-medium">商品名稱</label>
                   <input
                     type="text"
                     id="form_productName"
-                    class="form-input mr-2"
-                    v-model="productCard.productName"
+                    class="form-input my-2"
+                    v-model.trim="productCard.productName"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.productName }}</p>
+                  <p class="text-sm text-primary-light">{{ errors.productName }}</p>
                 </div>
                 <!-- price -->
-                <div>
-                  <label for="form_productPrice" class="block mb-2 font-medium">商品訂價</label>
+                <div class="mb-2">
+                  <label for="form_productPrice" class="block font-medium">商品訂價</label>
                   <input
-                    type="text"
+                    type="number"
                     id="form_productPrice"
-                    class="form-input mr-2"
-                    v-model="productCard.price"
+                    class="form-input my-2"
+                    v-model.number="productCard.price"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
+                  <p class="text-sm text-primary-light">{{ errors.price }}</p>
+                </div>
+                <!-- img -->
+                <div class="mb-2">
+                  <label for="form_productImg" class="block font-medium">商品圖片</label>
+                  <div class="flex flex-col">
+                    <input
+                      id="form_productImg"
+                      ref="imgFile"
+                      type="file"
+                      class="form-input my-2"
+                      @change="uploadFile"
+                    />
+                    <p class="text-sm text-primary-light mb-2">{{ errors.photoUrl }}</p>
+                    <img
+                      :src="productCard.photoUrl ? productCard.photoUrl : 'https://fakeimg.pl/300/'"
+                      :alt="productCard.productName"
+                      class="rounded-lg object-cover w-full h-[184px]"
+                    />
+                  </div>
+                </div>
+              </section>
+              <section class="col-span-1">
+                <!-- stock -->
+                <div class="mb-2">
+                  <label for="form_Stock" class="block font-medium">商品庫存數量</label>
+                  <input
+                    type="number"
+                    id="form_Stock"
+                    class="form-input my-2"
+                    v-model.number="productCard.inStockAmount"
+                  />
+                  <p class="text-sm text-primary-light">{{ errors.inStockAmount }}</p>
+                </div>
+                <!-- safe_stock -->
+                <div class="mb-2">
+                  <label for="form_SafeStock" class="block font-medium">安全庫存量</label>
+                  <input
+                    type="number"
+                    id="form_SafeStock"
+                    class="form-input my-2"
+                    v-model.number="productCard.safeStockAmount"
+                  />
+                  <p class="text-sm text-primary-light">{{ errors.safeStockAmount }}</p>
+                </div>
+                <!-- time -->
+                <div class="mb-2">
+                  <label for="form_time" class="block font-medium">製作時間</label>
+                  <div class="flex items-center my-2">
+                    <input
+                      type="text"
+                      id="form_time"
+                      class="form-input mr-2"
+                      v-model="productCard.productionTime"
+                    />
+                    <span class="whitespace-nowrap">分鐘</span>
+                  </div>
+                  <p class="text-sm text-primary-light">{{ errors.productionTime }}</p>
                 </div>
                 <!-- category -->
-                <div>
-                  <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
+                <div class="mb-2">
+                  <label for="selectStatus" class="block font-medium whitespace-nowrap"
                     >菜單分類</label
                   >
-                  <select id="filterCategory" class="form-select py-2">
+                  <select id="filterCategory" class="form-select my-2">
                     <template
                       v-for="dessertList in dessertTypeList"
                       :key="dessertList.productsType"
@@ -443,75 +500,12 @@ const handleModalClose = () => {
                     </template>
                   </select>
                 </div>
-                <!-- img -->
-                <div>
-                  <label for="form_productImg" class="block mt-2 mb-2 font-medium">商品圖片</label>
-                  <div class="flex flex-col">
-                    <input
-                      id="form_productImg"
-                      ref="imgFile"
-                      type="file"
-                      class="form-input mr-2"
-                      @change="uploadFile"
-                    />
-                    <div class="mt-8 mb-5">
-                      <img
-                        :src="
-                          productCard.photoUrl
-                            ? productCard.photoUrl
-                            : 'https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8ZGVzc2VydHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=800&q=60'
-                        "
-                        :alt="productCard.productName"
-                        class="rounded-lg object-cover w-full h-[184px]"
-                      />
-                      <p class="text-sm text-primary-light mt-2">{{ errors.photoUrl }}</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <section class="col-span-1">
-                <!-- stock -->
-                <div>
-                  <label for="form_Stock" class="block mb-2 font-medium">商品庫存數量</label>
-                  <input
-                    type="text"
-                    id="form_Stock"
-                    class="form-input mr-2"
-                    v-model="productCard.inStockAmount"
-                  />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.inStockAmount }}</p>
-                </div>
-                <!-- safe_stock -->
-                <div>
-                  <label for="form_SafeStock" class="block mb-2 font-medium">安全庫存量</label>
-                  <input
-                    type="text"
-                    id="form_SafeStock"
-                    class="form-input mr-2"
-                    v-model="productCard.safeStockAmount"
-                  />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.safeStockAmount }}</p>
-                </div>
-                <!-- time -->
-                <div>
-                  <label for="form_time" class="block mb-2 font-medium">製作時間</label>
-                  <div class="flex items-center">
-                    <input
-                      type="text"
-                      id="form_time"
-                      class="form-input mr-2"
-                      v-model="productCard.productionTime"
-                    />
-                    <p class="whitespace-nowrap">分鐘</p>
-                  </div>
-                  <p class="text-sm text-primary-light mt-2 mb-0">{{ errors.productionTime }}</p>
-                </div>
                 <!-- status -->
-                <div>
-                  <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
+                <div class="mb-2">
+                  <label for="form_memberStatus" class="block font-medium">狀態</label>
                   <select
                     id="form_memberStatus"
-                    class="form-select"
+                    class="form-select my-2"
                     v-model="productCard.isDisabled"
                   >
                     <option :value="true" selected>停用</option>
@@ -519,13 +513,13 @@ const handleModalClose = () => {
                   </select>
                 </div>
                 <!-- content -->
-                <div>
-                  <label for="form_content" class="block mb-2 font-medium">商品描述</label>
+                <div class="mb-2">
+                  <label for="form_content" class="block font-medium">商品描述</label>
                   <textarea
                     id="form_content"
                     rows="5"
-                    class="form-input"
-                    v-model="productCard.description"
+                    class="form-input my-2"
+                    v-model.trim="productCard.description"
                   ></textarea>
                 </div>
               </section>
@@ -545,33 +539,90 @@ const handleModalClose = () => {
             <section class="grid grid-cols-2 gap-4">
               <section class="col-span-1">
                 <!-- name -->
-                <div>
-                  <label for="form_productName" class="block mb-2 font-medium">商品名稱</label>
+                <div class="mb-2">
+                  <label for="form_productName" class="block font-medium">商品名稱</label>
                   <input
                     type="text"
                     id="form_productName"
-                    class="form-input mr-2"
-                    v-model="productCard.productName"
+                    class="form-input my-2"
+                    v-model.trim="productCard.productName"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.productName }}</p>
+                  <p class="text-sm text-primary-light">{{ errors.productName }}</p>
                 </div>
                 <!-- price -->
-                <div>
-                  <label for="form_productPrice" class="block mb-2 font-medium">商品訂價</label>
+                <div class="mb-2">
+                  <label for="form_productPrice" class="block font-medium">商品訂價</label>
                   <input
-                    type="text"
+                    type="number"
                     id="form_productPrice"
-                    class="form-input mr-2"
-                    v-model="productCard.price"
+                    class="form-input my-2"
+                    v-model.number="productCard.price"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
+                  <p class="text-sm text-primary-light">{{ errors.price }}</p>
+                </div>
+                <!-- img -->
+                <div class="mb-2">
+                  <label for="form_productImg" class="block font-medium">商品圖片</label>
+                  <div class="flex flex-col">
+                    <input
+                      id="form_productImg"
+                      ref="imgFile"
+                      type="file"
+                      class="form-input my-2"
+                      @change="uploadFile"
+                    />
+                    <p class="text-sm text-primary-light mb-2">{{ errors.photoUrl }}</p>
+                    <img
+                      :src="productCard.photoUrl"
+                      :alt="productCard.productName"
+                      class="rounded-lg object-cover w-full h-[184px]"
+                    />
+                  </div>
+                </div>
+              </section>
+              <section class="col-span-1">
+                <!-- stock -->
+                <div class="mb-2">
+                  <label for="form_Stock" class="block font-medium">商品庫存數量</label>
+                  <input
+                    type="number"
+                    id="form_Stock"
+                    class="form-input my-2"
+                    v-model.number="productCard.inStockAmount"
+                  />
+                  <p class="text-sm text-primary-light">{{ errors.inStockAmount }}</p>
+                </div>
+                <!-- safe_stock -->
+                <div class="mb-2">
+                  <label for="form_SafeStock" class="block font-medium">安全庫存量</label>
+                  <input
+                    type="number"
+                    id="form_SafeStock"
+                    class="form-input my-2"
+                    v-model.number="productCard.safeStockAmount"
+                  />
+                  <p class="text-sm text-primary-light">{{ errors.safeStockAmount }}</p>
+                </div>
+                <!-- time -->
+                <div class="mb-2">
+                  <label for="form_time" class="block font-medium">製作時間</label>
+                  <div class="flex items-center my-2">
+                    <input
+                      type="text"
+                      id="form_time"
+                      class="form-input mr-2"
+                      v-model="productCard.productionTime"
+                    />
+                    <span class="whitespace-nowrap">分鐘</span>
+                  </div>
+                  <p class="text-sm text-primary-light">{{ errors.productionTime }}</p>
                 </div>
                 <!-- category -->
-                <div>
-                  <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
+                <div class="mb-2">
+                  <label for="selectStatus" class="block font-medium whitespace-nowrap"
                     >菜單分類</label
                   >
-                  <select id="filterCategory" class="form-select py-3">
+                  <select id="filterCategory" class="form-select my-2">
                     <template
                       v-for="dessertList in dessertTypeList"
                       :key="dessertList.productsType"
@@ -582,71 +633,12 @@ const handleModalClose = () => {
                     </template>
                   </select>
                 </div>
-                <!-- img -->
-                <div>
-                  <label for="form_productImg" class="block mb-2 font-medium">商品圖片</label>
-                  <div class="flex flex-col">
-                    <input
-                      id="form_productImg"
-                      ref="imgFile"
-                      type="file"
-                      class="form-input mr-2"
-                      @change="uploadFile"
-                    />
-                    <div class="my-5">
-                      <img
-                        :src="productCard.photoUrl"
-                        alt="user"
-                        class="rounded-lg object-cover w-full h-[184px]"
-                      />
-                    </div>
-                    <p class="text-sm text-primary-light mt-2">{{ errors.photoUrl }}</p>
-                  </div>
-                </div>
-              </section>
-              <section class="col-span-1">
-                <!-- stock -->
-                <div>
-                  <label for="form_Stock" class="block mb-2 font-medium">商品庫存數量</label>
-                  <input
-                    type="text"
-                    id="form_Stock"
-                    class="form-input mr-2"
-                    v-model="productCard.inStockAmount"
-                  />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.inStockAmount }}</p>
-                </div>
-                <!-- safe_stock -->
-                <div>
-                  <label for="form_SafeStock" class="block mb-2 font-medium">安全庫存量</label>
-                  <input
-                    type="text"
-                    id="form_SafeStock"
-                    class="form-input mr-2"
-                    v-model="productCard.safeStockAmount"
-                  />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.safeStockAmount }}</p>
-                </div>
-                <!-- time -->
-                <div>
-                  <label for="form_time" class="block mb-2 font-medium">製作時間</label>
-                  <div class="flex items-center">
-                    <input
-                      type="text"
-                      id="form_time"
-                      class="form-input mr-2"
-                      v-model="productCard.productionTime"
-                    />
-                    <p class="whitespace-nowrap">分鐘</p>
-                  </div>
-                  <p class="text-sm text-primary-light mt-2">{{ errors.productionTime }}</p>
-                </div>
                 <!-- status -->
-                <div>
-                  <label for="form_memberStatus" class="block mb-2 font-medium">狀態</label>
+                <div class="mb-2">
+                  <label for="form_memberStatus" class="block font-medium">狀態</label>
                   <select
                     id="form_memberStatus"
-                    class="form-select"
+                    class="form-select my-2"
                     v-model="productCard.isDisabled"
                   >
                     <option :value="true" selected>停用</option>
@@ -654,13 +646,13 @@ const handleModalClose = () => {
                   </select>
                 </div>
                 <!-- content -->
-                <div>
-                  <label for="form_content" class="block mb-2 font-medium">商品描述</label>
+                <div class="mb-2">
+                  <label for="form_content" class="block font-medium">商品描述</label>
                   <textarea
                     id="form_content"
                     rows="5"
-                    class="form-input"
-                    v-model="productCard.description"
+                    class="form-input my-2"
+                    v-model.trim="productCard.description"
                   ></textarea>
                 </div>
               </section>
@@ -688,9 +680,9 @@ const handleModalClose = () => {
                 type="text"
                 id="form_selectStatus"
                 class="form-input mr-2"
-                v-model="dessertType.productsTypeName"
+                v-model.trim="dessertType.productsTypeName"
               />
-              <p class="text-sm text-primary-light mt-2">{{ errors.dessertCategory }}</p>
+              <p class="text-sm text-primary-light my-2">{{ errors.dessertCategory }}</p>
               <div class="mt-3">
                 <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
                   <button
