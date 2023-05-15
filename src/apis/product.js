@@ -4,7 +4,6 @@ import axios from '@/plugins/axios'
  * S-2-1 查詢商品類別
  * @param {Number} 商品分類編號，沒有等於查詢全部商品
  */
-export const searchTypeAll = () => axios.get('/v1/products')
 export const searchType = (productsType) => axios.get(`/v1/products?productsType=${productsType}`)
 
 /**
@@ -16,6 +15,7 @@ export const searchType = (productsType) => axios.get(`/v1/products?productsType
  */
 export const searchAdminProductAll = () => axios.get('/v1/products/admin')
 export const searchAdminProduct = (productsType, priceLowerLimit, priceUpperLimit, amountStatus) => axios.get(`/v1/products/admin?productsType=${productsType}&priceLowerLimit=${priceLowerLimit}&priceUpperLimit=${priceUpperLimit}&amountStatus=${amountStatus}`)
+
 /**
  * O-3-2 上傳商品圖片
  */

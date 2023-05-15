@@ -112,6 +112,8 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
+      searchPhone.value = ''
+      searchPage.value = 1
       memberForm.name = ''
       memberForm.phone = ''
     }
