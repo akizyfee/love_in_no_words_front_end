@@ -157,11 +157,11 @@ const handleModalClose = () => {
                 class="rounded py-1 px-2"
                 :class="
                   seat.isDisabled
-                    ? 'bg-secondary-light text-textself'
-                    : 'bg-neutralself-100 text-white'
+                    ? 'bg-neutralself-100 text-white'
+                    : 'bg-secondary-light text-textself'
                 "
               >
-                {{ seat.isDisabled ? '已啟用' : '已停用' }}
+                {{ seat.isDisabled ? '已停用' : '已啟用' }}
               </p>
               <div class="flex justify-between items-center">
                 <button
@@ -247,13 +247,19 @@ const handleModalClose = () => {
             <section class="flex justify-between items-center bg-bgself-light p-3 mb-3">
               <p class="font-medium">
                 桌號
-                <span class="text-white bg-primary-light rounded py-1 px-2">{{ seatForm.tableName }}</span>
+                <span class="text-white bg-primary-light rounded py-1 px-2">{{
+                  seatForm.tableName
+                }}</span>
               </p>
               <div class="flex items-center">
                 <label for="form_seatPeopleLimit" class="block font-medium whitespace-nowrap mr-1"
                   >人數</label
                 >
-                <select id="form_seatPeopleLimit" class="form-select py-1 rounded" v-model="seatForm.seats">
+                <select
+                  id="form_seatPeopleLimit"
+                  class="form-select py-1 rounded"
+                  v-model="seatForm.seats"
+                >
                   <option v-for="index in 20" :key="index" :value="index">{{ index }}</option>
                 </select>
               </div>
@@ -274,7 +280,13 @@ const handleModalClose = () => {
             </div>
             <!-- send_btn -->
             <div class="flex">
-              <button type="submit" class="w-full ml-1 btn btn-dark" @click.prevent="patchSeat(seatForm.tableNo)">確認修改</button>
+              <button
+                type="submit"
+                class="w-full ml-1 btn btn-dark"
+                @click.prevent="patchSeat(seatForm.tableNo)"
+              >
+                確認修改
+              </button>
             </div>
           </form>
         </div>

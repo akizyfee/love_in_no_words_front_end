@@ -92,18 +92,16 @@ const productCard = reactive({
   note: ''
 })
 
-// const tempProductCardQty = ref(1)
+const tempProductCardQty = ref(1)
 const tempProduct = ref([])
 
 const plusProductCount = () => {
-  // tempProductCardQty.value += 1
-  // productCard.qty = tempProductCardQty.value
-  console.log('+', productCard.qty)
+  tempProductCardQty.value += 1
+  productCard.qty = tempProductCardQty.value
 }
 const minusProductCount = () => {
-  // tempProductCardQty.value -= 1
-  // productCard.qty = tempProductCardQty.value
-  console.log('-', productCard.qty)
+  tempProductCardQty.value -= 1
+  productCard.qty = tempProductCardQty.value
 }
 
 const addToTempProduct = (item) => {
