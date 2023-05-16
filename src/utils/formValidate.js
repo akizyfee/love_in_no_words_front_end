@@ -38,7 +38,7 @@ export const errorsFormSchema = {
       return '購買數量必填'
     }
     if (value <= 0) {
-      return '數量需要大於 0，請重新填寫'
+      return '購買數量需要大於 0，請重新填寫'
     }
     return true
   }
