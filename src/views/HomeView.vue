@@ -39,6 +39,16 @@ const { width } = useWindowSize()
 const isMobile = computed(() => {
   return width.value < 1024
 })
+
+/**
+ * 跳轉至對應的錨點
+ */
+const toHref = (id) => {
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <template>
@@ -66,22 +76,22 @@ const isMobile = computed(() => {
           <li
             class="hover:text-white hover:bg-primary lg:border-0 lg:hover:text-primary lg:hover:bg-white p-6 lg:p-0"
           >
-            <a href="#" class="block">平台特色</a>
+            <a href="#" class="block" @click.prevent="toHref('feature')">平台特色</a>
           </li>
           <li
             class="hover:text-white hover:bg-primary lg:border-0 lg:hover:text-primary lg:hover:bg-white p-6 lg:p-0"
           >
-            <a href="#" class="block">合作夥伴</a>
+            <a href="#" class="block" @click.prevent="toHref('brand')">合作夥伴</a>
           </li>
           <li
             class="hover:text-white hover:bg-primary lg:border-0 lg:hover:text-primary lg:hover:bg-white p-6 lg:p-0"
           >
-            <a href="#" class="block">關於我們</a>
+            <a href="#" class="block" @click.prevent="toHref('about')">關於我們</a>
           </li>
           <li
             class="hover:text-white hover:bg-primary lg:border-0 lg:hover:text-primary lg:hover:bg-white p-6 lg:p-0"
           >
-            <a href="#" class="block">聯絡我們</a>
+            <a href="#" class="block" @click.prevent="toHref('mail')">聯絡我們</a>
           </li>
           <li class="p-10 pt-60 lg:p-0 w-full lg:w-auto grid grid-col-12 lg:block">
             <router-link to="signIn" class="btn btn-outline-dark"> 店家後台 </router-link>
@@ -171,7 +181,7 @@ const isMobile = computed(() => {
       </div>
     </section>
     <!-- feature -->
-    <section>
+    <section id="feature">
       <h3 class="text-[32px] font-bold text-center border-b-2 border-textself py-12 lg:py-16">
         平台特色
       </h3>
@@ -254,7 +264,7 @@ const isMobile = computed(() => {
       </ul>
     </section>
     <!-- brand -->
-    <section class="bg-textself py-12 px-3 lg:pt-16">
+    <section class="bg-textself py-12 px-3 lg:pt-16" id="brand">
       <h3 class="text-secondary-light text-center text-[28px] lg:text-[32px] font-bold pb-6">
         合作夥伴
       </h3>
@@ -304,7 +314,7 @@ const isMobile = computed(() => {
       </ul>
     </section>
     <!-- about -->
-    <section class="pt-[60px] pb-12 lg:py-24 mx-3 lg:mx-[240px]">
+    <section class="pt-[60px] pb-12 lg:py-24 mx-3 lg:mx-[240px]" id="about">
       <h3 class="text-center text-[28px] lg:text-[32px] font-bold">關於我們</h3>
       <!-- swiper -->
       <swiper
@@ -577,6 +587,7 @@ const isMobile = computed(() => {
       <button
         type="button"
         class="w-full btn btn-secondary flex justify-between items-center mt-15 lg:mt-24"
+        id="mail"
       >
         <div class="flex flex-col lg:flex-row lg:justify-between items-center">
           <div class="flex lg:justify-between items-center">
