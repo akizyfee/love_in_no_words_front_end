@@ -14,17 +14,17 @@
 	}
 	
 	.btn-outline-dark {
-		@apply text-textself bg-white focus:ring-2 focus:ring-neutralself-50 focus:bg-neutralself-50 focus:border-neutralself-50 border-2 border-textself shadow-self;
+		@apply text-textself bg-white border-2 border-textself shadow-self focus:ring focus:ring-textself focus:bg-neutralself-50;
 	}
 	.btn-outline-dark:hover {
-		@apply bg-neutralself-50 border-0
+		@apply bg-neutralself-50
 	}
 	.btn-outline-dark.disabled {
 		@apply text-neutralself-100 border-neutralself-50
 	}
 
 	.btn-dark {
-		@apply text-white bg-textself focus:ring-2 focus:ring-white focus:text-textself focus:bg-white focus:border-white focus:border-2 border-textself shadow-self;
+		@apply text-white bg-textself focus:ring focus:ring-textself focus:text-textself focus:bg-white border-2 border-textself shadow-self;
 	}
 	.btn-dark:hover {
 		@apply text-textself bg-white
@@ -34,7 +34,7 @@
 	}
 
 	.btn-primary {
-	  @apply text-white bg-primary-light focus:ring-2 focus:bg-white border-2 border-textself shadow-self;
+	  @apply text-white bg-primary-light focus:ring focus:ring-textself focus:text-textself focus:bg-white border-2 border-textself shadow-self;
 	}
 	.btn-primary:hover {
 		@apply text-textself bg-white
@@ -44,7 +44,10 @@
 	}
 
 	.btn-secondary {
-	  @apply text-textself bg-secondary-light focus:ring-2 focus:bg-white border-2 border-textself shadow-self;
+	  @apply text-textself bg-secondary-light focus:ring focus:ring-textself focus:bg-white border-2 border-textself shadow-self;
+	}
+	.btn-secondary:hover {
+		@apply bg-white
 	}
 
 	/* intro */

@@ -2,17 +2,18 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { catchError } from '@/utils/catchError'
 import { getAdminDessertType, searchType } from '@/apis/product'
 import { searchMember, addMember } from '@/apis/user'
 import { calculateTotalPrice, addOrder } from '@/apis/order'
-import { warningAlert, successAlert } from '@/plugins/toast'
+import { warningAlert, successAlert, errorAlert } from '@/plugins/toast'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
+const router = useRouter()
 
 /**
  * 取得商品種類代碼、查詢商品類別
@@ -105,20 +106,26 @@ const minusProductCount = () => {
 }
 
 const addToTempProduct = (item) => {
+  const findSame = tempProduct.value.find((product) => product._id === item._id)
   const temp = {
-    ...item,
-    qty: productCard.qty,
-    note: productCard.note
+    ...item
   }
-  const findSame = tempProduct.value.find((item) => item._id === temp._id)
+  if (!temp.qty) {
+    errorAlert('購買數量必填')
+    return
+  } else if (temp.qty <= 0) {
+    errorAlert('購買數量需要大於 0，請重新填寫')
+    return
+  } else if (temp.qty > productCard.inStockAmount) {
+    errorAlert('購買數量超過庫存，請重新填寫')
+    return
+  }
   if (findSame) {
     findSame.qty = temp.qty
     findSame.note = temp.note
   } else {
     tempProduct.value.push(temp)
   }
-  productCard.qty = 1
-  productCard.note = ''
   successAlert('編輯成功')
   handleModalClose()
 }
@@ -127,8 +134,8 @@ const removeTempProduct = (item) => {
   const temp = {
     ...item
   }
-  const findSame = tempProduct.value.filter((item) => item._id !== temp._id)
-  tempProduct.value = findSame
+  const findSame = tempProduct.value.findIndex((item) => item._id !== temp._id)
+  tempProduct.value.splice(findSame, 1)
   successAlert('刪除成功')
   handleModalClose()
 }
@@ -137,8 +144,8 @@ const removeTempProduct = (item) => {
  * 金額試算
  */
 const orderProductTotalPrice = ref({
-  tableName: getTable,
-  products: tempProduct,
+  tableName: getTable.value,
+  products: tempProduct.value,
   couponNo: ''
 })
 
@@ -152,7 +159,6 @@ const checkProductTotalPrice = ref({
 const fetchCalculateTotalPrice = catchError(async () => {
   const { data } = await calculateTotalPrice(orderProductTotalPrice.value)
   checkProductTotalPrice.value = data
-  tempProduct.value = []
 })
 
 /**
@@ -160,7 +166,9 @@ const fetchCalculateTotalPrice = catchError(async () => {
  * */
 const fetchAddOreder = catchError(async () => {
   const { message } = await addOrder(orderProductTotalPrice.value)
+  tempProduct.value = []
   successAlert(message)
+  router.push('/order')
 })
 
 /**
@@ -188,7 +196,9 @@ const handleModalOpen = (checkIsCreate, item) => {
         isDisabled,
         productionTime,
         productsType,
-        description
+        description,
+        qty,
+        note
       } = item
       productCard._id = _id
       productCard.productNo = productNo
@@ -201,9 +211,12 @@ const handleModalOpen = (checkIsCreate, item) => {
       productCard.productionTime = productionTime
       productCard.productsType = productsType
       productCard.description = description
+      productCard.qty = qty
+      productCard.note = note
     }
   })
 }
+
 const handleModalClose = () => {
   const childComponent = childComponentRef.value
 
@@ -215,6 +228,8 @@ const handleModalClose = () => {
        **/
       searchPhone.value = '0912000000'
       memberList.value = []
+      productCard.qty = 1
+      productCard.note = ''
     }
   })
 }
@@ -401,7 +416,7 @@ const handleModalClose = () => {
             </p>
             <p class="flex justify-between items-center font-medium">
               <span>&emsp;&emsp;餐點</span>
-              <span>0 份</span>
+              <span>{{ tempProduct.length }} 份</span>
             </p>
             <p class="flex justify-between items-center font-medium mt-4">
               <span>折扣金額</span>
@@ -531,6 +546,7 @@ const handleModalClose = () => {
                   +
                 </button>
               </div>
+              <p class="text-sm text-primary-light mt-2">{{ errors.qty }}</p>
             </div>
             <div class="px-3">
               <textarea
@@ -562,18 +578,39 @@ const handleModalClose = () => {
               <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
                 {{ productCard.productsType.productsTypeName }}
               </p>
-              <div class="transition-all duration-500 p-3">
-                <h2 class="text-2xl font-medium mb-3">{{ productCard.productName }}</h2>
+              <div
+                :class="[
+                  'transition-all duration-500 p-6',
+                  productCard.amountStatus === 'safe' && 'bg-white',
+                  productCard.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
+                ]"
+              >
+                <h2 class="text-2xl font-medium mb-1">{{ productCard.productName }}</h2>
+                <h3 class="text-neutralself-100 text-sm font-light mb-3">
+                  {{ productCard.description }}
+                </h3>
                 <div class="flex justify-between items-center">
                   <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
-                    <p class="font-normal">
+                    <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
-                      &emsp;{{ productCard.inStockAmount }}份
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
+                    </p>
+                    <p
+                      v-else-if="productCard.amountStatus === 'danger'"
+                      class="flex items-center text-primary-light font-normal"
+                    >
+                      <img src="@/assets/img/IconDanger.png" class="me-3" alt="Img_IconDanger" />
+                      <span>剩餘</span>
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
+                    </p>
+                    <p v-else-if="productCard.amountStatus === 'zero'" class="font-normal">
+                      <span class="text-neutralself-200">剩餘</span>
+                      {{ `&emsp;${productCard.inStockAmount}份` }}
                     </p>
                     <p class="font-normal">
                       <span class="text-neutralself-200">製作時間</span>
-                      &emsp;{{ productCard.productionTime }}分
+                      {{ `&emsp;${productCard.productionTime}分` }}
                     </p>
                   </div>
                 </div>
@@ -608,6 +645,7 @@ const handleModalClose = () => {
                   ＋
                 </button>
               </div>
+              <p class="text-sm text-primary-light mt-2">{{ errors.qty }}</p>
             </div>
             <div class="px-3">
               <textarea

@@ -1,7 +1,7 @@
 import axios from '@/plugins/axios'
 
 /**
- * S-1-1 現場帶位
+ * S-1-1 現場入座
  * @param {object} payload 桌位資料
  */
 export const noReservation = (payload) => axios.post('/v1/seats/no-reservation', payload)

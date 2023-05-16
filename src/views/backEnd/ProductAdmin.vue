@@ -448,27 +448,6 @@ const handleModalClose = () => {
                     class="form-input my-2"
                     v-model.number="productCard.price"
                   />
-                  <p class="text-sm text-primary-light mt-2">{{ errors.price }}</p>
-                </div>
-                <!-- category -->
-                <div>
-                  <label for="selectStatus" class="block mb-2 mr-3 font-medium whitespace-nowrap"
-                    >菜單分類</label
-                  >
-                  <select
-                    id="filterCategory"
-                    class="form-select py-2"
-                    v-model="productCard.productsType"
-                  >
-                    <template
-                      v-for="dessertList in dessertTypeList"
-                      :key="dessertList.productsType"
-                    >
-                      <option :value="dessertList.productsType">
-                        {{ dessertList.productsTypeName }}
-                      </option>
-                    </template>
-                  </select>
                   <p class="text-sm text-primary-light">{{ errors.price }}</p>
                 </div>
                 <!-- img -->

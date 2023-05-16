@@ -27,7 +27,7 @@ const searchForm = reactive({
 })
 
 /**
- * 帶位功能
+ * 入座功能
  **/
 const haveASeat = catchError(async (tableNo) => {
   const { reservationDate, reservationTime } = searchForm
@@ -36,7 +36,7 @@ const haveASeat = catchError(async (tableNo) => {
     reservationDate,
     reservationTime
   })
-  successAlert(message === '成功' ? '修改帶位成功' : message)
+  successAlert(message === '成功' ? '修改入座成功' : message)
   searchSeats()
 })
 
@@ -283,7 +283,16 @@ const handleModalClose = () => {
             </p>
             <div class="flex justify-between items-center mt-4">
               <p>
-                <span class="bg-secondary-light rounded py-1 px-2 mr-2"> {{ seat.status }}</span>
+                <span
+                  class="rounded py-1 px-2 mr-2"
+                  :class="
+                    seat.status === '未使用'
+                      ? 'bg-neutralself-100 text-white'
+                      : 'bg-secondary-light text-textself'
+                  "
+                >
+                  {{ seat.status }}</span
+                >
                 <span
                   class="rounded py-1 px-2"
                   :class="seat.isWindowSeat ? 'bg-primary text-white' : 'hidden'"
@@ -297,7 +306,7 @@ const handleModalClose = () => {
                   class="btn btn-outline-dark mx-1"
                   :class="seat.status === '未使用' ? '' : 'hidden'"
                 >
-                  帶位
+                  入座
                 </button>
                 <button
                   @click="handleModalOpen('create', seat)"
