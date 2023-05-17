@@ -40,7 +40,6 @@ const handleModalClose = () => {
           <th class="py-3">優惠名稱</th>
           <th class="py-3">優惠代碼</th>
           <th class="py-3">折扣比例</th>
-          <th class="py-3">停用時間</th>
           <th class="py-3">停用狀態</th>
           <th class="py-3"></th>
         </tr>
@@ -50,7 +49,6 @@ const handleModalClose = () => {
           <td class="py-3">85折</td>
           <td class="py-3">15%off</td>
           <td class="py-3">15%</td>
-          <td class="py-3">2023/05/01</td>
           <td class="py-3">停用</td>
           <td class="flex justify-end">
             <button
@@ -103,11 +101,6 @@ const handleModalClose = () => {
         <!-- Modal body -->
         <div class="w-full rounded-lg p-3">
           <form v-if="isCreate === 'create'" class="space-y-3" action="#">
-            <!-- number -->
-            <div>
-              <label for="form_couponNumber" class="block mb-2 font-medium">優惠編號 </label>
-              <input type="text" id="form_couponNumber" class="form-input" />
-            </div>
             <!-- name -->
             <div>
               <label for="form_couponName" class="block mb-2 font-medium">優惠名稱 </label>
@@ -135,11 +128,6 @@ const handleModalClose = () => {
             <button type="submit" class="w-full btn btn-dark">確定新增</button>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-3" action="#">
-            <!-- number -->
-            <div>
-              <label for="form_couponNumber" class="block mb-2 font-medium">優惠編號 </label>
-              <input type="text" id="form_couponNumber" class="form-input" />
-            </div>
             <!-- name -->
             <div>
               <label for="form_couponName" class="block mb-2 font-medium">優惠名稱 </label>

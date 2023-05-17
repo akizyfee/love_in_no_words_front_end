@@ -39,12 +39,21 @@ const handleModalClose = () => {
         <tr class="border-b-2 border-black">
           <th class="py-3">分類名稱</th>
           <th class="py-3">優惠活動</th>
+          <th class="py-3"></th>
         </tr>
       </thead>
       <tbody>
         <tr class="border-b-2 border-black">
           <td class="py-3 text-center">氣泡水 + 聖代</td>
           <td class="py-3 text-center">A + B</td>
+          <td class="flex justify-end">
+            <button
+              @click="handleModalOpen('delete')"
+              class="btn btn-outline-dark w-auto mx-1 my-2"
+            >
+              刪除
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -56,6 +65,7 @@ const handleModalClose = () => {
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
           <h2 v-if="isCreate === 'create'" class="text-xl font-medium">編輯 A + B 優惠活動</h2>
+          <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除 A + B 優惠活動</h2>
           <button
             @click="handleModalClose()"
             type="button"
@@ -80,22 +90,22 @@ const handleModalClose = () => {
         <!-- Modal body -->
         <div class="w-full rounded-lg p-3">
           <form v-if="isCreate === 'create'" class="space-y-3" action="#">
+            <div>
+              <label for="form_discount" class="block mb-2 font-medium">折扣比例 </label>
+              <input
+                type="number"
+                name="discount"
+                id="form_discount"
+                class="form-input"
+                placeholder="請輸入折扣比例"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">請輸入折扣比例</p>
+            </div>
             <!-- tag -->
             <section>
-              <p class="font-medium text-primary text-xl mb-2">可選擇的分類</p>
+              <p class="font-medium mb-2">可選擇的分類</p>
               <div class="flex flex-wrap">
-                <button
-                  type="submit"
-                  class="btn btn-primary font-medium my-2 mr-2 px-3 py-1 rounded"
-                >
-                  泡芙
-                </button>
-                <button
-                  type="submit"
-                  class="btn btn-primary font-medium my-2 mr-2 px-3 py-1 rounded"
-                >
-                  蛋糕
-                </button>
                 <button
                   type="submit"
                   class="btn btn-primary font-medium my-2 mr-2 px-3 py-1 rounded"
@@ -106,22 +116,34 @@ const handleModalClose = () => {
             </section>
             <!-- tag checked -->
             <section>
-              <p class="font-medium text-primary text-xl mb-2">已選擇的分類 (最多兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)</p>
+              <p class="font-medium mb-2">
+                已選擇的分類 (最多兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)
+              </p>
               <div class="flex flex-wrap">
                 <button
                   type="submit"
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
                 >
-                  氣泡水
+                  泡芙
                 </button>
                 <button
                   type="submit"
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
                 >
-                  聖代
+                  蛋糕
                 </button>
               </div>
             </section>
+            <!-- send_btn -->
+            <button type="submit" class="w-full btn btn-dark">確定新增</button>
+          </form>
+          <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">
+            <h3 class="text-xl font-medium text-neutral-400">
+              請確認是否刪除
+              <span class="text-primary-light"> A+B 優惠活動</span> ?
+            </h3>
+            <!-- send_btn -->
+            <button type="submit" class="w-full btn btn-dark">確認刪除</button>
           </form>
         </div>
       </div>

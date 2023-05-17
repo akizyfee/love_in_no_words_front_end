@@ -516,7 +516,7 @@ const handleModalClose = () => {
                 <!-- category -->
                 <div class="mb-2">
                   <label for="selectStatus" class="block font-medium whitespace-nowrap"
-                    >菜單分類</label
+                    >商品分類</label
                   >
                   <select id="filterCategory" class="form-select my-2">
                     <template
@@ -649,7 +649,7 @@ const handleModalClose = () => {
                 <!-- category -->
                 <div class="mb-2">
                   <label for="selectStatus" class="block font-medium whitespace-nowrap"
-                    >菜單分類</label
+                    >商品分類</label
                   >
                   <select id="filterCategory" class="form-select my-2">
                     <template
@@ -695,11 +695,7 @@ const handleModalClose = () => {
               >
                 刪除
               </button>
-              <button
-                @click.prevent="fetchEditProduct"
-                type="submit"
-                class="w-full btn btn-dark"
-              >
+              <button @click.prevent="fetchEditProduct" type="submit" class="w-full btn btn-dark">
                 確定修改
               </button>
             </div>
@@ -707,13 +703,14 @@ const handleModalClose = () => {
           <form v-else-if="isCreate === 'updateCategory'">
             <div>
               <label for="form_selectStatus" class="block mb-2 font-medium"
-                >菜單分類 (點擊黃色按鈕，即刻刪除該分類)
+                >商品分類 (點擊黃色按鈕，即刻刪除該分類)
               </label>
               <input
                 type="text"
                 id="form_selectStatus"
                 class="form-input"
                 v-model.trim="dessertType.productsTypeName"
+                placeholder="請輸入分類"
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.dessertCategory }}</p>
               <div class="flex flex-wrap mt-3">
