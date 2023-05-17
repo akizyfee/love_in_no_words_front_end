@@ -125,15 +125,15 @@ const handleModalClose = () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <section class="ml-[315px]">
+  <section class="ml-[315px] bg-white">
     <!-- title -->
-    <nav class="bg-white border-b-2 border-textself p-6">
-      <h1 class="flex items-center text-[36px] font-bold">會員資料</h1>
+    <nav class="border-b-2 border-textself p-6">
+      <h1 class="flex items-center text-[36px] font-bold">會員資訊</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <div class="flex justify-between items-end mb-6">
         <div class="flex flex-col">
-          <label for="searchPhone" class="block mb-2 font-medium">手機號碼</label>
+          <label for="searchPhone" class="block mb-2 font-medium">電話</label>
           <input
             type="tel"
             id="searchPhone"
@@ -147,7 +147,7 @@ const handleModalClose = () => {
         </button>
       </div>
       <!-- table -->
-      <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-5">
+      <section class="overflow-auto bg-bgself-light rounded-xl p-5">
         <table class="w-full text-center">
           <thead class="text-xl font-medium text-secondary-light bg-textself">
             <tr class="border-b-2 border-black">
@@ -214,7 +214,7 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6 p-3">
+          <form v-if="isCreate === 'create'" class="space-y-3 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
@@ -244,13 +244,11 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
-            <section class="flex">
-              <button type="submit" class="w-full btn btn-dark" @click.prevent="postMember">
-                確認新增
-              </button>
-            </section>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postMember">
+              確認新增
+            </button>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6 p-3">
+          <form v-else-if="isCreate === 'update'" class="space-y-3 p-3">
             <div>
               <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
               <input
@@ -280,13 +278,11 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
-            <section class="flex">
-              <button type="submit" class="w-full btn btn-dark" @click.prevent="patchMember">
-                確認修改
-              </button>
-            </section>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="patchMember">
+              確認修改
+            </button>
           </form>
-          <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
+          <form v-else-if="isCreate === 'delete'" class="space-y-3 p-3">
             <div>
               <p class="block mb-2 text-xl font-medium text-gray-900">姓名</p>
               <p>{{ memberForm.name }}</p>
@@ -295,17 +291,14 @@ const handleModalClose = () => {
               <p class="block mb-2 text-xl font-medium text-gray-900">電話</p>
               <p>{{ memberForm.phone }}</p>
             </div>
-            <p class="text-xl font-semibold text-gray-900">是否要刪除會員資料?</p>
+            <p class="text-xl font-medium text-neutral-400">是否要刪除會員資料?</p>
             <!-- send_btn -->
-            <section class="flex mt-12">
-              <button type="submit" class="w-full btn btn-dark" @click.prevent="delMember">
-                確認刪除
-              </button>
-            </section>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="delMember">
+              確認刪除
+            </button>
           </form>
         </div>
       </div>
     </section>
   </Modal>
 </template>
-<style scoped></style>

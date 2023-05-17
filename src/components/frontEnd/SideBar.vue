@@ -14,7 +14,7 @@ const signOut = catchError(async () => {
 </script>
 <template>
   <div class="w-full h-full border-r-2 border-textself">
-    <div class="h-full bg-white flex flex-col justify-between">
+    <div class="h-full bg-bgself flex flex-col justify-between">
       <section>
         <router-link to="signin" class="flex justify-center my-12">
           <img src="@/assets/img/LOGO_horizon.svg" class="w-1/2 object-cover" alt="Logo_PC" />
@@ -70,4 +70,3 @@ const signOut = catchError(async () => {
     </div>
   </div>
 </template>
-<style scoped></style>

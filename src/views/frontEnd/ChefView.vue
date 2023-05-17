@@ -5,12 +5,12 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <section class="ml-[315px]">
+  <section class="ml-[315px] bg-white">
     <!-- title -->
-    <nav class="bg-white border-b-2 border-textself p-6">
-      <h1 class="flex items-center text-[36px] font-bold">廚師</h1>
+    <nav class="border-b-2 border-textself p-6">
+      <h1 class="flex items-center text-[36px] font-bold">廚房訂單資訊</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
         <li class="mr-2">
@@ -80,6 +80,6 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
 </template>
 <style scoped>
 .tabbar-active {
-  @apply text-primary-light bg-white;
+  @apply bg-bgself-light;
 }
 </style>

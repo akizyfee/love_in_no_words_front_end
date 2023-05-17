@@ -115,18 +115,18 @@ const handleModalClose = () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <div class="ml-[315px]">
-    <nav class="bg-white border-b-2 border-textself p-6">
+  <div class="ml-[315px] bg-white">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">使用者管理</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <div class="flex justify-end mb-6">
         <button @click.prevent="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
           新增使用者
         </button>
       </div>
       <!-- table -->
-      <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-6">
+      <section class="overflow-auto bg-bgself-light rounded-xl p-6">
         <table class="w-full text-center">
           <thead class="text-xl font-medium text-secondary-light bg-textself">
             <tr class="border-b-2 border-black">
@@ -195,9 +195,9 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6 p-3">
+          <form v-if="isCreate === 'create'" class="space-y-3 p-3">
             <div>
-              <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
+              <label for="name" class="block mb-2 font-medium">姓名</label>
               <input
                 type="text"
                 name="name"
@@ -209,7 +209,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
-              <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
+              <label for="phone" class="block mb-2 font-medium">電話</label>
               <input
                 type="text"
                 name="phone"
@@ -230,7 +230,7 @@ const handleModalClose = () => {
               </select>
             </div>
             <div v-if="userProfile.titleNo === 1">
-              <label for="email" class="block mb-2 text-xl font-medium text-gray-900">信箱</label>
+              <label for="email" class="block mb-2 font-medium">信箱</label>
               <input
                 type="email"
                 name="email"
@@ -242,7 +242,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
             </div>
             <div v-if="userProfile.titleNo !== 4">
-              <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
+              <label for="password" class="block mb-2 font-medium"
                 >密碼</label
               >
               <input
@@ -268,9 +268,9 @@ const handleModalClose = () => {
               確認新增
             </button>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6 p-3" action="#">
+          <form v-else-if="isCreate === 'update'" class="space-y-3 p-3" action="#">
             <div>
-              <label for="name" class="block mb-2 text-xl font-medium text-gray-900">姓名</label>
+              <label for="name" class="block mb-2 font-medium">姓名</label>
               <input
                 type="text"
                 name="name"
@@ -282,7 +282,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
-              <label for="phone" class="block mb-2 text-xl font-medium text-gray-900">電話</label>
+              <label for="phone" class="block mb-2 font-medium">電話</label>
               <input
                 type="text"
                 name="phone"
@@ -303,7 +303,7 @@ const handleModalClose = () => {
               </select>
             </div>
             <div v-if="userProfile.titleNo === 1">
-              <label for="email" class="block mb-2 text-xl font-medium text-gray-900">信箱</label>
+              <label for="email" class="block mb-2 font-medium">信箱</label>
               <input
                 type="email"
                 name="email"
@@ -315,7 +315,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
             </div>
             <div v-if="userProfile.titleNo !== 4">
-              <label for="password" class="block mb-2 text-xl font-medium text-gray-900"
+              <label for="password" class="block mb-2 font-medium"
                 >密碼</label
               >
               <input
@@ -336,24 +336,22 @@ const handleModalClose = () => {
                 <option :value="false">啟用</option>
               </select>
             </div>
-            <!-- time -->
-            <!-- <p class="text-xl font-semibold text-gray-900">註冊日期 : 2023/03/10</p> -->
             <!-- send_btn -->
             <button @click.prevent="fetcheditUser" type="submit" class="w-full btn btn-dark">
               確認修改
             </button>
           </form>
-          <form v-else-if="isCreate === 'delete'" class="space-y-6 p-3">
-            <p class="text-xl font-semibold text-gray-900">
+          <form v-else-if="isCreate === 'delete'" class="space-y-3 p-3">
+            <p class="text-xl font-medium text-neutral-400">
               是否要刪除
-              <span class="text-primary">{{ userProfile.name }}</span>
+              <span class="text-primary-light">{{ userProfile.name }}</span>
               資料?
             </p>
             <!-- send_btn -->
             <button
               @click.prevent="fetchDeleteUser"
               type="submit"
-              class="w-full btn btn-dark mt-12"
+              class="w-full btn btn-dark"
             >
               確認刪除
             </button>
@@ -363,4 +361,3 @@ const handleModalClose = () => {
     </section>
   </Modal>
 </template>
-<style scoped></style>

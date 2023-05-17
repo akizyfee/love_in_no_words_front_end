@@ -101,7 +101,7 @@
 
 	/* form_Qty */
 	.form-qty {
-		@apply inline-flex items-center border-2 border-textself bg-secondary-light focus:text-textself focus:ring-secondary-dark focus:border-secondary-light py-2 px-3
+		@apply inline-flex items-center border-2 border-textself bg-neutralself-50 focus:text-textself focus:ring-secondary-dark focus:border-secondary-light py-2 px-3
 	}
 
 	/* form_Radio */

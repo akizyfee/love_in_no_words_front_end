@@ -61,7 +61,7 @@ const signIn = catchError(async () => {
       </div>
       <form class="flex flex-col justify-center lg:py-10">
         <div class="mb-6">
-          <label for="tel" class="block mb-2 text-xl font-medium">手機號碼</label>
+          <label for="tel" class="block mb-2 text-xl font-medium">電話</label>
           <input
             type="tel"
             id="tel"

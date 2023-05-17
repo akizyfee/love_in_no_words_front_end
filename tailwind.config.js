@@ -14,6 +14,7 @@ module.exports = {
           dark: '#FDB137'
         },
         bgself: {
+          DEFAULT: '#FEFAF4',
           light: '#F6EFE5',
           dark: '#F1E7D9'
         },

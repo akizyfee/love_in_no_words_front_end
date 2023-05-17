@@ -22,11 +22,11 @@ export default defineComponent({
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <div class="ml-[315px]">
-    <nav class="bg-white border-b-2 border-textself p-6">
+  <div class="ml-[315px] bg-white">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">活動管理</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- select -->
       <label for="selectCoupon" class="block mb-2 font-medium whitespace-nowrap">活動分類</label>
       <select
@@ -37,7 +37,7 @@ export default defineComponent({
       >
         <option value="cuponCode">優惠碼</option>
         <option value="freeOne">買一送一</option>
-        <option value="freebiePlus">A+B優惠</option>
+        <option value="freebiePlus">A + B 優惠</option>
       </select>
       <!-- table -->
       <keep-alive>
