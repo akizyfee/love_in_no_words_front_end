@@ -130,14 +130,13 @@ const searchFilterProduct = reactive({
   amountStatus: ''
 })
 const fetchSearchProduct = catchError(async () => {
-  const { data, message } = await searchAdminProduct(
+  const { data } = await searchAdminProduct(
     searchFilterProduct.productsType,
     searchFilterProduct.priceLowerLimit,
     searchFilterProduct.priceUpperLimit,
     searchFilterProduct.amountStatus
   )
   productList.value = data
-  successAlert(message)
 })
 
 watch(
@@ -238,11 +237,11 @@ const handleModalClose = () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <div class="ml-[315px]">
-    <nav class="bg-white border-b-2 border-textself p-6">
+  <div class="ml-[315px] bg-white">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">商品管理</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- select -->
       <div class="flex-col xl:flex xl:flex-row items-end justify-between mb-3">
         <div class="flex items-end gap-4 mb-3">
@@ -279,7 +278,10 @@ const handleModalClose = () => {
             </select>
           </section>
           <!-- price -->
-          <section class="flex">
+          <section class="flex flex-col">
+            <label for="filterPrice" class="block mb-1 font-medium whitespace-nowrap"
+              >價格區間</label
+            >
             <div class="flex items-center mr-3">
               <input
                 type="text"
@@ -291,19 +293,19 @@ const handleModalClose = () => {
               <div class="text-2xl align-middle mx-3">~</div>
               <input
                 type="text"
-                id="filterPrice"
+                id="filterPriceTwo"
                 class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
                 required
                 v-model="searchFilterProduct.priceUpperLimit"
               />
+              <button
+                @click.prevent="fetchSearchProduct"
+                type="button"
+                class="btn btn-outline-dark whitespace-nowrap mx-3"
+              >
+                搜尋
+              </button>
             </div>
-            <button
-              @click.prevent="fetchSearchProduct"
-              type="button"
-              class="btn btn-outline-dark whitespace-nowrap"
-            >
-              搜尋
-            </button>
           </section>
         </div>
         <!-- btn -->
@@ -329,7 +331,9 @@ const handleModalClose = () => {
             :src="itemProductList.photoUrl"
             :alt="itemProductList.productName"
           />
-          <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+          <p
+            class="bg-neutralself-400 text-white rounded px-2 py-1 text-sm font-normal absolute top-36 left-5"
+          >
             {{ itemProductList.productsTypeName }}
           </p>
           <div
@@ -372,7 +376,9 @@ const handleModalClose = () => {
             style="background: rgba(8, 8, 8, 0.5)"
           >
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
+              <p
+                class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself rounded-lg"
+              >
                 {{ itemProductList.isDisabled === true ? '已停用' : '已售完' }}
               </p>
             </div>
@@ -558,7 +564,7 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-if="isCreate === 'updateProduct'" class="space-y-6">
+          <form v-if="isCreate === 'updateProduct'">
             <section class="grid grid-cols-2 gap-4">
               <section class="col-span-1">
                 <!-- name -->
@@ -669,7 +675,7 @@ const handleModalClose = () => {
                   </select>
                 </div>
                 <!-- content -->
-                <div class="mb-2">
+                <div>
                   <label for="form_content" class="block font-medium">商品描述</label>
                   <textarea
                     id="form_content"
@@ -689,36 +695,44 @@ const handleModalClose = () => {
               >
                 刪除
               </button>
-              <button @click.prevent="fetchEditProduct" type="submit" class="w-full btn btn-dark">
+              <button
+                @click.prevent="fetchEditProduct"
+                type="submit"
+                class="w-full btn btn-dark"
+              >
                 確定修改
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'updateCategory'" class="space-y-6">
+          <form v-else-if="isCreate === 'updateCategory'">
             <div>
               <label for="form_selectStatus" class="block mb-2 font-medium"
-                >菜單分類 (點擊紅色按鈕，即刻刪除該分類)
+                >菜單分類 (點擊黃色按鈕，即刻刪除該分類)
               </label>
               <input
                 type="text"
                 id="form_selectStatus"
-                class="form-input mr-2"
+                class="form-input"
                 v-model.trim="dessertType.productsTypeName"
               />
-              <p class="text-sm text-primary-light my-2">{{ errors.dessertCategory }}</p>
-              <div class="mt-3">
-                <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
-                  <button
-                    @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
-                    class="bg-primary-light text-white font-medium mt-2 mr-2 px-3 py-1 rounded"
-                  >
-                    {{ dessertList.productsTypeName }}
-                  </button>
-                </template>
+              <p class="text-sm text-primary-light mt-2">{{ errors.dessertCategory }}</p>
+              <div class="flex flex-wrap mt-3">
+                <button
+                  @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
+                  class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
+                  v-for="dessertList in dessertTypeList"
+                  :key="dessertList.productsType"
+                >
+                  {{ dessertList.productsTypeName }}
+                </button>
               </div>
             </div>
             <!-- send_btn -->
-            <button @click.prevent="fetchAddDessertcodes" type="submit" class="w-full btn btn-dark">
+            <button
+              @click.prevent="fetchAddDessertcodes"
+              type="submit"
+              class="w-full btn btn-dark mt-3"
+            >
               確定新增
             </button>
           </form>
@@ -727,4 +741,3 @@ const handleModalClose = () => {
     </section>
   </Modal>
 </template>
-<style scoped></style>

@@ -134,7 +134,7 @@ const removeTempProduct = (item) => {
   const temp = {
     ...item
   }
-  const findSame = tempProduct.value.findIndex((item) => item._id !== temp._id)
+  const findSame = tempProduct.value.findIndex((item) => item._id === temp._id)
   tempProduct.value.splice(findSame, 1)
   successAlert('刪除成功')
   handleModalClose()
@@ -153,7 +153,7 @@ const checkProductTotalPrice = ref({
   orderList: [],
   tableName: 0,
   totalPrice: 0,
-  totalTime: ''
+  totalTime: 0
 })
 
 const fetchCalculateTotalPrice = catchError(async () => {
@@ -239,7 +239,7 @@ const handleModalClose = () => {
     <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
       <SiderBar />
     </aside>
-    <main class="mx-[315px] bg-secondary-light p-6 min-h-screen">
+    <main class="mx-[315px] bg-white p-6 min-h-screen">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
         <li class="mr-2" v-for="types in typeList" :key="types._id">
@@ -265,7 +265,9 @@ const handleModalClose = () => {
             :src="itemProductList.photoUrl"
             :alt="itemProductList.productName"
           />
-          <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+          <p
+            class="bg-neutralself-400 text-white rounded px-2 py-1 text-sm font-normal absolute top-36 left-5"
+          >
             {{ itemProductList.productsType.productsTypeName }}
           </p>
           <div
@@ -277,7 +279,7 @@ const handleModalClose = () => {
           >
             <h2 class="text-2xl font-medium mb-3">{{ itemProductList.productName }}</h2>
             <div class="flex justify-between items-center">
-              <p class="text-primary-light text-[32px] font-bold">${{ itemProductList.price }}</p>
+              <p class="text-[32px] font-bold">${{ itemProductList.price }}</p>
               <div class="flex flex-col items-end">
                 <p v-if="itemProductList.amountStatus === 'safe'" class="font-normal">
                   <span class="text-neutralself-200">剩餘</span>
@@ -308,7 +310,9 @@ const handleModalClose = () => {
             style="background: rgba(8, 8, 8, 0.5)"
           >
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <p class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself">
+              <p
+                class="text-2xl text-white font-medium py-6 px-9 whitespace-nowrap bg-textself rounded-lg"
+              >
                 {{ itemProductList.isDisabled === true ? '已停用' : '已售完' }}
               </p>
             </div>
@@ -343,7 +347,7 @@ const handleModalClose = () => {
                   <span>{{ tempProducts.productName }}</span>
                   <span>&emsp;{{ tempProducts.qty }}份</span>
                 </h2>
-                <p class="font-medium text-xl text-primary-light my-2">${{ tempProducts.price }}</p>
+                <p class="font-medium text-xl my-2">${{ tempProducts.price }}</p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
                 >
@@ -469,29 +473,25 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg">
-          <form v-if="isCreate === 'create'" class="space-y-6" action="#">
+          <form v-if="isCreate === 'create'" class="space-y-3" action="#">
             <div class="relative">
               <img
                 class="object-cover w-full h-[184px] border-b-2 border-textself"
                 :src="productCard.photoUrl"
                 :alt="productCard.productName"
               />
-              <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+              <p
+                class="bg-neutralself-400 text-white rounded px-2 py-1 text-sm font-normal absolute top-36 left-5"
+              >
                 {{ productCard.productsType.productsTypeName }}
               </p>
-              <div
-                :class="[
-                  'transition-all duration-500 p-6',
-                  productCard.amountStatus === 'safe' && 'bg-white',
-                  productCard.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
-                ]"
-              >
+              <div class="transition-all duration-500 bg-white p-6">
                 <h2 class="text-2xl font-medium mb-1">{{ productCard.productName }}</h2>
                 <h3 class="text-neutralself-100 text-sm font-light mb-3">
                   {{ productCard.description }}
                 </h3>
                 <div class="flex justify-between items-center">
-                  <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
+                  <p class="text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
                     <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
@@ -568,29 +568,25 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6" action="#">
+          <form v-else-if="isCreate === 'update'" class="space-y-3" action="#">
             <div class="relative">
               <img
                 class="object-cover w-full h-[184px] border-b-2 border-textself"
                 :src="productCard.photoUrl"
                 alt="ImgProduct"
               />
-              <p class="bg-secondary-light px-2 py-1 text-sm font-normal absolute top-36 left-5">
+              <p
+                class="bg-neutralself-400 text-white rounded px-2 py-1 text-sm font-normal absolute top-36 left-5"
+              >
                 {{ productCard.productsType.productsTypeName }}
               </p>
-              <div
-                :class="[
-                  'transition-all duration-500 p-6',
-                  productCard.amountStatus === 'safe' && 'bg-white',
-                  productCard.amountStatus === 'danger' && 'bg-[#F31F1F1A]'
-                ]"
-              >
+              <div class="transition-all duration-500 bg-white p-6">
                 <h2 class="text-2xl font-medium mb-1">{{ productCard.productName }}</h2>
                 <h3 class="text-neutralself-100 text-sm font-light mb-3">
                   {{ productCard.description }}
                 </h3>
                 <div class="flex justify-between items-center">
-                  <p class="text-primary-light text-[32px] font-bold">${{ productCard.price }}</p>
+                  <p class="text-[32px] font-bold">${{ productCard.price }}</p>
                   <div class="flex flex-col items-end">
                     <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
@@ -667,27 +663,23 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'delete'" class="space-y-6" action="#">
-            <div class="flex flex-col">
-              <h3 class="text-xl text-center font-medium p-3 pb-0">
-                請確認是否刪除
-                <span class="text-primary-light">{{ productCard.productName }}</span> ?
-              </h3>
-              <!-- send_btn -->
-              <div class="flex m-3">
-                <button
-                  @click.prevent="removeTempProduct(productCard)"
-                  type="submit"
-                  class="w-full ml-1 btn btn-dark"
-                >
-                  確認刪除
-                </button>
-              </div>
-            </div>
+          <form v-else-if="isCreate === 'delete'" class="space-y-3 p-3" action="#">
+            <h3 class="text-xl font-medium text-neutral-400">
+              請確認是否刪除
+              <span class="text-primary-light">{{ productCard.productName }}</span> ?
+            </h3>
+            <!-- send_btn -->
+            <button
+              @click.prevent="removeTempProduct(productCard)"
+              type="submit"
+              class="w-full btn btn-dark"
+            >
+              確認刪除
+            </button>
           </form>
-          <form v-else-if="isCreate === 'readMember'" class="space-y-6 p-3" action="#">
+          <form v-else-if="isCreate === 'readMember'" class="space-y-3 p-3" action="#">
             <div>
-              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <label for="form_tel" class="block mb-2 font-medium">電話</label>
               <input
                 type="tel"
                 id="form_tel"
@@ -696,7 +688,7 @@ const handleModalClose = () => {
                 v-model="searchPhone"
               />
             </div>
-            <div class="bg-bgself-light p-4">
+            <div class="bg-bgself-light rounded-xl p-4">
               <h3 class="mb-2 font-medium">查詢結果</h3>
               <p v-if="memberList.length === 0" class="text-primary-light">沒有符合的會員資料</p>
               <div
@@ -725,7 +717,7 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'createMember'" class="space-y-6 p-3" action="#">
+          <form v-else-if="isCreate === 'createMember'" class="space-y-3 p-3" action="#">
             <div>
               <label for="form_name" class="block mb-2 font-medium">姓名</label>
               <input
@@ -740,7 +732,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
-              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <label for="form_tel" class="block mb-2 font-medium">電話</label>
               <input
                 type="tel"
                 name="phone"
@@ -759,7 +751,7 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'createActivity'" class="space-y-4 p-3" action="#">
+          <form v-else-if="isCreate === 'createActivity'" class="space-y-3 p-3" action="#">
             <ul class="flex flex-col">
               <li class="mb-3">
                 <div class="flex items-center mb-3">
@@ -773,7 +765,7 @@ const handleModalClose = () => {
                   />
                   <label for="form_checkIn_radio" class="ml-2 text-xl font-medium">打卡優惠</label>
                 </div>
-                <div class="bg-bgself-light p-4">
+                <div class="bg-bgself-light rounded-xl p-4">
                   <select id="checkIn_status" class="form-select mb-3">
                     <option value="85%" selected>85 折</option>
                     <option value="88%">88 折</option>
@@ -805,7 +797,7 @@ const handleModalClose = () => {
                     >新會員優惠</label
                   >
                 </div>
-                <div class="bg-bgself-light p-4 hidden">
+                <div class="bg-bgself-light rounded-xl p-4 hidden">
                   <select id="newMember_status" class="form-select mb-3">
                     <option value="85%" selected>85 折</option>
                     <option value="88%">88 折</option>
@@ -837,7 +829,7 @@ const handleModalClose = () => {
                     >熟客優惠</label
                   >
                 </div>
-                <div class="bg-bgself-light p-4 hidden">
+                <div class="bg-bgself-light rounded-xl p-4 hidden">
                   <select id="member_status" class="form-select mb-3">
                     <option value="85%" selected>85 折</option>
                     <option value="88%">88 折</option>
@@ -869,7 +861,7 @@ const handleModalClose = () => {
                     >生日優惠</label
                   >
                 </div>
-                <div class="bg-bgself-light p-4 hidden">
+                <div class="bg-bgself-light rounded-xl p-4 hidden">
                   <select id="birth_status" class="form-select mb-3">
                     <option value="85%" selected>85 折</option>
                     <option value="88%">88 折</option>
@@ -887,9 +879,7 @@ const handleModalClose = () => {
               </li>
             </ul>
             <!-- send_btn -->
-            <div class="flex">
-              <button type="submit" class="w-full ml-1 btn btn-dark">確認</button>
-            </div>
+            <button type="submit" class="w-full btn btn-dark">確認</button>
           </form>
         </div>
       </div>
@@ -898,6 +888,6 @@ const handleModalClose = () => {
 </template>
 <style scoped>
 .tabbar-active {
-  @apply text-primary-light bg-white;
+  @apply bg-bgself-light;
 }
 </style>

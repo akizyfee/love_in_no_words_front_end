@@ -29,12 +29,12 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <section class="ml-[315px]">
+  <section class="ml-[315px] bg-white">
     <!-- title -->
-    <nav class="bg-white border-b-2 border-textself p-4">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">訂單資訊</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- menu -->
       <div class="flex justify-between items-center mb-6">
         <ul class="flex text-xl font-medium">
@@ -295,11 +295,11 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
   </section>
 </template>
 <style scoped>
-.tabbar-active {
-  @apply text-primary-light bg-white;
-}
-
 table {
   border-spacing: 0;
+}
+
+.tabbar-active {
+  @apply bg-bgself-light;
 }
 </style>

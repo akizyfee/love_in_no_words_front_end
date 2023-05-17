@@ -114,11 +114,11 @@ const handleModalClose = () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <div class="ml-[315px]">
-    <nav class="bg-white border-b-2 border-textself p-6">
+  <div class="ml-[315px] bg-white">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">座位管理</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <div class="flex justify-end mb-6">
         <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
           編輯桌號
@@ -127,7 +127,7 @@ const handleModalClose = () => {
       <!-- table -->
       <ul class="grid grid-cols-12 gap-4">
         <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
+          class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-xl shadow"
           v-for="seat in seatList"
           :key="seat._id"
         >
@@ -209,10 +209,10 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg p-3">
-          <form v-if="isCreate === 'create'" class="space-y-6" action="#">
+          <form v-if="isCreate === 'create'" class="space-y-3" action="#">
             <div>
               <label for="form_seatNumber" class="block mb-2 font-medium"
-                >桌號 (點擊紅色按鈕，即刻刪除該桌號資料)
+                >桌號 (點擊黃色按鈕，即刻刪除該桌號資料)
               </label>
               <input
                 type="number"
@@ -224,10 +224,10 @@ const handleModalClose = () => {
                 required
               />
               <p class="text-sm text-primary-light mt-2">{{ errors.tableName }}</p>
-              <div class="d-flex flex-wrap mt-3">
+              <div class="flex flex-wrap mt-3">
                 <button
                   type="submit"
-                  class="btn btn-primary font-medium mr-2 px-3 py-1"
+                  class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
                   v-for="seat in seatList"
                   :key="seat._id"
                   @click.prevent="delSeat(seat.tableNo)"
@@ -237,14 +237,12 @@ const handleModalClose = () => {
               </div>
             </div>
             <!-- send_btn -->
-            <div class="flex">
-              <button type="submit" class="w-full ml-1 btn btn-dark" @click.prevent="postSeat">
-                確定新增
-              </button>
-            </div>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postSeat">
+              確定新增
+            </button>
           </form>
-          <form v-else-if="isCreate === 'update'" class="space-y-6" action="#">
-            <section class="flex justify-between items-center bg-bgself-light p-3 mb-3">
+          <form v-else-if="isCreate === 'update'" class="space-y-3" action="#">
+            <section class="flex justify-between items-center bg-bgself-light rounded-xl p-3 mb-3">
               <p class="font-medium">
                 桌號
                 <span class="text-white bg-primary-light rounded py-1 px-2">{{
@@ -279,19 +277,16 @@ const handleModalClose = () => {
               </select>
             </div>
             <!-- send_btn -->
-            <div class="flex">
-              <button
-                type="submit"
-                class="w-full ml-1 btn btn-dark"
-                @click.prevent="patchSeat(seatForm.tableNo)"
-              >
-                確認修改
-              </button>
-            </div>
+            <button
+              type="submit"
+              class="w-full btn btn-dark"
+              @click.prevent="patchSeat(seatForm.tableNo)"
+            >
+              確認修改
+            </button>
           </form>
         </div>
       </div>
     </section>
   </Modal>
 </template>
-<style scoped></style>

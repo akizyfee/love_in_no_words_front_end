@@ -214,12 +214,12 @@ const handleModalClose = () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <section class="ml-[315px]">
+  <section class="ml-[315px] bg-white">
     <!-- title -->
-    <nav class="bg-white border-b-2 border-textself p-6">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">座位資訊</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- select -->
       <ul class="grid grid-cols-12 gap-4 items-center mb-6">
         <li class="col-span-3">
@@ -370,7 +370,7 @@ const handleModalClose = () => {
         </div>
         <!-- Modal body -->
         <div class="w-full rounded-lg p-3" v-if="isCreate === 'create'">
-          <div class="flex justify-between items-center bg-bgself-light p-3 mb-3">
+          <div class="flex justify-between items-center bg-bgself-light rounded-xl p-3 mb-3">
             <p class="font-medium">
               桌號
               <span class="text-white bg-primary-light rounded py-1 px-2">{{
@@ -382,7 +382,7 @@ const handleModalClose = () => {
               <span class="text-white bg-textself rounded py-1 px-2">{{ seatForm.seats }}</span>
             </p>
           </div>
-          <form class="space-y-6" action="#">
+          <form class="space-y-3" action="#">
             <div>
               <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
               <select
@@ -421,7 +421,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
-              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <label for="form_tel" class="block mb-2 font-medium">電話</label>
               <input
                 type="tel"
                 name="phone"
@@ -434,15 +434,13 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.phone }}</p>
             </div>
             <!-- send_btn -->
-            <div class="flex">
-              <button type="submit" class="w-full btn btn-dark" @click.prevent="postReservation">
-                新增訂位
-              </button>
-            </div>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postReservation">
+              確定新增
+            </button>
           </form>
         </div>
         <div class="w-full rounded-lg p-3" v-else-if="isCreate === 'update'">
-          <div class="flex justify-between items-center bg-bgself-light p-3 mb-3">
+          <div class="flex justify-between items-center bg-bgself-light rounded-xl p-3 mb-3">
             <p class="font-medium">
               桌號
               <span class="text-white bg-primary-light rounded py-1 px-2">{{
@@ -454,7 +452,7 @@ const handleModalClose = () => {
               <span class="text-white bg-textself rounded py-1 px-2">{{ seatForm.seats }}</span>
             </p>
           </div>
-          <form class="space-y-6" action="#">
+          <form class="space-y-3" action="#">
             <div>
               <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
               <select
@@ -493,7 +491,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.name }}</p>
             </div>
             <div>
-              <label for="form_tel" class="block mb-2 font-medium">手機號碼</label>
+              <label for="form_tel" class="block mb-2 font-medium">電話</label>
               <input
                 type="tel"
                 name="phone"
@@ -536,4 +534,3 @@ const handleModalClose = () => {
     </section>
   </Modal>
 </template>
-<style scoped></style>

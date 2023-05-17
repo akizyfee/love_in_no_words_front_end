@@ -53,7 +53,7 @@ const drawChart = () => {
       type: 'donut'
     },
     donut: {
-      title: '本月各產品銷量',
+      title: '本月產品銷量',
       label: {
         format: function (value, ratio, id) {
           return value
@@ -152,27 +152,27 @@ const fetchSearchAdminOrders = catchError(async () => {
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
     <SiderBar />
   </aside>
-  <div class="ml-[315px]">
-    <nav class="bg-white border-b-2 border-textself p-6">
+  <div class="ml-[315px] bg-white">
+    <nav class="border-b-2 border-textself p-6">
       <h1 class="flex items-center text-[36px] font-bold">報表查詢</h1>
     </nav>
-    <main class="bg-secondary-light min-h-screen p-6">
+    <main class="min-h-screen p-6">
       <!-- imgReport -->
       <ul class="grid grid-cols-12 gap-5">
         <li
-          class="col-span-6 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
           <div id="chart1"></div>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
         <li
-          class="col-span-6 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
           <div id="chart2"></div>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
         <li
-          class="col-span-6 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
           <div id="chart3"></div>
           <button href="#" class="btn btn-dark py-2">寄信</button>
@@ -212,7 +212,7 @@ const fetchSearchAdminOrders = catchError(async () => {
         </div>
       </div>
       <!-- table -->
-      <section class="relative overflow-x-auto bg-bgself-light rounded-xl p-6 mb-6">
+      <section class="overflow-auto bg-bgself-light rounded-xl p-6 mb-6">
         <table class="w-full text-center">
           <thead class="text-xl font-medium text-secondary-light bg-textself">
             <tr class="border-b-2 border-black">
@@ -242,4 +242,3 @@ const fetchSearchAdminOrders = catchError(async () => {
     </main>
   </div>
 </template>
-<style scoped></style>
