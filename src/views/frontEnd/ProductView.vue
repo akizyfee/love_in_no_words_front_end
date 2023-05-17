@@ -134,7 +134,8 @@ const removeTempProduct = (item) => {
   const temp = {
     ...item
   }
-  const findSame = tempProduct.value.findIndex((item) => item._id !== temp._id)
+  const findSame = tempProduct.value.findIndex((item) => item._id === temp._id)
+  console.log(findSame)
   tempProduct.value.splice(findSame, 1)
   successAlert('刪除成功')
   handleModalClose()
@@ -153,7 +154,7 @@ const checkProductTotalPrice = ref({
   orderList: [],
   tableName: 0,
   totalPrice: 0,
-  totalTime: ''
+  totalTime: 0
 })
 
 const fetchCalculateTotalPrice = catchError(async () => {
@@ -412,7 +413,7 @@ const handleModalClose = () => {
           <div class="flex flex-col px-3 py-4">
             <p class="flex justify-between items-center font-medium">
               <span>製作時間</span>
-              <span>{{ checkProductTotalPrice.totalTime }} 分</span>
+              <span>{{ checkProductTotalPrice.totalTime  }} 分</span>
             </p>
             <p class="flex justify-between items-center font-medium">
               <span>&emsp;&emsp;餐點</span>
