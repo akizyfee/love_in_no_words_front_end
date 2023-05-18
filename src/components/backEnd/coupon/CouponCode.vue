@@ -1,7 +1,74 @@
 <script setup>
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
+import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon } from '@/apis/coupon'
+import { warningAlert, successAlert } from '@/plugins/toast'
+import { catchError } from '@/utils/catchError'
+import { useForm } from 'vee-validate'
+import { errorsCouponSchema } from '@/utils/formValidate'
+
 /**
+ * 取得優惠碼活動
+ **/
+const couponList = ref([])
+
+const getCoupon = catchError(async () => {
+  const { data } = await getAdminCoupon('cuponCode')
+  if (data.length === 0) {
+    warningAlert('尚未建立優惠碼活動')
+  }
+  couponList.value = data
+})
+
+onMounted(() => {
+  getCoupon()
+})
+
+/**
+ * VeeValidate 套件
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsCouponSchema
+})
+const couponForm = ref({
+  couponName: useFieldModel('couponName'),
+  couponCode: useFieldModel('couponCode'),
+  discount: useFieldModel('discount'),
+  isDisabled: false
+})
+const couponNoVal = ref('')
+
+/**
+ * 新增優惠碼活動
+ **/
+const postCoupon = catchError(async () => {
+  const { message } = await addAdminCoupon(couponForm.value)
+  handleModalClose()
+  successAlert(message)
+  getCoupon()
+})
+
+/**
+ * 修改優惠碼活動
+ **/
+const patchCoupon = catchError(async () => {
+  const { message } = await editAdminCoupon(couponNoVal.value, couponForm.value)
+  handleModalClose()
+  successAlert(message)
+  getCoupon()
+})
+
+/**
+ * 刪除優惠碼活動
+ **/
+const delCoupon = catchError(async () => {
+  const { message } = await deleteAdminCoupon(couponNoVal.value)
+  handleModalClose()
+  successAlert(message)
+  getCoupon()
+})
+
+/*
  * modal
  * */
 const isCreate = ref(false)
@@ -14,6 +81,19 @@ const handleModalOpen = (checkIsNew, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'update') {
+      const { couponNo, couponName, couponCode, discount, isDisabled } = item
+      couponForm.value.couponName = couponName
+      couponForm.value.couponCode = couponCode
+      couponForm.value.discount = discount
+      couponForm.value.isDisabled = isDisabled
+      couponNoVal.value = couponNo
+    }
+    if (isCreate.value === 'delete') {
+      const { couponNo, couponName } = item
+      couponForm.value.couponName = couponName
+      couponNoVal.value = couponNo
+    }
   })
 }
 const handleModalClose = () => {
@@ -22,6 +102,12 @@ const handleModalClose = () => {
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      couponForm.value.couponName = ''
+      couponForm.value.couponCode = ''
+      couponForm.value.discount = 0
     }
   })
 }
@@ -29,7 +115,7 @@ const handleModalClose = () => {
 <template>
   <div class="flex justify-end my-6">
     <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
-      新增優惠活動
+      新增優惠碼活動
     </button>
   </div>
   <!-- table -->
@@ -45,20 +131,20 @@ const handleModalClose = () => {
         </tr>
       </thead>
       <tbody>
-        <tr class="border-b-2 border-textself">
-          <td class="py-3">85折</td>
-          <td class="py-3">15%off</td>
-          <td class="py-3">15%</td>
-          <td class="py-3">停用</td>
+        <tr class="border-b-2 border-textself" v-for="coupon in couponList" :key="coupon._id">
+          <td class="py-3">{{ coupon.couponName }}</td>
+          <td class="py-3">{{ coupon.couponCode }}</td>
+          <td class="py-3">{{ coupon.discount }}%</td>
+          <td class="py-3">{{ coupon.isDisabled ? '已停用' : '已啟用' }}</td>
           <td class="flex justify-end">
             <button
-              @click="handleModalOpen('update')"
+              @click="handleModalOpen('update', coupon)"
               class="btn btn-outline-dark w-auto mx-1 my-2"
             >
               修改
             </button>
             <button
-              @click="handleModalOpen('delete')"
+              @click="handleModalOpen('delete', coupon)"
               class="btn btn-outline-dark w-auto mx-1 my-2"
             >
               刪除
@@ -103,64 +189,124 @@ const handleModalClose = () => {
           <form v-if="isCreate === 'create'" class="space-y-3" action="#">
             <!-- name -->
             <div>
-              <label for="form_couponName" class="block mb-2 font-medium">優惠名稱 </label>
-              <input type="text" id="form_couponName" class="form-input" />
+              <label for="form_couponName" class="block mb-2 font-medium">優惠名稱</label>
+              <input
+                type="text"
+                name="couponName"
+                id="form_couponName"
+                class="form-input"
+                placeholder="請輸入優惠名稱"
+                v-model.trim="couponForm.couponName"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.couponName }}</p>
             </div>
             <!-- couponCode -->
             <div>
-              <label for="form_couponCode" class="block mb-2 font-medium">優惠代碼 </label>
-              <input type="text" id="form_couponCode" class="form-input" />
+              <label for="form_couponCode" class="block mb-2 font-medium">優惠代碼</label>
+              <input
+                type="text"
+                name="couponCode"
+                id="form_couponCode"
+                class="form-input"
+                placeholder="請輸入優惠代碼"
+                v-model.trim="couponForm.couponCode"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.couponCode }}</p>
             </div>
             <!-- couponDiscount -->
             <div>
-              <label for="form_couponDiscount " class="block mb-2 font-medium">折扣比例 </label>
-              <input type="text" id="form_couponDiscount" class="form-input" />
+              <label for="form_couponDiscount " class="block mb-2 font-medium">折扣比例</label>
+              <input
+                type="number"
+                name="discount"
+                id="form_couponDiscount"
+                class="form-input"
+                placeholder="請輸入折扣比例"
+                v-model.number="couponForm.discount"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.discount }}</p>
             </div>
             <!-- status -->
             <div>
               <label for="form_couponStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_couponStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select id="form_couponStatus" class="form-select" v-model="couponForm.isDisabled">
+                <option :value="true" selected>停用</option>
+                <option :value="false">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確定新增</button>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postCoupon">
+              確定新增
+            </button>
           </form>
           <form v-else-if="isCreate === 'update'" class="space-y-3" action="#">
             <!-- name -->
             <div>
               <label for="form_couponName" class="block mb-2 font-medium">優惠名稱 </label>
-              <input type="text" id="form_couponName" class="form-input" />
+              <input
+                type="text"
+                name="couponName"
+                id="form_couponName"
+                class="form-input"
+                placeholder="請輸入優惠名稱"
+                v-model.trim="couponForm.couponName"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.couponName }}</p>
             </div>
             <!-- couponCode -->
             <div>
               <label for="form_couponCode" class="block mb-2 font-medium">優惠代碼 </label>
-              <input type="text" id="form_couponCode" class="form-input" />
+              <input
+                type="text"
+                name="couponCode"
+                id="form_couponCode"
+                class="form-input"
+                placeholder="請輸入優惠代碼"
+                v-model.trim="couponForm.couponCode"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.couponCode }}</p>
             </div>
             <!-- couponDiscount -->
             <div>
               <label for="form_couponDiscount " class="block mb-2 font-medium">折扣比例 </label>
-              <input type="text" id="form_couponDiscount" class="form-input" />
+              <input
+                type="number"
+                name="discount"
+                id="form_couponDiscount"
+                class="form-input"
+                placeholder="請輸入折扣比例"
+                v-model.number="couponForm.discount"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.discount }}</p>
             </div>
             <!-- status -->
             <div>
               <label for="form_couponStatus" class="block mb-2 font-medium">狀態</label>
-              <select id="form_couponStatus" class="form-select">
-                <option value="停用" selected>停用</option>
-                <option value="啟用">啟用</option>
+              <select id="form_couponStatus" class="form-select" v-model="couponForm.isDisabled">
+                <option :value="true" selected>停用</option>
+                <option :value="false">啟用</option>
               </select>
             </div>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確定修改</button>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="patchCoupon">
+              確定修改
+            </button>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">
             <h3 class="text-xl font-medium text-neutral-400">
               請確認是否刪除
-              <span class="text-primary-light">優惠活動</span> ?
+              <span class="text-primary-light">{{ couponForm.couponName }}</span> 優惠活動?
             </h3>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確認刪除</button>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="delCoupon">
+              確認刪除
+            </button>
           </form>
         </div>
       </div>

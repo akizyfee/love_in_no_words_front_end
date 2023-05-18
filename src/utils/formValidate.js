@@ -94,3 +94,25 @@ export const errorProductSchema = {
     return true
   }
 }
+
+export const errorsCouponSchema = {
+  couponName(value) {
+    // 定義驗證後的回傳內容
+    if (!value) {
+      return '優惠名稱必填'
+    }
+    return true
+  },
+  couponCode(value) {
+    if (!value) {
+      return '優惠代碼必填'
+    }
+    return true
+  },
+  discount(value) {
+    if (!value) {
+      return '折扣比例必填'
+    }
+    return true
+  }
+}
