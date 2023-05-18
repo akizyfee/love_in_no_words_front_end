@@ -272,8 +272,8 @@ const handleModalClose = () => {
             <div>
               <label for="form_seatStatus" class="block mb-2 font-medium">狀態</label>
               <select id="form_seatStatus" class="form-select" v-model="seatForm.isDisabled">
-                <option :value="false" selected>停用</option>
-                <option :value="true">啟用</option>
+                <option :value="true" selected>停用</option>
+                <option :value="false">啟用</option>
               </select>
             </div>
             <!-- send_btn -->

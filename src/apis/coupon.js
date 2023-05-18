@@ -14,10 +14,9 @@ export const getAdminCoupon = (activity) => axios.get(`/v1/coupons/admin?activit
 
 /**
  * O-4-3 新增優惠活動
- * @param {string} 活動種類
  * @param {object} payload 優惠活動資料
  */
-export const addAdminCoupon = (activity, payload) => axios.post(`/v1/coupons/admin?activity=${activity}`, payload)
+export const addAdminCoupon = (payload) => axios.post('/v1/coupons/admin', payload)
 
 /**
  * O-4-4 修改優惠活動
@@ -28,7 +27,6 @@ export const editAdminCoupon = (couponNo, payload) => axios.patch(`/v1/coupons/a
 
 /**
  * O-4-5 刪除優惠活動
- * @param {string} 活動種類
  * @param {string} 優惠碼順序
  */
-export const deleteAdminCoupon = (activity, couponNo) => axios.delete(`/v1/coupons/admin?activity=${activity}&couponNo=${couponNo}`)
+export const deleteAdminCoupon = (couponNo) => axios.delete(`/v1/coupons/admin/${couponNo}`)
