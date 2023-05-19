@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { catchError } from '@/utils/catchError'
 import { getAdminDessertType, searchType } from '@/apis/product'
 import { searchMember, addMember } from '@/apis/user'
+import { getCoupon } from '@/apis/coupon'
 import { calculateTotalPrice, addOrder } from '@/apis/order'
 import { warningAlert, successAlert, errorAlert } from '@/plugins/toast'
 import { useForm } from 'vee-validate'
@@ -73,6 +74,22 @@ const postMember = catchError(async () => {
   const { message } = await addMember(memberForm)
   handleModalClose()
   successAlert(message)
+})
+
+/**
+ * 取得優惠碼活動
+ **/
+const couponList = ref([])
+
+const getCouponCode = catchError(async () => {
+  const { data } = await getCoupon('cuponCode')
+  couponList.value = data.filter(function (item) {
+    return !item.isDisabled
+  })
+})
+
+onMounted(() => {
+  getCouponCode()
 })
 
 /**
@@ -150,6 +167,9 @@ const orderProductTotalPrice = ref({
 })
 
 const checkProductTotalPrice = ref({
+  couponName: '',
+  couponNo: '',
+  discount: 0,
   orderList: [],
   tableName: 0,
   totalPrice: 0,
@@ -424,7 +444,7 @@ const handleModalClose = () => {
             </p>
             <p class="flex justify-between items-center font-medium mt-4">
               <span>折扣金額</span>
-              <span class="text-primary">0</span>
+              <span class="text-primary">{{ checkProductTotalPrice.discount }}</span>
             </p>
             <p class="flex justify-between items-center font-medium mb-7">
               <span class="text-xl ps-1">&emsp;合計</span>
@@ -701,7 +721,6 @@ const handleModalClose = () => {
                   checked
                   id="form_readmember_radio"
                   type="radio"
-                  value=""
                   name="form-radio"
                   class="form-radio"
                 />
@@ -751,135 +770,33 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'createActivity'" class="space-y-3 p-3" action="#">
+          <form v-else-if="isCreate === 'createActivity'" class="overflow-y-auto h-96 space-y-3 p-3" action="#">
             <ul class="flex flex-col">
-              <li class="mb-3">
+              <li class="mb-3" v-for="coupon in couponList" :key="coupon._id">
                 <div class="flex items-center mb-3">
                   <input
-                    checked
                     id="form_checkIn_radio"
                     type="radio"
-                    value=""
+                    :value="coupon.couponNo"
+                    v-model="orderProductTotalPrice.couponNo"
                     name="form-radio"
                     class="form-radio"
                   />
-                  <label for="form_checkIn_radio" class="ml-2 text-xl font-medium">打卡優惠</label>
+                  <label for="form_checkIn_radio" class="ml-2 text-xl font-medium">{{
+                    coupon.couponName
+                  }}</label>
                 </div>
                 <div class="bg-bgself-light rounded-xl p-4">
-                  <select id="checkIn_status" class="form-select mb-3">
-                    <option value="85%" selected>85 折</option>
-                    <option value="88%">88 折</option>
-                    <option value="90%">90 折</option>
-                  </select>
-                  <input
-                    type="text"
-                    id="form_checkIn"
-                    class="form-input"
-                    placeholder="優惠代碼"
-                    required
-                  />
-                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
-                </div>
-              </li>
-              <li class="mb-3">
-                <div class="flex items-center mb-3">
-                  <input
-                    disabled
-                    id="form_newMember_radio"
-                    type="radio"
-                    value=""
-                    name="form-radio"
-                    class="form-radio"
-                  />
-                  <label
-                    for="form_newMember_radio"
-                    class="ml-2 text-xl font-medium text-neutralself-100"
-                    >新會員優惠</label
-                  >
-                </div>
-                <div class="bg-bgself-light rounded-xl p-4 hidden">
-                  <select id="newMember_status" class="form-select mb-3">
-                    <option value="85%" selected>85 折</option>
-                    <option value="88%">88 折</option>
-                    <option value="90%">90 折</option>
-                  </select>
-                  <input
-                    type="text"
-                    id="form_newMember"
-                    class="form-input"
-                    placeholder="優惠代碼"
-                    required
-                  />
-                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
-                </div>
-              </li>
-              <li class="mb-3">
-                <div class="flex items-center mb-3">
-                  <input
-                    disabled
-                    id="form_member_radio"
-                    type="radio"
-                    value=""
-                    name="form-radio"
-                    class="form-radio"
-                  />
-                  <label
-                    for="form_member_radio"
-                    class="ml-2 text-xl font-medium text-neutralself-100"
-                    >熟客優惠</label
-                  >
-                </div>
-                <div class="bg-bgself-light rounded-xl p-4 hidden">
-                  <select id="member_status" class="form-select mb-3">
-                    <option value="85%" selected>85 折</option>
-                    <option value="88%">88 折</option>
-                    <option value="90%">90 折</option>
-                  </select>
-                  <input
-                    type="text"
-                    id="form_member"
-                    class="form-input"
-                    placeholder="優惠代碼"
-                    required
-                  />
-                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
-                </div>
-              </li>
-              <li class="mb-3">
-                <div class="flex items-center mb-3">
-                  <input
-                    disabled
-                    id="form_birth_radio"
-                    type="radio"
-                    value=""
-                    name="form-radio"
-                    class="form-radio"
-                  />
-                  <label
-                    for="form_birth_radio"
-                    class="ml-2 text-xl font-medium text-neutralself-100"
-                    >生日優惠</label
-                  >
-                </div>
-                <div class="bg-bgself-light rounded-xl p-4 hidden">
-                  <select id="birth_status" class="form-select mb-3">
-                    <option value="85%" selected>85 折</option>
-                    <option value="88%">88 折</option>
-                    <option value="90%">90 折</option>
-                  </select>
-                  <input
-                    type="text"
-                    id="form_birth"
-                    class="form-input"
-                    placeholder="優惠代碼"
-                    required
-                  />
-                  <p class="text-sm text-primary-light mt-2">Twitter username is required</p>
+                  <h3 class="mb-2 font-medium">優惠內容</h3>
+                  <p class="text-sm mt-2">
+                    優惠代碼：<span class="text-secondary-dark">{{ coupon.couponCode }}</span>
+                  </p>
+                  <p class="text-sm mt-2">
+                    折扣比例：<span class="text-primary-dark">{{ coupon.discount }}%</span>
+                  </p>
                 </div>
               </li>
             </ul>
-            <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確認</button>
           </form>
         </div>
       </div>
