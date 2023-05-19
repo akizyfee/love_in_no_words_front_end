@@ -65,7 +65,7 @@ const signOut = catchError(async () => {
         </ul>
       </section>
       <section class="flex items-center">
-        <button type="button" class="w-full btn btn-outline-dark m-6" @click="signOut">登出</button>
+        <button type="button" class="w-full btn btn-bgself m-6" @click="signOut">登出</button>
       </section>
     </div>
   </div>
