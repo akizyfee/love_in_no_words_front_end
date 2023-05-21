@@ -13,8 +13,7 @@ export const searchType = (productsType) => axios.get(`/v1/products?productsType
  * @param {Number} 價格區間上限
  * @param {String} 安全危險無庫存狀態
  */
-export const searchAdminProductAll = () => axios.get('/v1/products/admin')
-export const searchAdminProduct = (productsType, priceLowerLimit, priceUpperLimit, amountStatus) => axios.get(`/v1/products/admin?productsType=${productsType}&priceLowerLimit=${priceLowerLimit}&priceUpperLimit=${priceUpperLimit}&amountStatus=${amountStatus}`)
+export const searchAdminProduct = (productsType = '', priceLowerLimit = '', priceUpperLimit = '', amountStatus = '') => axios.get(`/v1/products/admin?productsType=${productsType}&priceLowerLimit=${priceLowerLimit}&priceUpperLimit=${priceUpperLimit}&amountStatus=${amountStatus}`)
 
 /**
  * O-3-2 上傳商品圖片
