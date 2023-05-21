@@ -10,100 +10,28 @@ import {
 } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
-import c3 from 'c3'
+import useDountChart from '@/utils/useDountChar'
+import useBarChart from '@/utils/useEcharBar'
 
 /**
- * C3繪製
- */
-const drawChart = () => {
-  c3.generate({
-    bindto: '#chart1',
-    data: {
-      columns: c3RevenueReport,
-      type: 'donut'
-    },
-    donut: {
-      title: '本月營收',
-      label: {
-        format: function (value, ratio, id) {
-          return value
-        }
-      }
-    }
-  })
-  c3.generate({
-    bindto: '#chart2',
-    data: {
-      columns: c3OerderQtyReport,
-      type: 'donut'
-    },
-    donut: {
-      title: '本月訂單量',
-      label: {
-        format: function (value, ratio, id) {
-          return value
-        }
-      }
-    }
-  })
-  c3.generate({
-    bindto: '#chart3',
-    data: {
-      columns: c3SellQtyReport,
-      type: 'donut'
-    },
-    donut: {
-      title: '本月產品銷量',
-      label: {
-        format: function (value, ratio, id) {
-          return value
-        }
-      }
-    }
-  })
-}
-
-/**
- * 取得營收資料
+ * 取得每月營收和訂單量
  */
 const revenueYear = ref(nowYear)
-const c3RevenueReport = []
-const fetchGetAdminRevenue = catchError(async () => {
-  const { data } = await getAdminRevenue(revenueYear)
-  const filterReport = data.map((item) => {
-    const month = item.month
-    const total = item.monthTotal
-    return [`mouth:${month}`, total]
-  })
-  c3RevenueReport.push(...filterReport)
-  drawChart()
+const BarcharDom = ref()
+
+const fetchGetAdminRevenueAndOrders = catchError(async () => {
+  const dataCash = await getAdminRevenue(revenueYear)
+  const dataOrder = await getAdminOrdersQty(revenueYear)
+  const setOption = useBarChart(BarcharDom.value)
+  setOption(dataCash.data, dataOrder.data)
 })
 
 onMounted(() => {
-  fetchGetAdminRevenue()
+  fetchGetAdminRevenueAndOrders()
 })
 
 /**
- * 取得訂單數量資料
- */
-const c3OerderQtyReport = []
-const fetchGetAdminOrdersQty = catchError(async () => {
-  const { data } = await getAdminOrdersQty()
-  const filterReport = data.map((item) => {
-    const month = item.month
-    const orderNumber = item.orderNumber
-    return [`mouth:${month}`, orderNumber]
-  })
-  c3OerderQtyReport.push(...filterReport)
-  drawChart()
-})
-
-onMounted(() => {
-  fetchGetAdminOrdersQty()
-})
-
-/**
- * 取得賣出數量資料
+ * 取得每月賣出數量資料
  */
 const sellQtyYear = ref(nowYear)
 const c3SellQtyReport = []
@@ -115,7 +43,7 @@ const fetchGetAdminSellQty = catchError(async () => {
     return [`${productName}`, amount]
   })
   c3SellQtyReport.push(...filterReport)
-  drawChart()
+  useDountChart(c3SellQtyReport)
 })
 
 onMounted(() => {
@@ -160,24 +88,21 @@ const fetchSearchAdminOrders = catchError(async () => {
       <!-- imgReport -->
       <ul class="grid grid-cols-12 gap-5">
         <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-12 p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
-          <div id="chart1"></div>
+          <p class="flex items-center text-[36px] font-bold">本年度每月營收和訂單量</p>
+          <div ref="BarcharDom" class="w-full h-[500px] mt-10"></div>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
         <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
+          class="col-span-12 p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
-          <div id="chart2"></div>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
-        </li>
-        <li
-          class="col-span-12 lg:col-span-6 xl:col-span-4 max-w-lg p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
-        >
-          <div id="chart3"></div>
+          <p class="flex items-center text-[36px] font-bold">本年度各產品銷量占比</p>
+          <div id="dountChar" class="w-full h-[500px] mt-10"></div>
           <button href="#" class="btn btn-dark py-2">寄信</button>
         </li>
       </ul>
+
       <!-- select -->
       <div class="flex mt-5 mb-3">
         <div class="flex items-end gap-4 mb-3">

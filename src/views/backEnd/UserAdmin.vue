@@ -3,23 +3,16 @@ import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, reactive } from 'vue'
 import { useForm } from 'vee-validate'
-import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
-import { catchError } from '@/utils/catchError'
-import { successAlert } from '@/plugins/toast'
 import { errorsFormSchema } from '@/utils/formValidate'
+
+import { useUserAdminStore } from '@/stores/userAdmin'
+const userAdminStore = useUserAdminStore()
 
 /**
  * 設置使用者列表
  */
-const userList = ref([])
-
-const fetchUser = catchError(async () => {
-  const currentPage = 1
-  const { data } = await getAdminUser(currentPage)
-  userList.value = data.usersList
-})
 onMounted(() => {
-  fetchUser()
+  userAdminStore.fetchUser()
 })
 
 /**
@@ -28,6 +21,7 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
+
 const initUserProfile = reactive({
   name: '',
   phone: '',
@@ -48,32 +42,27 @@ const userProfile = reactive({
 /**
  * 新增使用者
  */
-const fetchAddUser = catchError(async () => {
-  const { message } = await addAdminUser(userProfile)
-  successAlert(message)
+
+const fetchAddUser = () => {
+  userAdminStore.fetchAddUser(userProfile)
   handleModalClose()
-  fetchUser()
-})
+}
 
 /**
  * 修改使用者
  */
-const fetcheditUser = catchError(async () => {
-  const { message } = await editAdminUser(userProfile._id, userProfile)
+const fetcheditUser = () => {
+  userAdminStore.fetcheditUser(userProfile)
   handleModalClose()
-  successAlert(message)
-  fetchUser()
-})
+}
 
 /**
  * 刪除使用者
  */
-const fetchDeleteUser = catchError(async () => {
-  const { message } = await deleteAdminUser(userProfile._id, userProfile.titleNo)
+const fetchDeleteUser = () => {
+  userAdminStore.fetchDeleteUser(userProfile)
   handleModalClose()
-  successAlert(message)
-  fetchUser()
-})
+}
 
 /**
  * modal
@@ -138,7 +127,11 @@ const handleModalClose = () => {
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b-2 border-black" v-for="users in userList" :key="users._id">
+            <tr
+              class="border-b-2 border-black"
+              v-for="users in userAdminStore.userList"
+              :key="users._id"
+            >
               <td class="py-3">{{ users.name }}</td>
               <td class="py-3">{{ users.phone }}</td>
               <td class="py-3">{{ users.title }}</td>
@@ -242,9 +235,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
             </div>
             <div v-if="userProfile.titleNo !== 4">
-              <label for="password" class="block mb-2 font-medium"
-                >密碼</label
-              >
+              <label for="password" class="block mb-2 font-medium">密碼</label>
               <input
                 type="password"
                 name="password"
@@ -315,9 +306,7 @@ const handleModalClose = () => {
               <p class="text-sm text-primary-light mt-2">{{ errors.email }}</p>
             </div>
             <div v-if="userProfile.titleNo !== 4">
-              <label for="password" class="block mb-2 font-medium"
-                >密碼</label
-              >
+              <label for="password" class="block mb-2 font-medium">密碼</label>
               <input
                 type="password"
                 name="password"
@@ -348,11 +337,7 @@ const handleModalClose = () => {
               資料?
             </p>
             <!-- send_btn -->
-            <button
-              @click.prevent="fetchDeleteUser"
-              type="submit"
-              class="w-full btn btn-dark"
-            >
+            <button @click.prevent="fetchDeleteUser" type="submit" class="w-full btn btn-dark">
               確認刪除
             </button>
           </form>

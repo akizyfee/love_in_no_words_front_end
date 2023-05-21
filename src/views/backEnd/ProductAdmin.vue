@@ -9,7 +9,6 @@ import { useForm } from 'vee-validate'
 import {
   uploadAdminPhotos,
   addAdminProduct,
-  searchAdminProductAll,
   addAdminDessertType,
   getAdminDessertType,
   deleteAdminDessertType,
@@ -112,8 +111,9 @@ const productCard = reactive({
  */
 const productList = ref([])
 const fetchAllProduct = catchError(async () => {
-  const { data } = await searchAdminProductAll()
+  const { data } = await searchAdminProduct()
   productList.value = data
+  console.log(data)
 })
 
 onMounted(() => {
