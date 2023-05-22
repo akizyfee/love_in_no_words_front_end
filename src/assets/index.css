@@ -24,13 +24,13 @@
 	}
 
 	.btn-dark {
-		@apply text-white bg-textself focus:ring-1 focus:ring-textself focus:text-textself focus:bg-white border-2 border-textself shadow-self;
+		@apply text-white bg-textself focus:ring-1 focus:ring-textself focus:bg-neutralself-200 border-2 border-textself shadow-self;
 	}
 	.btn-dark:hover {
-		@apply text-textself bg-white
+		@apply bg-neutralself-300
 	}
 	.btn-dark.disabled {
-		@apply text-neutralself-100 bg-neutralself-50 border-neutralself-100
+		@apply text-neutralself-100 bg-neutralself-50
 	}
 
 	.btn-primary {
