@@ -44,7 +44,7 @@
 	}
 
 	.btn-secondary {
-	  @apply text-textself bg-secondary-light focus:ring-1 focus:ring-textself focus:bg-white border-2 border-textself shadow-self;
+	  @apply text-textself bg-secondary-light focus:ring-1 focus:ring-textself focus:bg-secondary border-2 border-textself shadow-self;
 	}
 	.btn-secondary:hover {
 		@apply bg-white

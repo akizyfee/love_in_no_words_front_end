@@ -3,19 +3,12 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  noReservation,
-  searchReservation,
-  addReservation,
-  editReservation,
-  deleteReservation
-} from '@/apis/seat'
-import { warningAlert, successAlert } from '@/plugins/toast'
-import { catchError } from '@/utils/catchError'
-import { dayWeek } from '@/plugins/day'
+import { useSeatStore } from '@/stores/frontEnd/seatView'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
+import { dayWeek } from '@/plugins/day'
 const router = useRouter()
+const seatStore = useSeatStore()
 
 const statusList = ref(['', '未使用', '使用中', '已預約'])
 const dateList = ref(dayWeek())
@@ -23,57 +16,36 @@ const timeList = ref(['上午', '下午'])
 const searchForm = reactive({
   status: statusList.value[0],
   reservationDate: dateList.value[0],
-  reservationTime: timeList.value[0]
-})
-
-/**
- * 入座功能
- **/
-const haveASeat = catchError(async (tableNo) => {
-  const { reservationDate, reservationTime } = searchForm
-  const { message } = await noReservation({
-    tableNo,
-    reservationDate,
-    reservationTime
-  })
-  successAlert(message === '成功' ? '修改入座成功' : message)
-  searchSeats()
+  reservationTime: timeList.value[0],
+  tableNo: 0
 })
 
 /**
  * 查詢座位功能
  **/
-const seatList = ref([])
-
-const searchSeats = catchError(async () => {
-  const { data } = await searchReservation(
-    searchForm.status,
-    searchForm.reservationDate,
-    searchForm.reservationTime
-  )
-  const { tables } = data
-  if (tables.length === 0) {
-    warningAlert('沒有符合的座位資料')
-  }
-  seatList.value = tables.sort(function (a, b) {
-    return a.tableName - b.tableName
-  })
-})
-
 onMounted(() => {
-  searchSeats()
+  seatStore.searchSeats(searchForm)
 })
 
 watch(
   [() => searchForm.status, () => searchForm.reservationDate, () => searchForm.reservationTime],
   () => {
-    searchSeats()
+    seatStore.searchSeats(searchForm)
   },
   {
     immediate: true,
     deep: true
   }
 )
+
+/**
+ * 入座功能
+ **/
+const haveASeat = async (tableNo) => {
+  searchForm.tableNo = tableNo
+  await seatStore.haveASeat(searchForm)
+  await seatStore.searchSeats(searchForm)
+}
 
 /**
  * VeeValidate 套件
@@ -109,58 +81,41 @@ const seatForm = reactive({
 /**
  * 新增訂位功能
  **/
-const postReservation = catchError(async () => {
-  const { tableNo, reservationDate, reservationTime, name, phone } = seatForm
-  const { message } = await addReservation({
-    tableNo,
-    reservationDate,
-    reservationTime,
-    name,
-    phone
-  })
+const postReservation = async() => {
+  await seatStore.postReservation(seatForm)
   handleModalClose()
-  successAlert(message === '成功' ? '新增成功' : message)
-  searchSeats()
-})
+  await seatStore.searchSeats(searchForm)
+}
 
 /**
  * 修改訂位功能
  **/
-const patchReservation = catchError(async () => {
-  const { status, reservationId, reservationDate, reservationTime, name, phone } = seatForm
-  const { message } = await editReservation(reservationId, {
-    status,
-    reservationDate,
-    reservationTime,
-    name,
-    phone
-  })
+const patchReservation = async () => {
+  await seatStore.patchReservation(seatForm)
   handleModalClose()
-  successAlert(message === '成功' ? '修改成功' : message)
-  searchSeats()
-})
+  await seatStore.searchSeats(searchForm)
+}
 
 /**
  * 取消訂位功能
  **/
-const delReservation = catchError(async (reservationId) => {
-  const { message } = await deleteReservation(reservationId)
+const delReservation = async () => {
+  await seatStore.delReservation(seatForm)
   handleModalClose()
-  successAlert(message)
-  searchSeats()
-})
+  await seatStore.searchSeats(searchForm)
+}
 
 /**
  * 跳轉至點餐頁面
  */
-const toPropduct = catchError(async (tableName) => {
+const toProduct = (tableName) => {
   router.push({
     path: '/product',
     query: {
       table: `${tableName}`
     }
   })
-})
+}
 
 /**
  * modal
@@ -181,7 +136,7 @@ const handleModalOpen = (checkIsCreate, item) => {
       seatForm.tableName = tableName
       seatForm.seats = seats
     }
-    if (isCreate.value === 'update') {
+    if (isCreate.value === 'update' || isCreate.value === 'delete') {
       const { tableNo, tableName, seats, status, reservation } = item
       seatForm.tableNo = tableNo
       seatForm.tableName = tableName
@@ -259,7 +214,7 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4">
         <li
           class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-lg shadow"
-          v-for="seat in seatList"
+          v-for="seat in seatStore.seatList"
           :key="seat._id"
         >
           <div class="flex justify-between items-center border-b-2 border-textself px-4">
@@ -325,7 +280,7 @@ const handleModalClose = () => {
                   修改
                 </button>
                 <button
-                  @click="toPropduct(seat.tableName)"
+                  @click="toProduct(seat.tableName)"
                   type="button"
                   class="btn btn-outline-dark mx-1"
                   :class="seat.status === '使用中' ? '' : 'hidden'"

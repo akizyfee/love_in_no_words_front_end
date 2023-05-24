@@ -113,7 +113,6 @@ const productList = ref([])
 const fetchAllProduct = catchError(async () => {
   const { data } = await searchAdminProduct()
   productList.value = data
-  console.log(data)
 })
 
 onMounted(() => {

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useForm } from 'vee-validate'
 import { loginApi } from '@/apis/user'
 import { setCookieToken } from '@/utils/cookie'
+import { setCookieTitleNo } from '@/utils/titleNo'
 import { catchError } from '@/utils/catchError'
 import { errorsFormSchema } from '@/utils/formValidate'
 const router = useRouter()
@@ -28,14 +29,17 @@ const signIn = catchError(async () => {
   switch (titleNo) {
     case 1:
       await setCookieToken(token)
+      await setCookieTitleNo(titleNo)
       router.push('/userAdmin')
       break
     case 2:
       await setCookieToken(token)
+      await setCookieTitleNo(titleNo)
       router.push('/seat')
       break
     case 3:
       await setCookieToken(token)
+      await setCookieTitleNo(titleNo)
       router.push('/chef')
       break
     default:
