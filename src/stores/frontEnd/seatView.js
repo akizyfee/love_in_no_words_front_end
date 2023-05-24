@@ -21,7 +21,8 @@ export const useSeatStore = defineStore('seatData', () => {
       reservationTime,
       tableNo
     })
-    successAlert(message === '成功' ? '修改入座成功' : message)
+    message === '成功' && successAlert('修改入座成功')
+    searchSeats(searchForm)
   })
 
   /**
@@ -46,7 +47,7 @@ export const useSeatStore = defineStore('seatData', () => {
   /**
    * 新增訂位功能
   **/
-  const postReservation = catchError(async (seatForm) => {
+  const postReservation = catchError(async (seatForm, searchForm) => {
     const { tableNo, reservationDate, reservationTime, name, phone } = seatForm
     const { message } = await addReservation({
       tableNo,
@@ -55,13 +56,14 @@ export const useSeatStore = defineStore('seatData', () => {
       name,
       phone
     })
-    successAlert(message === '成功' ? '新增成功' : message)
+    message === '成功' && successAlert('新增成功')
+    searchSeats(searchForm)
   })
 
   /**
    * 修改訂位功能
    **/
-  const patchReservation = catchError(async (seatForm) => {
+  const patchReservation = catchError(async (seatForm, searchForm) => {
     const { status, reservationId, reservationDate, reservationTime, name, phone } = seatForm
     const { message } = await editReservation(reservationId, {
       status,
@@ -70,16 +72,18 @@ export const useSeatStore = defineStore('seatData', () => {
       name,
       phone
     })
-    successAlert(message === '成功' ? '修改成功' : message)
+    message === '成功' && successAlert('修改成功')
+    searchSeats(searchForm)
   })
 
   /**
    * 取消訂位功能
    **/
-  const delReservation = catchError(async (seatForm) => {
+  const delReservation = catchError(async (seatForm, searchForm) => {
     const { reservationId } = seatForm
     const { message } = await deleteReservation(reservationId)
     successAlert(message)
+    searchSeats(searchForm)
   })
 
   return { seatList, haveASeat, searchSeats, postReservation, patchReservation, delReservation }
