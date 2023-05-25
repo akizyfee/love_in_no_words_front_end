@@ -41,10 +41,9 @@ watch(
 /**
  * 入座功能
  **/
-const haveASeat = async (tableNo) => {
+const haveASeat = (tableNo) => {
   searchForm.tableNo = tableNo
-  await seatStore.haveASeat(searchForm)
-  await seatStore.searchSeats(searchForm)
+  seatStore.haveASeat(searchForm)
 }
 
 /**
@@ -81,28 +80,25 @@ const seatForm = reactive({
 /**
  * 新增訂位功能
  **/
-const postReservation = async() => {
-  await seatStore.postReservation(seatForm)
+const postReservation = () => {
+  seatStore.postReservation(seatForm, searchForm)
   handleModalClose()
-  await seatStore.searchSeats(searchForm)
 }
 
 /**
  * 修改訂位功能
  **/
-const patchReservation = async () => {
-  await seatStore.patchReservation(seatForm)
+const patchReservation = () => {
+  seatStore.patchReservation(seatForm, searchForm)
   handleModalClose()
-  await seatStore.searchSeats(searchForm)
 }
 
 /**
  * 取消訂位功能
  **/
-const delReservation = async () => {
-  await seatStore.delReservation(seatForm)
+const delReservation = () => {
+  seatStore.delReservation(seatForm, searchForm)
   handleModalClose()
-  await seatStore.searchSeats(searchForm)
 }
 
 /**
