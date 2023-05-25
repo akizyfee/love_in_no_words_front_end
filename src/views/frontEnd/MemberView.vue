@@ -2,36 +2,29 @@
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, watch, reactive } from 'vue'
-import { searchMember, addMember, editMember, deleteMember } from '@/apis/user'
-import { warningAlert, successAlert } from '@/plugins/toast'
-import { catchError } from '@/utils/catchError'
+import { useMemberStore } from '@/stores/frontEnd/memberView'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
+
+const memberStore = useMemberStore()
+
+const searchForm = reactive({
+  phone: '',
+  page: 1
+})
 
 /**
  * 查詢會員功能
  **/
-const searchPhone = ref('')
-const searchPage = ref(1)
-const memberList = ref([])
-
-const getMembers = catchError(async () => {
-  const { data } = await searchMember(searchPhone.value, searchPage.value)
-  const { membersList } = data
-  if (membersList.length === 0) {
-    warningAlert('沒有符合的會員資料')
-  }
-  memberList.value = membersList
-})
 
 onMounted(() => {
-  getMembers()
+  memberStore.getMembers(searchForm.phone, searchForm.page)
 })
 
 watch(
-  () => searchPhone.value,
+  [() => searchForm.phone, () => searchForm.page],
   () => {
-    getMembers()
+    memberStore.getMembers(searchForm.phone, searchForm.page)
   },
   {
     immediate: true,
@@ -45,6 +38,7 @@ watch(
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
+
 const memberForm = reactive({
   _id: '',
   name: useFieldModel('name'),
@@ -54,32 +48,26 @@ const memberForm = reactive({
 /**
  * 新增會員功能
  **/
-const postMember = catchError(async () => {
-  const { message } = await addMember(memberForm)
+const postMember = () => {
+  memberStore.postMember(memberForm, searchForm)
   handleModalClose()
-  successAlert(message)
-  getMembers()
-})
+}
 
 /**
  * 修改會員功能
  **/
-const patchMember = catchError(async () => {
-  const { message } = await editMember(memberForm._id, memberForm)
+const patchMember = () => {
+  memberStore.patchMember(memberForm._id, memberForm, searchForm)
   handleModalClose()
-  successAlert(message)
-  getMembers()
-})
+}
 
 /**
  * 刪除會員功能
  **/
-const delMember = catchError(async () => {
-  const { message } = await deleteMember(memberForm._id)
+const delMember = () => {
+  memberStore.delMember(memberForm._id, searchForm)
   handleModalClose()
-  successAlert(message)
-  getMembers()
-})
+}
 
 /**
  * modal
@@ -112,8 +100,8 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
-      searchPhone.value = ''
-      searchPage.value = 1
+      searchForm.phone = ''
+      searchForm.page = 1
       memberForm.name = ''
       memberForm.phone = ''
     }
@@ -139,7 +127,7 @@ const handleModalClose = () => {
             id="searchPhone"
             class="block form-input p-3"
             placeholder="0912345678"
-            v-model="searchPhone"
+            v-model="searchForm.phone"
           />
         </div>
         <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
@@ -158,7 +146,11 @@ const handleModalClose = () => {
             </tr>
           </thead>
           <tbody>
-            <tr class="border-b-2 border-black" v-for="member in memberList" :key="member.number">
+            <tr
+              class="border-b-2 border-black"
+              v-for="member in memberStore.memberList"
+              :key="member.number"
+            >
               <td class="py-3">{{ member.name }}</td>
               <td class="py-3">{{ member.phone }}</td>
               <td class="py-3">{{ member.createdAt }}</td>
