@@ -10,9 +10,7 @@ export const useMemberStore = defineStore('memberData', () => {
    **/
   const memberList = ref([])
   const getMembers = catchError(async (phone, page) => {
-    console.log(phone, page)
     const { data } = await searchMember(phone, page)
-    console.log(data)
     if (data.membersList.length === 0) {
       warningAlert('沒有符合的會員資料')
     }
