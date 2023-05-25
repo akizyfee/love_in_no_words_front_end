@@ -3,12 +3,8 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, reactive, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { catchError } from '@/utils/catchError'
-import { getAdminDessertType, searchType } from '@/apis/product'
-import { searchMember, addMember } from '@/apis/user'
-import { getCoupon } from '@/apis/coupon'
-import { calculateTotalPrice, addOrder } from '@/apis/order'
-import { warningAlert, successAlert, errorAlert } from '@/plugins/toast'
+import { useProductStore } from '@/stores/frontEnd/productView'
+import { successAlert, errorAlert } from '@/plugins/toast'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
@@ -16,32 +12,28 @@ const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 const router = useRouter()
 
+const productStore = useProductStore()
+
 /**
  * 取得商品種類代碼、查詢商品類別
+ * 取得優惠碼活動
  **/
-const typeList = ref([])
-const currentIndex = ref(0)
-const productList = ref([])
-
-const fetchAllDessertType = catchError(async (index) => {
-  const { data } = await getAdminDessertType()
-  typeList.value = data
-  currentIndex.value = data[0].productsType
-  fetchProduct(data[0].productsType)
-})
-
-const fetchProduct = catchError(async (dessertType) => {
-  const { data } = await searchType(dessertType)
-  if (data.length === 0) {
-    warningAlert('沒有符合的商品資料')
-  }
-  productList.value = data
-  currentIndex.value = dessertType
-})
-
 onMounted(() => {
-  fetchAllDessertType()
+  productStore.fetchAllDessertType()
+  productStore.getCouponCode()
 })
+
+/**
+ * 查詢會員
+ **/
+const searchForm = reactive({
+  phone: '0912000000',
+  page: 1
+})
+
+const getMembers = () => {
+  productStore.getMembers(searchForm.phone, searchForm.page)
+}
 
 /**
  * VeeValidate 套件
@@ -56,41 +48,12 @@ const memberForm = reactive({
 })
 
 /**
- * 查詢會員
- **/
-const searchPhone = ref('0912000000')
-const memberList = ref([])
-
-const getMembers = catchError(async () => {
-  const { data } = await searchMember(searchPhone.value, 1)
-  const { membersList } = data
-  memberList.value = membersList
-})
-
-/**
  * 新增會員
  **/
-const postMember = catchError(async () => {
-  const { message } = await addMember(memberForm)
+const postMember = () => {
+  productStore.postMember(memberForm)
   handleModalClose()
-  successAlert(message)
-})
-
-/**
- * 取得優惠碼活動
- **/
-const couponList = ref([])
-
-const getCouponCode = catchError(async () => {
-  const { data } = await getCoupon('cuponCode')
-  couponList.value = data.filter(function (item) {
-    return !item.isDisabled
-  })
-})
-
-onMounted(() => {
-  getCouponCode()
-})
+}
 
 /**
  * 購物車
@@ -166,30 +129,18 @@ const orderProductTotalPrice = ref({
   couponNo: ''
 })
 
-const checkProductTotalPrice = ref({
-  couponName: '',
-  couponNo: '',
-  discount: 0,
-  orderList: [],
-  tableName: 0,
-  totalPrice: 0,
-  totalTime: 0
-})
-
-const fetchCalculateTotalPrice = catchError(async () => {
-  const { data } = await calculateTotalPrice(orderProductTotalPrice.value)
-  checkProductTotalPrice.value = data
-})
+const fetchCalculateTotalPrice = () => {
+  productStore.fetchCalculateTotalPrice(orderProductTotalPrice.value)
+}
 
 /**
  * 新增訂單
  * */
-const fetchAddOreder = catchError(async () => {
-  const { message } = await addOrder(orderProductTotalPrice.value)
+const fetchAddOreder = () => {
+  productStore.fetchAddOreder(orderProductTotalPrice.value)
   tempProduct.value = []
-  successAlert(message)
   router.push('/order')
-})
+}
 
 /**
  * modal
@@ -246,8 +197,11 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
-      searchPhone.value = '0912000000'
-      memberList.value = []
+      searchForm.phone = '0912000000'
+      searchForm.page = 1
+      productStore.memberList = []
+      memberForm.name = ''
+      memberForm.phone = ''
       productCard.qty = 1
       productCard.note = ''
     }
@@ -262,12 +216,12 @@ const handleModalClose = () => {
     <main class="mx-[315px] bg-white p-6 min-h-screen">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
-        <li class="mr-2" v-for="types in typeList" :key="types._id">
+        <li class="mr-2" v-for="types in productStore.typeList" :key="types._id">
           <a
-            @click.prevent="fetchProduct(types.productsType)"
+            @click.prevent="productStore.fetchProduct(types.productsType)"
             href="#"
             class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            :class="{ 'tabbar-active': currentIndex === types.productsType }"
+            :class="{ 'tabbar-active': productStore.currentIndex === types.productsType }"
             >{{ types.productsTypeName }}
           </a>
         </li>
@@ -276,7 +230,7 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4">
         <li
           @click.prevent="handleModalOpen('create', itemProductList)"
-          v-for="itemProductList in productList"
+          v-for="itemProductList in productStore.productList"
           :key="itemProductList.productNo"
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
@@ -434,23 +388,31 @@ const handleModalClose = () => {
             </li>
           </ul>
           <div class="flex flex-col px-3 py-4">
-            <p class="flex justify-between items-center font-medium">
-              <span>製作時間</span>
-              <span>{{ checkProductTotalPrice.totalTime }} 分</span>
+            <p class="flex justify-between items-center font-medium mb-4">
+              <span>套用優惠 </span>
+              <span class="text-secondary-dark">{{
+                productStore.checkProductTotalPrice.couponName === ''
+                  ? '尚未選擇'
+                  : productStore.checkProductTotalPrice.couponName
+              }}</span>
             </p>
             <p class="flex justify-between items-center font-medium">
+              <span>製作時間</span>
+              <span>{{ productStore.checkProductTotalPrice.totalTime }} 分</span>
+            </p>
+            <p class="flex justify-between items-center font-medium mb-4">
               <span>&emsp;&emsp;餐點</span>
               <span>{{ tempProduct.length }} 份</span>
             </p>
-            <p class="flex justify-between items-center font-medium mt-4">
+            <p class="flex justify-between items-center font-medium">
               <span>折扣金額</span>
-              <span class="text-primary">{{ checkProductTotalPrice.discount }}</span>
+              <span class="text-primary">{{ productStore.checkProductTotalPrice.discount }} 元</span>
             </p>
             <p class="flex justify-between items-center font-medium mb-7">
               <span class="text-xl ps-1">&emsp;合計</span>
-              <span class="text-xl text-primary">NT$ {{ checkProductTotalPrice.totalPrice }}</span>
+              <span class="text-xl text-primary">NT$ {{ productStore.checkProductTotalPrice.totalPrice }}</span>
             </p>
-            <button @click="fetchAddOreder()" class="btn btn-dark py-2 w-full">送出訂單</button>
+            <button @click="fetchAddOreder" class="btn btn-dark py-2 w-full">送出訂單</button>
           </div>
         </div>
       </div>
@@ -705,16 +667,16 @@ const handleModalClose = () => {
                 id="form_tel"
                 class="block form-input p-3"
                 placeholder="0912000000"
-                v-model="searchPhone"
+                v-model="searchForm.phone"
               />
             </div>
             <div class="bg-bgself-light rounded-xl p-4">
               <h3 class="mb-2 font-medium">查詢結果</h3>
-              <p v-if="memberList.length === 0" class="text-primary-light">沒有符合的會員資料</p>
+              <p v-if="productStore.memberList.length === 0" class="text-primary-light">沒有符合的會員資料</p>
               <div
                 v-else
                 class="flex items-center"
-                v-for="member in memberList"
+                v-for="member in productStore.memberList"
                 :key="member.number"
               >
                 <input
@@ -770,19 +732,23 @@ const handleModalClose = () => {
               </button>
             </div>
           </form>
-          <form v-else-if="isCreate === 'createActivity'" class="overflow-y-auto h-96 space-y-3 p-3" action="#">
+          <form
+            v-else-if="isCreate === 'createActivity'"
+            class="overflow-y-auto h-96 space-y-3 p-3"
+            action="#"
+          >
             <ul class="flex flex-col">
-              <li class="mb-3" v-for="coupon in couponList" :key="coupon._id">
+              <li class="mb-3" v-for="coupon in productStore.couponList" :key="coupon._id">
                 <div class="flex items-center mb-3">
                   <input
-                    id="form_checkIn_radio"
+                    :id="coupon._id"
                     type="radio"
                     :value="coupon.couponNo"
                     v-model="orderProductTotalPrice.couponNo"
                     name="form-radio"
                     class="form-radio"
                   />
-                  <label for="form_checkIn_radio" class="ml-2 text-xl font-medium">{{
+                  <label :for="coupon._id" class="ml-2 text-xl font-medium">{{
                     coupon.couponName
                   }}</label>
                 </div>
@@ -797,6 +763,16 @@ const handleModalClose = () => {
                 </div>
               </li>
             </ul>
+            <!-- btn -->
+            <div class="flex p-3">
+              <button
+                @click="orderProductTotalPrice.couponNo = ''"
+                type="button"
+                class="w-full btn btn-dark"
+              >
+                取消優惠
+              </button>
+            </div>
           </form>
         </div>
       </div>
