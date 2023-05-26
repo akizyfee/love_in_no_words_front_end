@@ -2,28 +2,18 @@
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, reactive } from 'vue'
-import { getAdminSeat, addAdminSeat, editAdminSeat, deleteAdminSeat } from '@/apis/seat'
-import { catchError } from '@/utils/catchError'
-import { warningAlert, successAlert } from '@/plugins/toast'
 import { dayFormat } from '@/plugins/day'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
+import { useSeatAdminStore } from '@/stores/backEnd/seatAdmin'
+const seatAdminStore = useSeatAdminStore()
+
 /**
  * 取得座位列表
  **/
-const seatList = ref([])
-
-const getSeats = catchError(async () => {
-  const { data } = await getAdminSeat()
-  if (data.length === 0) {
-    warningAlert('尚未建立座位的資料')
-  }
-  seatList.value = data
-})
-
 onMounted(() => {
-  getSeats()
+  seatAdminStore.getSeats()
 })
 
 /**
@@ -32,6 +22,17 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsFormSchema
 })
+
+const initSeatForm = reactive({
+  _id: '',
+  tableNo: 1,
+  tableName: '',
+  seats: 1,
+  isWindowSeat: false,
+  isDisabled: false,
+  createdAt: ''
+})
+
 const seatForm = reactive({
   _id: '',
   tableNo: 1,
@@ -45,32 +46,26 @@ const seatForm = reactive({
 /**
  * 新增座位功能
  **/
-const postSeat = catchError(async () => {
-  const { message } = await addAdminSeat(seatForm)
+const postSeat = () => {
+  seatAdminStore.postSeat(seatForm)
   handleModalClose()
-  successAlert(message === '成功' ? '新增成功' : message)
-  getSeats()
-})
+}
 
 /**
  * 修改座位功能
  **/
-const patchSeat = catchError(async (tableNo) => {
-  const { message } = await editAdminSeat(tableNo, seatForm)
+const patchSeat = (tableNo) => {
+  seatAdminStore.patchSeat(tableNo, seatForm)
   handleModalClose()
-  successAlert(message)
-  getSeats()
-})
+}
 
 /**
  * 刪除座位功能
  **/
-const delSeat = catchError(async (tableNo) => {
-  const { message } = await deleteAdminSeat(tableNo)
+const delSeat = (tableNo) => {
+  seatAdminStore.delSeat(tableNo)
   handleModalClose()
-  successAlert(message)
-  getSeats()
-})
+}
 
 /**
  * modal
@@ -105,7 +100,7 @@ const handleModalClose = () => {
       /**
        * 清空欄位功能
        **/
-      seatForm.tableName = ''
+      Object.assign(seatForm, initSeatForm)
     }
   })
 }
@@ -128,7 +123,7 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4">
         <li
           class="col-span-12 lg:col-span-6 xl:col-span-4 py-4 bg-white border-2 border-textself rounded-xl shadow"
-          v-for="seat in seatList"
+          v-for="seat in seatAdminStore.seatList"
           :key="seat._id"
         >
           <div class="flex justify-between items-center border-b-2 border-textself px-4">
@@ -228,7 +223,7 @@ const handleModalClose = () => {
                 <button
                   type="submit"
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
-                  v-for="seat in seatList"
+                  v-for="seat in seatAdminStore.seatList"
                   :key="seat._id"
                   @click.prevent="delSeat(seat.tableNo)"
                 >

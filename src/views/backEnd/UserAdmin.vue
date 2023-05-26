@@ -5,7 +5,7 @@ import { ref, nextTick, onMounted, reactive } from 'vue'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 
-import { useUserAdminStore } from '@/stores/userAdmin'
+import { useUserAdminStore } from '@/stores/backEnd/userAdmin'
 const userAdminStore = useUserAdminStore()
 
 /**
