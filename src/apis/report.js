@@ -30,10 +30,3 @@ export const sendAdminReport = (params) => axios.get(`/v1/send/email/admin/repor
  */
 export const searchAllAdminOrders = () => axios.get('/v1/reports/admin/orders')
 export const searchAdminOrders = (month, number) => axios.get(`/v1/reports/admin/orders?month=${month}&number=${number}`)
-
-/**
- * O-5-6 下載訂單：Excel
- * @param {number} paramsOne 月份
- * @param {number} paramsTwo 筆數
- */
-export const downloadAdminOrders = (paramsOne, paramsTwo) => axios.get(`v1/reports/admin/orders/download?month=${paramsOne}&dataAmount=${paramsTwo}`)

@@ -112,7 +112,7 @@ const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null)
 })
 
 /**
- * 下載訂單資訊
+ * O-5-6 下載訂單：Excel
  */
 const downloadFile = async () => {
   const url = `https://love-in-no-words-api.onrender.com/v1/reports/admin/orders/download?month=${searchMouth.value}&dataAmount=${searchNumber.value}`
@@ -124,16 +124,6 @@ const downloadFile = async () => {
   downloadLink.download = fileName
   downloadLink.click()
 }
-
-// const fetchDownloadAdminOrders = catchError(async () => {
-//   const file = await downloadAdminOrders(searchMouth.value, searchNumber.value)
-//   const xmlContent = file
-//   const blob = new Blob([xmlContent], { type: 'text/xml' })
-//   const downloadLink = document.createElement('a')
-//   downloadLink.href = URL.createObjectURL(blob)
-//   downloadLink.download = '訂單資訊.xml'
-//   downloadLink.click()
-// })
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
