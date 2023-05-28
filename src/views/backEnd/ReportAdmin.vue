@@ -6,13 +6,16 @@ import {
   getAdminOrdersQty,
   getAdminSellQty,
   searchAdminOrders,
-  searchAllAdminOrders
+  searchAllAdminOrders,
+  sendAdminReport,
+  downloadAdminOrders
 } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
 import useDountChart from '@/utils/useDountChar'
 import useBarChart from '@/utils/useEcharBar'
 import { useWindowSize } from '@vueuse/core'
+import { successAlert } from '@/plugins/toast'
 
 /**
  * 取得每月營收和訂單量
@@ -82,12 +85,43 @@ onMounted(() => {
 /**
  * 條件搜尋定單資訊
  */
-const searchMouth = ref(5)
-const searchNumber = ref(100)
+const searchMouth = ref()
+const searchNumber = ref()
 const fetchSearchAdminOrders = catchError(async () => {
-  const { data } = await searchAdminOrders(searchMouth.value, searchNumber.value)
+  const { data, message } = await searchAdminOrders(searchMouth.value, searchNumber.value)
   orderReportList.value = data.data
   orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
+  successAlert(message)
+})
+
+/**
+ * 營收報表+賣出訂單報表寄送
+ */
+const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null) => {
+  if (reportType1) {
+    const { message } = await sendAdminReport(reportType1)
+    successAlert(message)
+  }
+  if (reportType1 && reportType2) {
+    const message1 = await sendAdminReport(reportType1)
+    const message2 = await sendAdminReport(reportType2)
+    if (message1 === '報表寄送成功' && message2 === '報表寄送成功') {
+      successAlert('報表寄送成功')
+    }
+  }
+})
+
+/**
+ * 下載訂單資訊
+ */
+const fetchDownloadAdminOrders = catchError(async () => {
+  const file = await downloadAdminOrders(searchMouth.value, searchNumber.value)
+  const xmlContent = file
+  const blob = new Blob([xmlContent], { type: 'text/xml' })
+  const downloadLink = document.createElement('a')
+  downloadLink.href = URL.createObjectURL(blob)
+  downloadLink.download = '訂單資訊.xml'
+  downloadLink.click()
 })
 </script>
 <template>
@@ -106,14 +140,16 @@ const fetchSearchAdminOrders = catchError(async () => {
         >
           <p class="flex items-center text-[36px] font-bold">本年度每月營收和訂單量</p>
           <div ref="BarcharDom" class="w-full h-[500px] mt-10"></div>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
+          <button @click.prevent="fetchSendAdminRreport(1, 3)" class="btn btn-dark py-2">
+            寄信
+          </button>
         </li>
         <li
           class="col-span-12 p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
           <p class="flex items-center text-[36px] font-bold">本年度各產品銷量占比</p>
           <div id="dountChar" class="w-full h-[500px] mt-10"></div>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
+          <button @click.prevent="fetchSendAdminRreport(2)" class="btn btn-dark py-2">寄信</button>
         </li>
       </ul>
 
@@ -133,11 +169,9 @@ const fetchSearchAdminOrders = catchError(async () => {
           <section class="flex-col items-center">
             <label for="countries_disabled" class="block mb-2 font-medium">月份</label>
             <select id="countries_disabled" class="form-select py-3" v-model="searchMouth">
-              <option value="1" selected>1月</option>
-              <option value="2">2月</option>
-              <option value="3">3月</option>
-              <option value="4">4月</option>
-              <option value="5">5月</option>
+              <option v-for="number in 12" :key="number" :value="number" selected>
+                {{ number }}月
+              </option>
             </select>
           </section>
           <!-- searchBtn -->
@@ -147,6 +181,13 @@ const fetchSearchAdminOrders = catchError(async () => {
             class="btn btn-outline-dark whitespace-nowrap"
           >
             搜尋
+          </button>
+          <button
+            @click.prevent="fetchDownloadAdminOrders"
+            type="button"
+            class="btn btn-outline-dark whitespace-nowrap"
+          >
+            下載
           </button>
         </div>
       </div>

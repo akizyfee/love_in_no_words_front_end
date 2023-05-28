@@ -19,9 +19,9 @@ export const getAdminOrdersQty = () => axios.get('/v1/send/email/admin/orders-qu
 
 /**
  * O-5-4 寄送報表
- * @param {number} 報表種類
+ * @param {number} 報表種類 1營收 2賣出數量 3訂單數量
  */
-export const sendAdminReport = (reportType, payload) => axios.post(`/v1/send/email/admin/report/${reportType}`, payload)
+export const sendAdminReport = (params) => axios.get(`/v1/send/email/admin/report/${params}`)
 
 /**
  * O-5-5 查詢訂單資訊
@@ -32,7 +32,8 @@ export const searchAllAdminOrders = () => axios.get('/v1/reports/admin/orders')
 export const searchAdminOrders = (month, number) => axios.get(`/v1/reports/admin/orders?month=${month}&number=${number}`)
 
 /**
- * O-5-5 下載訂單：Excel
- * @param {number} 訂單資料
+ * O-5-6 下載訂單：Excel
+ * @param {number} paramsOne 月份
+ * @param {number} paramsTwo 筆數
  */
-export const downloadAdminOrders = (payload) => axios.post('/v1/reports/admin/orders/download', payload)
+export const downloadAdminOrders = (paramsOne, paramsTwo) => axios.get(`v1/reports/admin/orders/download?month=${paramsOne}&dataAmount=${paramsTwo}`)
