@@ -21,6 +21,7 @@
     "flowbite": "^1.6.5",
     "flowbite-vue": "^0.0.10",
     "pinia": "^2.0.32",
+    "socket.io-client": "^4.6.1",
     "swiper": "^9.2.2",
     "universal-cookie": "^4.0.4",
     "vee-validate": "^4.8.6",

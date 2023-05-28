@@ -1,5 +1,35 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
+import { io } from 'socket.io-client'
+import { successAlert, warningAlert } from '@/plugins/toast'
+
+const socket = io(import.meta.env.VITE_SOCKET_URL)
+
+/**
+ * 發送出餐訊息
+ * employee 為店員
+ * chef 為廚師
+ * @param {object} msg 訊息
+ */
+const submitEmployee = () => {
+  const sendMessage = {
+    message: '訂單XXX已製作完成，請出餐'
+  }
+  socket.emit('employee', sendMessage)
+}
+
+/**
+ * 接收訊息
+ */
+socket.on('employee', (messages) => {
+  warningAlert(messages.message)
+})
+socket.on('chef', (messages) => {
+  // 這邊等 API 串接收到消息可以改成刷新訂單，就不用通知了
+  if (messages) {
+    successAlert('收到訂單')
+  }
+})
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
@@ -14,17 +44,27 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
         <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active">未出餐</a>
+          <a
+            href="#"
+            class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white tabbar-active"
+            >未出餐</a
+          >
         </li>
         <li class="mr-2">
-          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white">已出餐</a>
+          <a href="#" class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
+            >已出餐</a
+          >
         </li>
       </ul>
       <!-- table -->
       <ul class="grid grid-cols-12 gap-4">
-        <li class="col-span-12 lg:col-span-6 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow">
+        <li
+          class="col-span-12 lg:col-span-6 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow"
+        >
           <div class="flex justify-between px-2 pt-4 rounded-lg bg-bgself-light">
-            <p class="text-lg font-medium text-white bg-secondary-light rounded-lg py-1 px-2">訂單編號 : 123456789</p>
+            <p class="text-lg font-medium text-white bg-secondary-light rounded-lg py-1 px-2">
+              訂單編號 : 123456789
+            </p>
           </div>
           <div class="flex justify-between p-4 bg-bgself-light">
             <p class="font-medium text-xl text-primary-light">預計出餐時間</p>
@@ -70,8 +110,16 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
             </li>
           </ul>
           <!-- send_btn -->
-          <div class="rounded-br-lg rounded-bl-lg bg-bgself-light hover:bg-primary-light hover:text-white text-center">
-            <button type="button" class="font-medium text-xl w-full p-4">出餐</button>
+          <div
+            class="rounded-br-lg rounded-bl-lg bg-bgself-light hover:bg-primary-light hover:text-white text-center"
+          >
+            <button
+              @click.prevent="submitEmployee"
+              type="button"
+              class="font-medium text-xl w-full p-4"
+            >
+              出餐
+            </button>
           </div>
         </li>
       </ul>
