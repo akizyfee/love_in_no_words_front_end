@@ -19,6 +19,7 @@
     "dayjs": "^1.11.7",
     "echarts": "^5.4.2",
     "flowbite": "^1.6.5",
+    "flowbite-vue": "^0.0.10",
     "pinia": "^2.0.32",
     "swiper": "^9.2.2",
     "universal-cookie": "^4.0.4",
