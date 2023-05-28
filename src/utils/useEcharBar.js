@@ -22,8 +22,11 @@ echarts.use([
 
 const useBarChart = (e) => {
   const BarChart = echarts.init(e)
+  const resize = () => {
+    BarChart.resize()
+  }
 
-  return (dataCash, dataOrder) => {
+  const updateChart = (dataCash, dataOrder) => {
     const filterDataCash = dataCash.map(item => ({
       value: item.monthTotal,
       month: item.month
@@ -33,7 +36,6 @@ const useBarChart = (e) => {
       value: item.orderNumber,
       month: item.month
     }))
-
     const option = {
       tooltip: {
         trigger: 'axis',
@@ -111,6 +113,11 @@ const useBarChart = (e) => {
     }
 
     BarChart.setOption(option)
+  }
+
+  return {
+    resize,
+    updateChart
   }
 }
 

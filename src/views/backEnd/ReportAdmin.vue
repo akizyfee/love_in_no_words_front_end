@@ -1,6 +1,6 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import {
   getAdminRevenue,
   getAdminOrdersQty,
@@ -12,10 +12,12 @@ import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
 import useDountChart from '@/utils/useDountChar'
 import useBarChart from '@/utils/useEcharBar'
+import { useWindowSize } from '@vueuse/core'
 
 /**
  * 取得每月營收和訂單量
  */
+const { width } = useWindowSize()
 const revenueYear = ref(nowYear)
 const BarcharDom = ref()
 
@@ -23,12 +25,24 @@ const fetchGetAdminRevenueAndOrders = catchError(async () => {
   const dataCash = await getAdminRevenue(revenueYear)
   const dataOrder = await getAdminOrdersQty(revenueYear)
   const setOption = useBarChart(BarcharDom.value)
-  setOption(dataCash.data, dataOrder.data)
+  setOption.updateChart(dataCash.data, dataOrder.data)
+  setOption.resize()
 })
 
 onMounted(() => {
   fetchGetAdminRevenueAndOrders()
 })
+
+watch(
+  () => width,
+  () => {
+    fetchGetAdminRevenueAndOrders()
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
 
 /**
  * 取得每月賣出數量資料
