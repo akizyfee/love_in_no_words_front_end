@@ -7,8 +7,7 @@ import {
   getAdminSellQty,
   searchAdminOrders,
   searchAllAdminOrders,
-  sendAdminReport,
-  downloadAdminOrders
+  sendAdminReport
 } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
@@ -16,6 +15,7 @@ import useDountChart from '@/utils/useDountChar'
 import useBarChart from '@/utils/useEcharBar'
 import { useWindowSize } from '@vueuse/core'
 import { successAlert } from '@/plugins/toast'
+import axios from 'axios'
 
 /**
  * 取得每月營收和訂單量
@@ -114,15 +114,26 @@ const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null)
 /**
  * 下載訂單資訊
  */
-const fetchDownloadAdminOrders = catchError(async () => {
-  const file = await downloadAdminOrders(searchMouth.value, searchNumber.value)
-  const xmlContent = file
-  const blob = new Blob([xmlContent], { type: 'text/xml' })
+const downloadFile = async () => {
+  const url = `https://love-in-no-words-api.onrender.com/v1/reports/admin/orders/download?month=${searchMouth.value}&dataAmount=${searchNumber.value}`
+  const response = await axios.get(url, { responseType: 'blob' })
   const downloadLink = document.createElement('a')
+  const blob = new Blob([response.data], { type: response.headers['content-type'] })
+  const fileName = '訂單資訊下載.xlsx'
   downloadLink.href = URL.createObjectURL(blob)
-  downloadLink.download = '訂單資訊.xml'
+  downloadLink.download = fileName
   downloadLink.click()
-})
+}
+
+// const fetchDownloadAdminOrders = catchError(async () => {
+//   const file = await downloadAdminOrders(searchMouth.value, searchNumber.value)
+//   const xmlContent = file
+//   const blob = new Blob([xmlContent], { type: 'text/xml' })
+//   const downloadLink = document.createElement('a')
+//   downloadLink.href = URL.createObjectURL(blob)
+//   downloadLink.download = '訂單資訊.xml'
+//   downloadLink.click()
+// })
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
@@ -183,7 +194,7 @@ const fetchDownloadAdminOrders = catchError(async () => {
             搜尋
           </button>
           <button
-            @click.prevent="fetchDownloadAdminOrders"
+            @click.prevent="downloadFile"
             type="button"
             class="btn btn-outline-dark whitespace-nowrap"
           >
