@@ -1,5 +1,35 @@
 <script setup>
+import { ref, onMounted, nextTick } from 'vue'
+import { Accordion } from 'flowbite'
 import SiderBar from '@/components/frontEnd/SideBar.vue'
+
+const heading1 = ref()
+const body1 = ref()
+const AccordionImgChange = ref(false)
+
+let accordion
+onMounted(() => {
+  const accordionItems = [
+    {
+      id: heading1.value,
+      triggerEl: heading1.value,
+      targetEl: body1.value,
+      active: true
+    }
+  ]
+  accordion = new Accordion(accordionItems)
+})
+
+const open = (heading, body) => {
+  const childComponent = body.value
+
+  AccordionImgChange.value = !AccordionImgChange.value
+  nextTick(() => {
+    if (childComponent) {
+      accordion.open(heading)
+    }
+  })
+}
 // import { ref, onMounted } from 'vue'
 // import { Accordion } from 'flowbite'
 
@@ -78,9 +108,24 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
           class="w-full border-2 text-center border-separate mt-4 rounded-lg border-black overflow-hidden"
         >
           <tbody class="bg-white relative">
-            <tr class="grid grid-cols-12 p-4">
+            <tr class="grid grid-cols-12 p-4" ref="heading1">
               <td class="p-4 col-span-1 align-middle">
-                <img src="@/assets/img/IconMinus.png" width="32" height="32" alt="IconMinus">
+                <img
+                  v-if="!AccordionImgChange"
+                  @click="open(heading1, body1)"
+                  src="@/assets/img/IconMinus.png"
+                  width="32"
+                  height="32"
+                  alt="IconMinus"
+                />
+                <img
+                  v-else-if="AccordionImgChange"
+                  @click="open(heading1, body1)"
+                  src="@/assets/img/IconAdd.png"
+                  width="32"
+                  height="32"
+                  alt="IconMinus"
+                />
               </td>
               <td class="p-4 col-span-2 align-middle">2023/03/26</td>
               <td class="p-4 col-span-3 align-middle">202303261200</td>
@@ -90,130 +135,10 @@ import SiderBar from '@/components/frontEnd/SideBar.vue'
               </td>
               <td class="col-span-2 align-middle">
                 <button type="button" class="btn btn-outline-dark py-2 px-3 mt-1">結帳</button>
-              </td>
-            </tr>
-            <tr class="grid grid-cols-12 p-4">
-              <td class="p-4 col-span-1 align-middle">
-                <img src="@/assets/img/IconAdd.png" width="32" height="32" alt="IconAdd">
-              </td>
-              <td class="p-4 col-span-2 align-middle">2023/03/26</td>
-              <td class="p-4 col-span-3 align-middle">202303261200</td>
-              <td class="p-4 col-span-2 align-middle">上午</td>
-              <td class="p-4 col-span-2 align-middle">
-                <span class="text-white bg-primary-light rounded py-1 px-2">1</span>
-              </td>
-              <td class="col-span-2 align-middle">
-                <button type="button" class="btn btn-outline-dark py-2 px-3 mt-1">結帳</button>
-              </td>
-            </tr>
-            <tr class="grid grid-cols-12 p-4">
-              <td class="p-4 col-span-1"></td>
-              <td class="p-4 col-span-11 bg-bgself-light rounded-lg">
-                <table class="w-full">
-                  <thead>
-                    <tr class="border-b-2 border-textself">
-                      <th class="p-4">#</th>
-                      <th class="p-4">餐點名稱</th>
-                      <th class="p-4">價錢</th>
-                      <th class="p-4">數量</th>
-                      <th class="p-4">備註</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="border-b-2 border-textself">
-                      <td class="p-4">1</td>
-                      <td class="p-4">鬆餅</td>
-                      <td class="p-4">150</td>
-                      <td class="p-4">1</td>
-                      <td class="p-4">無</td>
-                    </tr>
-                    <tr class="border-b-2 border-textself">
-                      <td class="p-4">2</td>
-                      <td class="p-4">甜甜圈</td>
-                      <td class="p-4">300</td>
-                      <td class="p-4">2</td>
-                      <td class="p-4">不要太甜</td>
-                    </tr>
-                    <tr class="border-b-2 border-textself">
-                      <td class="p-4">3</td>
-                      <td class="p-4">瑪得蓮</td>
-                      <td class="p-4">250</td>
-                      <td class="p-4">5</td>
-                      <td class="p-4">1</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-            <tr class="bg-white text-left grid grid-cols-12">
-              <td class="p-4 col-span-1"></td>
-              <td class="p-4 col-span-11">
-                <span class="text-neutralself-200">製作時間</span>
-                <span class="ml-4 text-xl font-medium">20 分</span>
-              </td>
-            </tr>
-            <tr class="bg-white text-left grid grid-cols-12">
-              <td class="p-4 col-span-1"></td>
-              <td class="p-4 col-span-11">
-                <span class="text-neutralself-200">優惠活動</span>
-                <span
-                  class="ml-4 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                  >已符合 A + B</span
-                >
-                <span
-                  class="ml-5 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                  >買一送一</span
-                >
-              </td>
-            </tr>
-            <tr class="bg-white text-left grid grid-cols-12">
-              <td class="p-4 col-span-1"></td>
-              <td class="p-4 col-span-11">
-                <span class="text-neutralself-200">折扣金額</span>
-                <span class="ml-4 text-primary font-medium">$9</span>
-              </td>
-            </tr>
-            <tr class="bg-white text-left grid grid-cols-12">
-              <td class="p-4 pb-4 col-span-1"></td>
-              <td class="p-4 pb-4 col-span-11">
-                <span class="text-neutralself-200">付款金額</span>
-                <span class="ml-4 text-primary text-xl font-medium">$999</span>
               </td>
             </tr>
           </tbody>
-        </table>
-        <table
-          class="w-full border-2 text-center border-separate mt-4 rounded-lg border-black overflow-hidden"
-        >
-          <tbody class="bg-white relative">
-            <tr class="grid grid-cols-12 p-4">
-              <td class="p-4 col-span-1 align-middle">
-                <img src="@/assets/img/IconMinus.png" width="32" height="32" alt="IconMinus">
-              </td>
-              <td class="p-4 col-span-2 align-middle">2023/03/26</td>
-              <td class="p-4 col-span-3 align-middle">202303261200</td>
-              <td class="p-4 col-span-2 align-middle">上午</td>
-              <td class="p-4 col-span-2 align-middle">
-                <span class="text-white bg-primary-light rounded py-1 px-2">1</span>
-              </td>
-              <td class="col-span-2 align-middle">
-                <button type="button" class="btn btn-outline-dark py-2 px-3 mt-1">結帳</button>
-              </td>
-            </tr>
-            <tr class="grid grid-cols-12 p-4">
-              <td class="p-4 col-span-1 align-middle">
-                <img src="@/assets/img/IconAdd.png" width="32" height="32" alt="IconAdd">
-              </td>
-              <td class="p-4 col-span-2 align-middle">2023/03/26</td>
-              <td class="p-4 col-span-3 align-middle">202303261200</td>
-              <td class="p-4 col-span-2 align-middle">上午</td>
-              <td class="p-4 col-span-2 align-middle">
-                <span class="text-white bg-primary-light rounded py-1 px-2">1</span>
-              </td>
-              <td class="col-span-2 align-middle">
-                <button type="button" class="btn btn-outline-dark py-2 px-3 mt-1">結帳</button>
-              </td>
-            </tr>
+          <tbody ref="body1" class="bg-white relative hidden">
             <tr class="grid grid-cols-12 p-4">
               <td class="p-4 col-span-1"></td>
               <td class="p-4 col-span-11 bg-bgself-light rounded-lg">

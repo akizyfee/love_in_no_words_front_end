@@ -1,21 +1,26 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import {
   getAdminRevenue,
   getAdminOrdersQty,
   getAdminSellQty,
   searchAdminOrders,
-  searchAllAdminOrders
+  searchAllAdminOrders,
+  sendAdminReport
 } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
 import useDountChart from '@/utils/useDountChar'
 import useBarChart from '@/utils/useEcharBar'
+import { useWindowSize } from '@vueuse/core'
+import { successAlert } from '@/plugins/toast'
+import axios from 'axios'
 
 /**
  * 取得每月營收和訂單量
  */
+const { width } = useWindowSize()
 const revenueYear = ref(nowYear)
 const BarcharDom = ref()
 
@@ -23,12 +28,24 @@ const fetchGetAdminRevenueAndOrders = catchError(async () => {
   const dataCash = await getAdminRevenue(revenueYear)
   const dataOrder = await getAdminOrdersQty(revenueYear)
   const setOption = useBarChart(BarcharDom.value)
-  setOption(dataCash.data, dataOrder.data)
+  setOption.updateChart(dataCash.data, dataOrder.data)
+  setOption.resize()
 })
 
 onMounted(() => {
   fetchGetAdminRevenueAndOrders()
 })
+
+watch(
+  () => width,
+  () => {
+    fetchGetAdminRevenueAndOrders()
+  },
+  {
+    immediate: true,
+    deep: true
+  }
+)
 
 /**
  * 取得每月賣出數量資料
@@ -68,13 +85,45 @@ onMounted(() => {
 /**
  * 條件搜尋定單資訊
  */
-const searchMouth = ref(5)
-const searchNumber = ref(100)
+const searchMouth = ref()
+const searchNumber = ref()
 const fetchSearchAdminOrders = catchError(async () => {
-  const { data } = await searchAdminOrders(searchMouth.value, searchNumber.value)
+  const { data, message } = await searchAdminOrders(searchMouth.value, searchNumber.value)
   orderReportList.value = data.data
   orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
+  successAlert(message)
 })
+
+/**
+ * 營收報表+賣出訂單報表寄送
+ */
+const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null) => {
+  if (reportType1) {
+    const { message } = await sendAdminReport(reportType1)
+    successAlert(message)
+  }
+  if (reportType1 && reportType2) {
+    const message1 = await sendAdminReport(reportType1)
+    const message2 = await sendAdminReport(reportType2)
+    if (message1 === '報表寄送成功' && message2 === '報表寄送成功') {
+      successAlert('報表寄送成功')
+    }
+  }
+})
+
+/**
+ * O-5-6 下載訂單：Excel
+ */
+const downloadFile = async () => {
+  const url = `https://love-in-no-words-api.onrender.com/v1/reports/admin/orders/download?month=${searchMouth.value}&dataAmount=${searchNumber.value}`
+  const response = await axios.get(url, { responseType: 'blob' })
+  const downloadLink = document.createElement('a')
+  const blob = new Blob([response.data], { type: response.headers['content-type'] })
+  const fileName = '訂單資訊下載.xlsx'
+  downloadLink.href = URL.createObjectURL(blob)
+  downloadLink.download = fileName
+  downloadLink.click()
+}
 </script>
 <template>
   <aside class="fixed top-0 left-0 z-40 w-[315px] h-screen">
@@ -92,14 +141,16 @@ const fetchSearchAdminOrders = catchError(async () => {
         >
           <p class="flex items-center text-[36px] font-bold">本年度每月營收和訂單量</p>
           <div ref="BarcharDom" class="w-full h-[500px] mt-10"></div>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
+          <button @click.prevent="fetchSendAdminRreport(1, 3)" class="btn btn-dark py-2">
+            寄信
+          </button>
         </li>
         <li
           class="col-span-12 p-6 bg-white border border-black rounded-lg shadow flex flex-col justify-between mx-3"
         >
           <p class="flex items-center text-[36px] font-bold">本年度各產品銷量占比</p>
           <div id="dountChar" class="w-full h-[500px] mt-10"></div>
-          <button href="#" class="btn btn-dark py-2">寄信</button>
+          <button @click.prevent="fetchSendAdminRreport(2)" class="btn btn-dark py-2">寄信</button>
         </li>
       </ul>
 
@@ -119,11 +170,9 @@ const fetchSearchAdminOrders = catchError(async () => {
           <section class="flex-col items-center">
             <label for="countries_disabled" class="block mb-2 font-medium">月份</label>
             <select id="countries_disabled" class="form-select py-3" v-model="searchMouth">
-              <option value="1" selected>1月</option>
-              <option value="2">2月</option>
-              <option value="3">3月</option>
-              <option value="4">4月</option>
-              <option value="5">5月</option>
+              <option v-for="number in 12" :key="number" :value="number" selected>
+                {{ number }}月
+              </option>
             </select>
           </section>
           <!-- searchBtn -->
@@ -133,6 +182,13 @@ const fetchSearchAdminOrders = catchError(async () => {
             class="btn btn-outline-dark whitespace-nowrap"
           >
             搜尋
+          </button>
+          <button
+            @click.prevent="downloadFile"
+            type="button"
+            class="btn btn-outline-dark whitespace-nowrap"
+          >
+            下載
           </button>
         </div>
       </div>

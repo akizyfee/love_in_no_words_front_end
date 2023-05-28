@@ -406,11 +406,15 @@ const handleModalClose = () => {
             </p>
             <p class="flex justify-between items-center font-medium">
               <span>折扣金額</span>
-              <span class="text-primary">{{ productStore.checkProductTotalPrice.discount }} 元</span>
+              <span class="text-primary"
+                >{{ productStore.checkProductTotalPrice.discount }} 元</span
+              >
             </p>
             <p class="flex justify-between items-center font-medium mb-7">
               <span class="text-xl ps-1">&emsp;合計</span>
-              <span class="text-xl text-primary">NT$ {{ productStore.checkProductTotalPrice.totalPrice }}</span>
+              <span class="text-xl text-primary"
+                >NT$ {{ productStore.checkProductTotalPrice.totalPrice }}</span
+              >
             </p>
             <button @click="fetchAddOreder" class="btn btn-dark py-2 w-full">送出訂單</button>
           </div>
@@ -672,7 +676,9 @@ const handleModalClose = () => {
             </div>
             <div class="bg-bgself-light rounded-xl p-4">
               <h3 class="mb-2 font-medium">查詢結果</h3>
-              <p v-if="productStore.memberList.length === 0" class="text-primary-light">沒有符合的會員資料</p>
+              <p v-if="productStore.memberList.length === 0" class="text-primary-light">
+                沒有符合的會員資料
+              </p>
               <div
                 v-else
                 class="flex items-center"
