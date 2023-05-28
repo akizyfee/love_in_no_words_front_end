@@ -18,21 +18,6 @@ const router = createRouter({
   linkActiveClass: 'bg-bgself-light',
   routes: [
     {
-      path: '/exampleTest',
-      name: 'exampleTest',
-      component: () => import('@/views/ExampleTest.vue')
-    },
-    {
-      path: '/exampleLazy',
-      name: 'exampleLazy',
-      component: () => import('@/views/ExampleLazy.vue')
-    },
-    {
-      path: '/test',
-      name: 'test',
-      component: () => import('@/views/TestTest.vue')
-    },
-    {
       path: '/',
       name: 'home',
       component: () => import('@/views/HomeView.vue')
