@@ -2,20 +2,19 @@
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, reactive, watch } from 'vue'
-import { catchError } from '@/utils/catchError'
-import { successAlert } from '@/plugins/toast'
-import { errorProductSchema } from '@/utils/formValidate'
 import { useForm } from 'vee-validate'
-import {
-  uploadAdminPhotos,
-  addAdminProduct,
-  addAdminDessertType,
-  getAdminDessertType,
-  deleteAdminDessertType,
-  editAdminProduct,
-  deleteAdminProduct,
-  searchAdminProduct
-} from '@/apis/product'
+import { errorProductSchema } from '@/utils/formValidate'
+
+import { useProductAdminStore } from '@/stores/backEnd/productAdmin'
+const productAdminStore = useProductAdminStore()
+
+/**
+ * 取得產品分類列表、設置商品列表
+ */
+onMounted(() => {
+  productAdminStore.fetchGetDessertTypeList()
+  productAdminStore.fetchAllProduct()
+})
 
 /**
  * 載入驗證
@@ -30,50 +29,22 @@ const { errors, useFieldModel } = useForm({
 const initDessertType = reactive({
   productsTypeName: ''
 })
+
 const dessertType = reactive({
   productsTypeName: useFieldModel('dessertCategory')
 })
 
-const fetchAddDessertcodes = catchError(async () => {
-  const { message } = await addAdminDessertType(dessertType)
-  successAlert(message)
+const fetchAddDessertcodes = () => {
+  productAdminStore.fetchAddDessertcodes(dessertType)
   Object.assign(dessertType, initDessertType)
-  fetchGetDessertTypeList()
-})
-
-/**
- * 取得產品分類列表
- */
-const dessertTypeList = ref([])
-const fetchGetDessertTypeList = catchError(async () => {
-  const { data } = await getAdminDessertType()
-  dessertTypeList.value = data
-})
-
-onMounted(() => {
-  fetchGetDessertTypeList()
-})
+}
 
 /**
  * 刪除商品分類
  */
-const fetchDeleteAdminDessertType = catchError(async (productsType) => {
-  const { message } = await deleteAdminDessertType(productsType)
-  successAlert(message)
-  fetchGetDessertTypeList()
-})
-
-/**
- * 圖片上傳
- */
-const imgFile = ref()
-const uploadFile = catchError(async () => {
-  const file = imgFile.value.files[0]
-  const formData = new FormData()
-  formData.append('file-to-upload', file)
-  const { data } = await uploadAdminPhotos(formData)
-  productCard.photoUrl = data.photoUrl
-})
+const fetchDeleteAdminDessertType = (productsType) => {
+  productAdminStore.fetchDeleteAdminDessertType(productsType)
+}
 
 /**
  * 商品表單
@@ -107,19 +78,6 @@ const productCard = reactive({
 })
 
 /**
- * 設置商品列表
- */
-const productList = ref([])
-const fetchAllProduct = catchError(async () => {
-  const { data } = await searchAdminProduct()
-  productList.value = data
-})
-
-onMounted(() => {
-  fetchAllProduct()
-})
-
-/**
  * 搜尋商品
  */
 const searchFilterProduct = reactive({
@@ -128,20 +86,15 @@ const searchFilterProduct = reactive({
   priceUpperLimit: '',
   amountStatus: ''
 })
-const fetchSearchProduct = catchError(async () => {
-  const { data } = await searchAdminProduct(
-    searchFilterProduct.productsType,
-    searchFilterProduct.priceLowerLimit,
-    searchFilterProduct.priceUpperLimit,
-    searchFilterProduct.amountStatus
-  )
-  productList.value = data
-})
+
+const fetchSearchProduct = () => {
+  productAdminStore.fetchSearchProduct(searchFilterProduct)
+}
 
 watch(
   [() => searchFilterProduct.productsType, () => searchFilterProduct.amountStatus],
   () => {
-    fetchSearchProduct()
+    productAdminStore.fetchSearchProduct(searchFilterProduct)
   },
   {
     immediate: true,
@@ -152,32 +105,39 @@ watch(
 /**
  * 新增商品
  */
-const fetchAddProduct = catchError(async () => {
-  const { message } = await addAdminProduct(productCard)
-  successAlert(message)
+const fetchAddProduct = () => {
+  productAdminStore.fetchAddProduct(productCard)
   handleModalClose()
-  fetchAllProduct()
-})
+}
 
 /**
  * 修改商品
  */
-const fetchEditProduct = catchError(async () => {
-  const { message } = await editAdminProduct(productCard.productNo, productCard)
-  successAlert(message)
+const fetchEditProduct = () => {
+  productAdminStore.fetchEditProduct(productCard)
   handleModalClose()
-  fetchAllProduct()
-})
+}
 
 /**
  * 刪除商品
  */
-const fetchDeleteProduct = catchError(async () => {
-  const { message } = await deleteAdminProduct(productCard.productNo)
-  successAlert(message)
+const fetchDeleteProduct = () => {
+  productAdminStore.fetchDeleteProduct(productCard)
   handleModalClose()
-  fetchAllProduct()
-})
+}
+
+/**
+ * 圖片上傳
+ */
+const imgFile = ref()
+const uploadFile = () => {
+  const file = imgFile.value.files[0]
+  const formData = new FormData()
+  formData.append('file-to-upload', file)
+  productAdminStore.uploadFile(formData).then((data) => {
+    productCard.photoUrl = data.photoUrl
+  })
+}
 
 /**
  * modal
@@ -254,7 +214,10 @@ const handleModalClose = () => {
               class="form-select py-3"
               v-model="searchFilterProduct.productsType"
             >
-              <template v-for="dessertList in dessertTypeList" :key="dessertList.productsType">
+              <template
+                v-for="dessertList in productAdminStore.dessertTypeList"
+                :key="dessertList.productsType"
+              >
                 <option :value="dessertList.productsType">
                   {{ dessertList.productsTypeName }}
                 </option>
@@ -283,19 +246,19 @@ const handleModalClose = () => {
             >
             <div class="flex items-center mr-3">
               <input
-                type="text"
+                type="number"
                 id="filterPrice"
                 class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
                 required
-                v-model="searchFilterProduct.priceLowerLimit"
+                v-model.number="searchFilterProduct.priceLowerLimit"
               />
               <div class="text-2xl align-middle mx-3">~</div>
               <input
-                type="text"
+                type="number"
                 id="filterPriceTwo"
                 class="form-select py-3 max-w-[120px] xl:max-w-[200px]"
                 required
-                v-model="searchFilterProduct.priceUpperLimit"
+                v-model.number="searchFilterProduct.priceUpperLimit"
               />
               <button
                 @click.prevent="fetchSearchProduct"
@@ -321,7 +284,7 @@ const handleModalClose = () => {
       <ul class="grid grid-cols-12 gap-4">
         <li
           @click="handleModalOpen('updateProduct', itemProductList)"
-          v-for="itemProductList in productList"
+          v-for="itemProductList in productAdminStore.productList"
           :key="itemProductList.productNo"
           class="col-span-12 xl:col-span-4 bg-white border-2 border-textself rounded-lg shadow relative"
         >
@@ -385,7 +348,7 @@ const handleModalClose = () => {
         </li>
       </ul>
       <!-- productList img -->
-      <div v-if="productList.length === 0" class="text-center">
+      <div v-if="productAdminStore.productList.length === 0" class="text-center">
         <img
           src="@/assets/img/ImgFeature02.svg"
           class="object-cover block mx-auto"
@@ -468,7 +431,11 @@ const handleModalClose = () => {
                     />
                     <p class="text-sm text-primary-light mb-2">{{ errors.photoUrl }}</p>
                     <img
-                      :src="productCard.photoUrl ? productCard.photoUrl : 'https://fakeimg.pl/300/'"
+                      :src="
+                        productCard.photoUrl
+                          ? productCard.photoUrl
+                          : 'https://picsum.photos/id/365/300/300'
+                      "
                       :alt="productCard.productName"
                       class="rounded-lg object-cover w-full h-[184px]"
                     />
@@ -519,7 +486,7 @@ const handleModalClose = () => {
                   >
                   <select id="filterCategory" class="form-select my-2">
                     <template
-                      v-for="dessertList in dessertTypeList"
+                      v-for="dessertList in productAdminStore.dessertTypeList"
                       :key="dessertList.productsType"
                     >
                       <option :value="dessertList.productsType">
@@ -652,7 +619,7 @@ const handleModalClose = () => {
                   >
                   <select id="filterCategory" class="form-select my-2">
                     <template
-                      v-for="dessertList in dessertTypeList"
+                      v-for="dessertList in productAdminStore.dessertTypeList"
                       :key="dessertList.productsType"
                     >
                       <option :value="dessertList.productsType">
@@ -716,7 +683,7 @@ const handleModalClose = () => {
                 <button
                   @click.prevent="fetchDeleteAdminDessertType(dessertList.productsType)"
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
-                  v-for="dessertList in dessertTypeList"
+                  v-for="dessertList in productAdminStore.dessertTypeList"
                   :key="dessertList.productsType"
                 >
                   {{ dessertList.productsTypeName }}

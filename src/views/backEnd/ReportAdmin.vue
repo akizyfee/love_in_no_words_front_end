@@ -213,7 +213,7 @@ const downloadFile = async () => {
               <td class="py-3">{{ reportList.totalPrice }}</td>
             </tr>
             <tr class="border-b-2 border-black">
-              <td class="py-3">淨利</td>
+              <td class="py-3">總營業額</td>
               <td></td>
               <td class="py-3">{{ orderReportListPrice }}</td>
             </tr>
