@@ -1,6 +1,93 @@
 <script setup>
 import Modal from '@/components/TheModal.vue'
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, computed } from 'vue'
+import { getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
+import { warningAlert, successAlert } from '@/plugins/toast'
+import { catchError } from '@/utils/catchError'
+import { useForm } from 'vee-validate'
+import { errorsCouponSchema } from '@/utils/formValidate'
+
+/**
+ * 取得 A+B 活動
+ **/
+const freebiePlusList = ref([])
+
+const getFreebiePlus = catchError(async () => {
+  const { data } = await getAdminFreebiePlus()
+  if (data.list.length === 0) {
+    warningAlert('尚未建立 A+B 活動')
+  }
+  freebiePlusList.value = data
+})
+
+onMounted(() => {
+  getFreebiePlus()
+})
+
+/**
+ * VeeValidate 套件
+ */
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsCouponSchema
+})
+const freebiePlusForm = ref({
+  list: [],
+  discount: useFieldModel('discount')
+})
+const freebiePlusCouponNoVal = ref('')
+
+/**
+ * 新增、刪除 A+B
+ **/
+const typeList = ref([])
+const chooseList = computed(() => typeList.value.filter((type) => type.isChoose === true))
+const unChooseList = computed(() => typeList.value.filter((type) => type.isChoose === false))
+const addTypeList = catchError(async (productsType) => {
+  // 新增
+  if (chooseList.value.length >= 2) {
+    warningAlert('無法加入所選擇的分類，原因是最多兩種不重複的分類')
+    return
+  } else {
+    freebiePlusForm.value.list.push(productsType)
+  }
+  typeList.value.forEach((item) => {
+    if (productsType === item.productsType) {
+      item.isChoose = true
+    }
+  })
+})
+const delTypeList = catchError(async (productsType) => {
+  typeList.value.forEach((item) => {
+    if (productsType === item.productsType) {
+      item.isChoose = false
+    }
+  })
+  const findSame = freebiePlusForm.value.list.findIndex(
+    (item) => productsType === item.productsType
+  )
+  freebiePlusForm.value.list.splice(findSame, 1)
+})
+
+/**
+ * 新增 A+B 活動
+ **/
+const postFreebiePlus = catchError(async () => {
+  const { message } = await addAdminFreebiePlus(freebiePlusForm.value)
+  handleModalClose()
+  successAlert(message)
+  getFreebiePlus()
+})
+
+/**
+ * 刪除 A+B 活動
+ **/
+const delFreebiePlus = catchError(async () => {
+  const { message } = await deleteAdminFreebiePlus(freebiePlusCouponNoVal.value)
+  handleModalClose()
+  successAlert(message)
+  getFreebiePlus()
+})
+
 /**
  * modal
  * */
@@ -14,6 +101,44 @@ const handleModalOpen = (checkIsNew, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
+    if (isCreate.value === 'create') {
+      const { list, availableList } = item
+      if (list.length !== 0) {
+        if (
+          Object.keys(list[0]).includes('productsTypeA') &&
+          Object.keys(list[0]).includes('productsTypeB')
+        ) {
+          list.forEach((item) => {
+            freebiePlusForm.value.discount = item.discount
+            typeList.value.push(
+              {
+                productsType: item.productsTypeA.productsType,
+                productsTypeName: item.productsTypeA.productsTypeName,
+                isChoose: true
+              },
+              {
+                productsType: item.productsTypeB.productsType,
+                productsTypeName: item.productsTypeB.productsTypeName,
+                isChoose: true
+              }
+            )
+          })
+        }
+      }
+      if (availableList.length !== 0) {
+        availableList.forEach((item) => {
+          typeList.value.push({
+            productsType: item.productsType,
+            productsTypeName: item.productsTypeName,
+            isChoose: false
+          })
+        })
+      }
+    }
+    if (isCreate.value === 'delete') {
+      const { couponNo } = item
+      freebiePlusCouponNoVal.value = couponNo
+    }
   })
 }
 const handleModalClose = () => {
@@ -22,14 +147,23 @@ const handleModalClose = () => {
   nextTick(() => {
     if (childComponent) {
       childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      typeList.value.length = 0
+      freebiePlusForm.value.list.length = 0
+      freebiePlusForm.value.discount = 0
     }
   })
 }
 </script>
 <template>
   <div class="flex justify-end my-6">
-    <button @click="handleModalOpen('create')" class="btn btn-dark whitespace-nowrap">
-      編輯 A + B 優惠活動
+    <button
+      @click="handleModalOpen('create', freebiePlusList)"
+      class="btn btn-dark whitespace-nowrap"
+    >
+      新增 A + B 優惠活動
     </button>
   </div>
   <!-- table -->
@@ -43,12 +177,14 @@ const handleModalClose = () => {
         </tr>
       </thead>
       <tbody>
-        <tr class="border-b-2 border-black">
-          <td class="py-3 text-center">氣泡水 + 聖代</td>
-          <td class="py-3 text-center">A + B</td>
+        <tr class="border-b-2 border-black" v-for="item in freebiePlusList.list" :key="item._id">
+          <td class="py-3 text-center">
+            {{ item.productsTypeA.productsTypeName }} + {{ item.productsTypeB.productsTypeName }}
+          </td>
+          <td class="py-3 text-center">{{ item.couponName }}</td>
           <td class="flex justify-end">
             <button
-              @click="handleModalOpen('delete')"
+              @click="handleModalOpen('delete', item)"
               class="btn btn-outline-dark w-auto mx-1 my-2"
             >
               刪除
@@ -64,7 +200,7 @@ const handleModalClose = () => {
       <div class="relative bg-white border-2 border-textself rounded-lg shadow">
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
-          <h2 v-if="isCreate === 'create'" class="text-xl font-medium">編輯 A + B 優惠活動</h2>
+          <h2 v-if="isCreate === 'create'" class="text-xl font-medium">新增 A + B 優惠活動</h2>
           <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除 A + B 優惠活動</h2>
           <button
             @click="handleModalClose()"
@@ -98,9 +234,10 @@ const handleModalClose = () => {
                 id="form_discount"
                 class="form-input"
                 placeholder="請輸入折扣比例"
+                v-model.number="freebiePlusForm.discount"
                 required
               />
-              <p class="text-sm text-primary-light mt-2">請輸入折扣比例</p>
+              <p class="text-sm text-primary-light mt-2">{{ errors.discount }}</p>
             </div>
             <!-- tag -->
             <section>
@@ -109,41 +246,51 @@ const handleModalClose = () => {
                 <button
                   type="submit"
                   class="btn btn-primary font-medium my-2 mr-2 px-3 py-1 rounded"
+                  v-for="type in unChooseList"
+                  :key="type.productsType"
+                  @click.prevent="addTypeList(type.productsType)"
                 >
-                  其他
+                  {{ type.productsTypeName }}
                 </button>
               </div>
             </section>
             <!-- tag checked -->
             <section>
               <p class="font-medium mb-2">
-                已選擇的分類 (最多兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)
+                已選擇的分類 (必須兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)
               </p>
               <div class="flex flex-wrap">
                 <button
                   type="submit"
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
+                  v-for="type in chooseList"
+                  :key="type.productsType"
+                  @click.prevent="delTypeList(type.productsType)"
                 >
-                  泡芙
-                </button>
-                <button
-                  type="submit"
-                  class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
-                >
-                  蛋糕
+                  {{ type.productsTypeName }}
                 </button>
               </div>
             </section>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確定新增</button>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postFreebiePlus">
+              確定新增
+            </button>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">
             <h3 class="text-xl font-medium text-neutral-400">
               請確認是否刪除
-              <span class="text-primary-light"> A+B 優惠活動</span> ?
+              <template v-for="item in freebiePlusList.list" :key="item._id">
+                <span class="text-primary-light">
+                  {{ item.productsTypeA.productsTypeName }} +
+                  {{ item.productsTypeB.productsTypeName }}</span
+                >
+                優惠活動?
+              </template>
             </h3>
             <!-- send_btn -->
-            <button type="submit" class="w-full btn btn-dark">確認刪除</button>
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="delFreebiePlus">
+              確認刪除
+            </button>
           </form>
         </div>
       </div>
