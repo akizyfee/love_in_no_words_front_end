@@ -484,7 +484,7 @@ const handleModalClose = () => {
                   <label for="selectStatus" class="block font-medium whitespace-nowrap"
                     >商品分類</label
                   >
-                  <select id="filterCategory" class="form-select my-2">
+                  <select id="filterCategory" class="form-select my-2" v-model="productCard.productsType">
                     <template
                       v-for="dessertList in productAdminStore.dessertTypeList"
                       :key="dessertList.productsType"
@@ -617,7 +617,7 @@ const handleModalClose = () => {
                   <label for="selectStatus" class="block font-medium whitespace-nowrap"
                     >商品分類</label
                   >
-                  <select id="filterCategory" class="form-select my-2">
+                  <select id="filterCategory" class="form-select my-2" v-model="productCard.productsType">
                     <template
                       v-for="dessertList in productAdminStore.dessertTypeList"
                       :key="dessertList.productsType"
