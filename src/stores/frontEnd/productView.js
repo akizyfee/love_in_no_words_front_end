@@ -81,6 +81,7 @@ export const useProductStore = defineStore('productData', () => {
     if (!Object.keys(data).includes('discount')) {
       checkProductTotalPrice.value.discount = 0
     }
+    return data.orderList
   })
 
   /**
