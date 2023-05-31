@@ -40,32 +40,37 @@ const freebiePlusCouponNoVal = ref('')
  * 新增、刪除 A+B
  **/
 const typeList = ref([])
-const chooseList = computed(() => typeList.value.filter((type) => type.isChoose === true))
+const chooseList = ref([])
 const unChooseList = computed(() => typeList.value.filter((type) => type.isChoose === false))
-const addTypeList = catchError(async (productsType) => {
+const addTypeList = catchError(async (type) => {
   // 新增
   if (chooseList.value.length >= 2) {
     warningAlert('無法加入所選擇的分類，原因是最多兩種不重複的分類')
     return
   } else {
-    freebiePlusForm.value.list.push(productsType)
+    freebiePlusForm.value.list.push(type.productsType)
+    chooseList.value.push(type)
   }
   typeList.value.forEach((item) => {
-    if (productsType === item.productsType) {
+    if (type.productsType === item.productsType) {
       item.isChoose = true
     }
   })
 })
-const delTypeList = catchError(async (productsType) => {
+const delTypeList = catchError(async (type) => {
   typeList.value.forEach((item) => {
-    if (productsType === item.productsType) {
+    if (type.productsType === item.productsType) {
       item.isChoose = false
     }
   })
-  const findSame = freebiePlusForm.value.list.findIndex(
-    (item) => productsType === item.productsType
+  const findFreebiePlusSame = freebiePlusForm.value.list.findIndex(
+    (item) => type.productsType === item.productsType
   )
-  freebiePlusForm.value.list.splice(findSame, 1)
+  const findChooseListSame = chooseList.value.findIndex(
+    (item) => type.productsType === item.productsType
+  )
+  freebiePlusForm.value.list.splice(findFreebiePlusSame, 1)
+  chooseList.value.splice(findChooseListSame, 1)
 })
 
 /**
@@ -109,7 +114,6 @@ const handleModalOpen = (checkIsNew, item) => {
           Object.keys(list[0]).includes('productsTypeB')
         ) {
           list.forEach((item) => {
-            freebiePlusForm.value.discount = item.discount
             typeList.value.push(
               {
                 productsType: item.productsTypeA.productsType,
@@ -172,7 +176,8 @@ const handleModalClose = () => {
       <thead class="text-xl font-medium text-secondary-light bg-textself">
         <tr class="border-b-2 border-black">
           <th class="py-3">分類名稱</th>
-          <th class="py-3">優惠活動</th>
+          <th class="py-3">優惠代碼</th>
+          <th class="py-3">折扣比例</th>
           <th class="py-3"></th>
         </tr>
       </thead>
@@ -181,7 +186,8 @@ const handleModalClose = () => {
           <td class="py-3 text-center">
             {{ item.productsTypeA.productsTypeName }} + {{ item.productsTypeB.productsTypeName }}
           </td>
-          <td class="py-3 text-center">{{ item.couponName }}</td>
+          <td class="py-3 text-center">{{ item.couponNo }}</td>
+          <td class="py-3 text-center">{{ item.discount }}%</td>
           <td class="flex justify-end">
             <button
               @click="handleModalOpen('delete', item)"
@@ -248,7 +254,7 @@ const handleModalClose = () => {
                   class="btn btn-primary font-medium my-2 mr-2 px-3 py-1 rounded"
                   v-for="type in unChooseList"
                   :key="type.productsType"
-                  @click.prevent="addTypeList(type.productsType)"
+                  @click.prevent="addTypeList(type)"
                 >
                   {{ type.productsTypeName }}
                 </button>
@@ -257,7 +263,7 @@ const handleModalClose = () => {
             <!-- tag checked -->
             <section>
               <p class="font-medium mb-2">
-                已選擇的分類 (必須兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)
+                目前選擇的分類 (必須兩種不重複的分類、點擊黃色按鈕，即刻刪除該分類)
               </p>
               <div class="flex flex-wrap">
                 <button
@@ -265,7 +271,7 @@ const handleModalClose = () => {
                   class="btn btn-secondary font-medium my-2 mr-2 px-3 py-1 rounded"
                   v-for="type in chooseList"
                   :key="type.productsType"
-                  @click.prevent="delTypeList(type.productsType)"
+                  @click.prevent="delTypeList(type)"
                 >
                   {{ type.productsTypeName }}
                 </button>
