@@ -125,11 +125,12 @@ const removeTempProduct = (item) => {
  */
 const orderProductTotalPrice = ref({
   tableName: getTable.value,
-  products: tempProduct.value,
+  products: [],
   couponNo: ''
 })
 
 const fetchCalculateTotalPrice = () => {
+  orderProductTotalPrice.value.products = tempProduct.value
   productStore.fetchCalculateTotalPrice(orderProductTotalPrice.value).then((data) => {
     tempProduct.value = data
   })
@@ -139,6 +140,7 @@ const fetchCalculateTotalPrice = () => {
  * 新增訂單
  * */
 const fetchAddOreder = () => {
+  orderProductTotalPrice.value.products = tempProduct.value
   productStore.fetchAddOreder(orderProductTotalPrice.value)
   tempProduct.value = []
   router.push('/order')
