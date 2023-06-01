@@ -86,6 +86,8 @@ const postFreebiePlus = catchError(async () => {
 /**
  * 刪除 A+B 活動
  **/
+const productsTypeAName = ref('')
+const productsTypeBName = ref('')
 const delFreebiePlus = catchError(async () => {
   const { message } = await deleteAdminFreebiePlus(freebiePlusCouponNoVal.value)
   handleModalClose()
@@ -140,7 +142,9 @@ const handleModalOpen = (checkIsNew, item) => {
       }
     }
     if (isCreate.value === 'delete') {
-      const { couponNo } = item
+      const { couponNo, productsTypeA, productsTypeB } = item
+      productsTypeAName.value = productsTypeA.productsTypeName
+      productsTypeBName.value = productsTypeB.productsTypeName
       freebiePlusCouponNoVal.value = couponNo
     }
   })
@@ -285,13 +289,10 @@ const handleModalClose = () => {
           <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">
             <h3 class="text-xl font-medium text-neutral-400">
               請確認是否刪除
-              <template v-for="item in freebiePlusList.list" :key="item._id">
                 <span class="text-primary-light">
-                  {{ item.productsTypeA.productsTypeName }} +
-                  {{ item.productsTypeB.productsTypeName }}</span
-                >
+                  {{ productsTypeAName }} +
+                  {{ productsTypeBName }}</span>
                 優惠活動?
-              </template>
             </h3>
             <!-- send_btn -->
             <button type="submit" class="w-full btn btn-dark" @click.prevent="delFreebiePlus">
