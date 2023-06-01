@@ -1,27 +1,20 @@
 <script setup>
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, computed } from 'vue'
-import { getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
-import { warningAlert, successAlert } from '@/plugins/toast'
+// import { getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
+import { warningAlert } from '@/plugins/toast'
 import { catchError } from '@/utils/catchError'
 import { useForm } from 'vee-validate'
 import { errorsCouponSchema } from '@/utils/formValidate'
 
+import { useFreebiePlusAdminStore } from '@/stores/backEnd/couponAdmin'
+const freebiePlusAdminStore = useFreebiePlusAdminStore()
+
 /**
  * 取得 A+B 活動
  **/
-const freebiePlusList = ref([])
-
-const getFreebiePlus = catchError(async () => {
-  const { data } = await getAdminFreebiePlus()
-  if (data.list.length === 0) {
-    warningAlert('尚未建立 A+B 活動')
-  }
-  freebiePlusList.value = data
-})
-
 onMounted(() => {
-  getFreebiePlus()
+  freebiePlusAdminStore.getFreebiePlus()
 })
 
 /**
@@ -30,10 +23,12 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsCouponSchema
 })
+
 const freebiePlusForm = ref({
   list: [],
   discount: useFieldModel('discount')
 })
+
 const freebiePlusCouponNoVal = ref('')
 
 /**
@@ -58,11 +53,6 @@ const addTypeList = catchError(async (type) => {
   })
 })
 const delTypeList = catchError(async (type) => {
-  typeList.value.forEach((item) => {
-    if (type.productsType === item.productsType) {
-      item.isChoose = false
-    }
-  })
   const findFreebiePlusSame = freebiePlusForm.value.list.findIndex(
     (item) => type.productsType === item.productsType
   )
@@ -71,29 +61,30 @@ const delTypeList = catchError(async (type) => {
   )
   freebiePlusForm.value.list.splice(findFreebiePlusSame, 1)
   chooseList.value.splice(findChooseListSame, 1)
+  typeList.value.forEach((item) => {
+    if (type.productsType === item.productsType) {
+      item.isChoose = false
+    }
+  })
 })
 
 /**
  * 新增 A+B 活動
  **/
-const postFreebiePlus = catchError(async () => {
-  const { message } = await addAdminFreebiePlus(freebiePlusForm.value)
+const postFreebiePlus = () => {
+  freebiePlusAdminStore.postFreebiePlus(freebiePlusForm.value)
   handleModalClose()
-  successAlert(message)
-  getFreebiePlus()
-})
+}
 
 /**
  * 刪除 A+B 活動
  **/
 const productsTypeAName = ref('')
 const productsTypeBName = ref('')
-const delFreebiePlus = catchError(async () => {
-  const { message } = await deleteAdminFreebiePlus(freebiePlusCouponNoVal.value)
+const delFreebiePlus = () => {
+  freebiePlusAdminStore.delFreebiePlus(freebiePlusCouponNoVal.value)
   handleModalClose()
-  successAlert(message)
-  getFreebiePlus()
-})
+}
 
 /**
  * modal
@@ -168,7 +159,7 @@ const handleModalClose = () => {
 <template>
   <div class="flex justify-end my-6">
     <button
-      @click="handleModalOpen('create', freebiePlusList)"
+      @click="handleModalOpen('create', freebiePlusAdminStore.freebiePlusList)"
       class="btn btn-dark whitespace-nowrap"
     >
       新增 A + B 優惠活動
@@ -186,7 +177,11 @@ const handleModalClose = () => {
         </tr>
       </thead>
       <tbody>
-        <tr class="border-b-2 border-black" v-for="item in freebiePlusList.list" :key="item._id">
+        <tr
+          class="border-b-2 border-black"
+          v-for="item in freebiePlusAdminStore.freebiePlusList.list"
+          :key="item._id"
+        >
           <td class="py-3 text-center">
             {{ item.productsTypeA.productsTypeName }} + {{ item.productsTypeB.productsTypeName }}
           </td>
@@ -289,10 +284,10 @@ const handleModalClose = () => {
           <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">
             <h3 class="text-xl font-medium text-neutral-400">
               請確認是否刪除
-                <span class="text-primary-light">
-                  {{ productsTypeAName }} +
-                  {{ productsTypeBName }}</span>
-                優惠活動?
+              <span class="text-primary-light">
+                {{ productsTypeAName }} + {{ productsTypeBName }}</span
+              >
+              優惠活動?
             </h3>
             <!-- send_btn -->
             <button type="submit" class="w-full btn btn-dark" @click.prevent="delFreebiePlus">

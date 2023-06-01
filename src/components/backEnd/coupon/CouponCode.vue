@@ -1,27 +1,17 @@
 <script setup>
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted } from 'vue'
-import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon } from '@/apis/coupon'
-import { warningAlert, successAlert } from '@/plugins/toast'
-import { catchError } from '@/utils/catchError'
 import { useForm } from 'vee-validate'
 import { errorsCouponSchema } from '@/utils/formValidate'
+
+import { useCouponAdminStore } from '@/stores/backEnd/couponAdmin'
+const couponAdminStore = useCouponAdminStore()
 
 /**
  * 取得優惠碼活動
  **/
-const couponList = ref([])
-
-const getCoupon = catchError(async () => {
-  const { data } = await getAdminCoupon('cuponCode')
-  if (data.length === 0) {
-    warningAlert('尚未建立優惠碼活動')
-  }
-  couponList.value = data
-})
-
 onMounted(() => {
-  getCoupon()
+  couponAdminStore.getCoupon()
 })
 
 /**
@@ -30,43 +20,39 @@ onMounted(() => {
 const { errors, useFieldModel } = useForm({
   validationSchema: errorsCouponSchema
 })
+
 const couponForm = ref({
   couponName: useFieldModel('couponName'),
   couponCode: useFieldModel('couponCode'),
   discount: useFieldModel('discount'),
   isDisabled: false
 })
+
 const couponNoVal = ref('')
 
 /**
  * 新增優惠碼活動
  **/
-const postCoupon = catchError(async () => {
-  const { message } = await addAdminCoupon(couponForm.value)
+const postCoupon = () => {
+  couponAdminStore.postCoupon(couponForm.value)
   handleModalClose()
-  successAlert(message)
-  getCoupon()
-})
+}
 
 /**
  * 修改優惠碼活動
  **/
-const patchCoupon = catchError(async () => {
-  const { message } = await editAdminCoupon(couponNoVal.value, couponForm.value)
+const patchCoupon = () => {
+  couponAdminStore.patchCoupon(couponNoVal.value, couponForm.value)
   handleModalClose()
-  successAlert(message)
-  getCoupon()
-})
+}
 
 /**
  * 刪除優惠碼活動
  **/
-const delCoupon = catchError(async () => {
-  const { message } = await deleteAdminCoupon(couponNoVal.value)
+const delCoupon = () => {
+  couponAdminStore.delCoupon(couponNoVal.value)
   handleModalClose()
-  successAlert(message)
-  getCoupon()
-})
+}
 
 /*
  * modal
@@ -131,7 +117,7 @@ const handleModalClose = () => {
         </tr>
       </thead>
       <tbody>
-        <tr class="border-b-2 border-textself" v-for="coupon in couponList" :key="coupon._id">
+        <tr class="border-b-2 border-textself" v-for="coupon in couponAdminStore.couponList" :key="coupon._id">
           <td class="py-3">{{ coupon.couponName }}</td>
           <td class="py-3">{{ coupon.couponCode }}</td>
           <td class="py-3">{{ coupon.discount }}%</td>
