@@ -36,7 +36,7 @@ export default defineComponent({
         class="form-select max-w-[250px] py-3"
       >
         <option value="cuponCode">優惠碼</option>
-        <option value="freeOne">買一送一</option>
+        <!-- <option value="freeOne">買一送一</option> -->
         <option value="freebiePlus">A + B 優惠</option>
       </select>
       <!-- table -->

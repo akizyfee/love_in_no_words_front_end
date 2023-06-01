@@ -125,18 +125,22 @@ const removeTempProduct = (item) => {
  */
 const orderProductTotalPrice = ref({
   tableName: getTable.value,
-  products: tempProduct.value,
+  products: [],
   couponNo: ''
 })
 
 const fetchCalculateTotalPrice = () => {
-  productStore.fetchCalculateTotalPrice(orderProductTotalPrice.value)
+  orderProductTotalPrice.value.products = tempProduct.value
+  productStore.fetchCalculateTotalPrice(orderProductTotalPrice.value).then((data) => {
+    tempProduct.value = data
+  })
 }
 
 /**
  * 新增訂單
  * */
 const fetchAddOreder = () => {
+  orderProductTotalPrice.value.products = tempProduct.value
   productStore.fetchAddOreder(orderProductTotalPrice.value)
   tempProduct.value = []
   router.push('/order')
@@ -324,8 +328,9 @@ const handleModalClose = () => {
                 <p class="font-medium text-xl my-2">${{ tempProducts.price }}</p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
+                  v-show="tempProducts.couponName"
                 >
-                  已符合 A + B
+                  可參與 {{ tempProducts?.couponName }} 活動
                 </p>
               </div>
               <div class="flex flex-col">

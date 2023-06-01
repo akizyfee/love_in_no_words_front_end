@@ -111,7 +111,7 @@ export const errorsCouponSchema = {
   },
   discount(value) {
     if (!value) {
-      return '折扣比例必填'
+      return '折扣比例必填，範圍在 1 到 99'
     }
     if (value < 1) {
       return '折扣比例不得小於 1'
