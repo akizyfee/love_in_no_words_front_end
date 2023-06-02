@@ -180,9 +180,9 @@ const handleModalClose = () => {
       <div class="relative bg-white border-2 border-textself rounded-lg shadow">
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
-          <p v-if="isCreate === 'create'" class="text-xl font-medium">新增會員資料</p>
-          <p v-else-if="isCreate === 'update'" class="text-xl font-medium">修改會員資料</p>
-          <p v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除會員資料</p>
+          <h2 v-if="isCreate === 'create'" class="text-xl font-medium">新增會員資料</h2>
+          <h2 v-else-if="isCreate === 'update'" class="text-xl font-medium">修改會員資料</h2>
+          <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除會員資料</h2>
           <button
             @click="handleModalClose()"
             type="button"
