@@ -110,10 +110,19 @@ const toHref = (id) => {
       />
     </figure>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <h1 class="text-[32px] lg:text-[64px] font-bold text-center lg:text-left">
-        傲嬌甜點
-        <span class="block lg:inline">POS 點餐系統</span>
-      </h1>
+      <div dir="rtl">
+        <h1 class="text-[32px] lg:text-[64px] font-bold text-center lg:text-left relative">
+          傲嬌甜點
+          <span class="block lg:inline">POS 點餐系統</span>
+          <figure class="absolute -top-14 -start-14">
+            <img
+              src="../assets/img/ImgTitleBg.svg"
+              class="w-[66px] h-14 object-cover"
+              alt="ImgTitleBg_Img"
+            />
+          </figure>
+        </h1>
+      </div>
       <h2 class="text-xl lg:text-2xl mt-6 mb-12">輕鬆管理，以智慧重新定義餐飲體驗</h2>
       <button type="button" class="btn btn-dark flex items-center text-xl">
         瞭解更多
@@ -134,8 +143,22 @@ const toHref = (id) => {
   </section>
   <main>
     <!-- point -->
-    <section class="bg-secondary-light border-y-2 border-textself">
-      <h3 class="text-center text-[28px] lg:text-[32px] font-bold p-12 lg:pt-24 lg:pb-16">
+    <section class="bg-secondary-light border-y-2 border-textself relative overflow-hidden -z-20">
+      <figure class="absolute -left-44 lg:-left-0 pt-[86px] lg:pt-[120px] lg:pl-[120px] -z-10">
+        <img
+          src="../assets/img/ImgPointBg01.svg"
+          class="w-[350px] h-[109px] object-cover"
+          alt="ImgPointBg01_Img"
+        />
+      </figure>
+      <figure class="absolute -bottom-6 -right-16 lg:bottom-0 lg:right-0 pb-0 lg:pr-6">
+        <img
+          src="../assets/img/ImgPointBg02.svg"
+          class="w-[311px] h-[114px] lg:w-[580px] lg:h-[213px] object-cover"
+          alt="ImgPointBg02_Img"
+        />
+      </figure>
+      <h3 class="text-center text-[28px] lg:text-[32px] font-bold p-12 lg:pt-24 lg:pb-16 z-10">
         解決以下困擾
       </h3>
       <div class="w-11/12 lg:w-9/12 mx-auto grid grid-cols-12 gap-3 pb-16 lg:pb-24">
@@ -146,7 +169,7 @@ const toHref = (id) => {
             alt="Point_Img"
           />
         </figure>
-        <ul class="col-span-12 lg:col-span-5 flex flex-col items-center list-none list-inside">
+        <ul class="col-span-12 lg:col-span-5 flex flex-col items-center list-none list-inside z-10">
           <li class="card-white">
             <figure class="border-4 border-textself rounded-full overflow-hidden">
               <img
@@ -181,7 +204,21 @@ const toHref = (id) => {
       </div>
     </section>
     <!-- feature -->
-    <section id="feature">
+    <section id="feature" class="relative overflow-hidden">
+      <figure class="absolute -left-16 lg:pt-[360px] hidden lg:block">
+        <img
+          src="../assets/img/ImgFeatureBg01.svg"
+          class="w-[270px] h-[310px] object-cover"
+          alt="ImgFeatureBg01_Img"
+        />
+      </figure>
+      <figure class="absolute right-2.5 lg:pt-[665px] hidden lg:block">
+        <img
+          src="../assets/img/ImgFeatureBg02.svg"
+          class="w-[203px] h-[110px] object-cover"
+          alt="ImgFeatureBg02_Img"
+        />
+      </figure>
       <h3 class="text-[32px] font-bold text-center border-b-2 border-textself py-12 lg:py-16">
         平台特色
       </h3>
@@ -314,291 +351,314 @@ const toHref = (id) => {
       </ul>
     </section>
     <!-- about -->
-    <section class="pt-[60px] pb-12 lg:py-24 mx-3 lg:mx-[240px]" id="about">
-      <h3 class="text-center text-[28px] lg:text-[32px] font-bold">關於我們</h3>
-      <!-- swiper -->
-      <swiper
-        :modules="modules"
-        :mousewheel="true"
-        :keyboard="true"
-        :navigation="!isMobile"
-        :slidesPerView="2"
-        :spaceBetween="24"
-        :centeredSlides="true"
-        :breakpoints="{
-          320: {
-            slidesPerView: 1,
-            spaceBetween: 0
-          },
-          375: {
-            slidesPerView: 1,
-            spaceBetween: 0
-          },
-          768: {
-            slidesPerView: 2,
-            spaceBetween: 24
-          }
-        }"
-        class="mySwiper relative"
-        :style="isMobile ? '' : 'margin-right: -240px'"
-      >
-        <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-          <div class="flex flex-col max-w-3xl">
-            <div class="card-secondary-p0 lg:mr-3">
-              <figure class="-mt-24">
-                <img
-                  src="../assets/img/Ellipse01.png"
-                  class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                  alt="Ellipse_Img1"
-                />
-              </figure>
-              <figure class="flex mt-[26px] mb-[14px]">
-                <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                <img
-                  src="../assets/img/IconInstagram.svg"
-                  class="w-6 h-6 mx-4"
-                  alt="Instagram_Img"
-                />
-                <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
-              </figure>
-              <h4 class="text-2xl font-medium">Eva Li</h4>
-              <p class="flex items-center mt-3 mb-4">
-                <img
-                  src="../assets/img/IconLocation.svg"
-                  class="w-[9px] h-[13px]"
-                  alt="Facebook_Img"
-                />
-                <span class="ml-2">高雄</span>
-              </p>
-              <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                網頁前端工程師
-              </h5>
-              <ul class="list-none list-outside p-6">
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>前端開發和設計的工作經驗</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>注重網頁的可用性和使用者體驗設計</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
-                </li>
-              </ul>
+    <section class="relative overflow-hidden -z-20" id="about">
+      <figure class="absolute -top-20 -left-20 -z-10">
+        <img
+          src="../assets/img/ImgAboutBg01.svg"
+          class="w-[284px] h-[282px] object-cover"
+          alt="ImgAboutBg01_Img"
+        />
+      </figure>
+      <figure class="absolute -right-4 pt-[101px] lg:right-2.5 lg:pr-[254px]">
+        <img
+          src="../assets/img/ImgAboutBg02.svg"
+          class="w-[89px] h-[68px] object-cover"
+          alt="ImgAboutBg02_Img"
+        />
+      </figure>
+      <figure class="absolute left-1/4 lg:pt-[756px] hidden lg:block">
+        <img
+          src="../assets/img/ImgAboutBg03.svg"
+          class="w-[218px] h-[152px] object-cover"
+          alt="ImgAboutBg03_Img"
+        />
+      </figure>
+      <div class="pt-[60px] pb-12 lg:py-24 mx-3 lg:mx-[240px]">
+        <h3 class="text-center text-[28px] lg:text-[32px] font-bold z-10">關於我們</h3>
+        <!-- swiper -->
+        <swiper
+          :modules="modules"
+          :mousewheel="true"
+          :keyboard="true"
+          :navigation="!isMobile"
+          :slidesPerView="2"
+          :spaceBetween="24"
+          :centeredSlides="true"
+          :breakpoints="{
+            320: {
+              slidesPerView: 1,
+              spaceBetween: 0
+            },
+            375: {
+              slidesPerView: 1,
+              spaceBetween: 0
+            },
+            768: {
+              slidesPerView: 2,
+              spaceBetween: 24
+            }
+          }"
+          class="mySwiper relative"
+          :style="isMobile ? '' : 'margin-right: -240px'"
+        >
+          <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
+            <div class="flex flex-col max-w-3xl">
+              <div class="card-secondary-p0 lg:mr-3">
+                <figure class="-mt-24">
+                  <img
+                    src="../assets/img/Ellipse01.png"
+                    class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
+                    alt="Ellipse_Img1"
+                  />
+                </figure>
+                <figure class="flex mt-[26px] mb-[14px]">
+                  <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
+                  <img
+                    src="../assets/img/IconInstagram.svg"
+                    class="w-6 h-6 mx-4"
+                    alt="Instagram_Img"
+                  />
+                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
+                </figure>
+                <h4 class="text-2xl font-medium">Eva Li</h4>
+                <p class="flex items-center mt-3 mb-4">
+                  <img
+                    src="../assets/img/IconLocation.svg"
+                    class="w-[9px] h-[13px]"
+                    alt="Facebook_Img"
+                  />
+                  <span class="ml-2">高雄</span>
+                </p>
+                <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
+                  網頁前端工程師
+                </h5>
+                <ul class="list-none list-outside p-6">
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>前端開發和設計的工作經驗</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>注重網頁的可用性和使用者體驗設計</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </swiper-slide>
-        <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-          <div class="max-w-3xl flex flex-col">
-            <div class="card-secondary-p0 lg:mr-3">
-              <figure class="-mt-24">
-                <img
-                  src="../assets/img/Ellipse02.png"
-                  class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                  alt="Ellipse_Img2"
-                />
-              </figure>
-              <figure class="flex mt-[26px] mb-[14px]">
-                <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                <img
-                  src="../assets/img/IconInstagram.svg"
-                  class="w-6 h-6 mx-4"
-                  alt="Instagram_Img"
-                />
-                <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
-              </figure>
-              <h4 class="text-2xl font-medium">Christina</h4>
-              <p class="flex items-center mt-3 mb-4">
-                <img
-                  src="../assets/img/IconLocation.svg"
-                  class="w-[9px] h-[13px]"
-                  alt="Facebook_Img"
-                />
-                <span class="ml-2">台南</span>
-              </p>
-              <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                網頁前端工程師
-              </h5>
-              <ul class="list-none list-outside p-6">
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>前端開發和設計的工作經驗</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>注重網頁的可用性和使用者體驗設計</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
-                </li>
-              </ul>
+          </swiper-slide>
+          <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
+            <div class="max-w-3xl flex flex-col">
+              <div class="card-secondary-p0 lg:mr-3">
+                <figure class="-mt-24">
+                  <img
+                    src="../assets/img/Ellipse02.png"
+                    class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
+                    alt="Ellipse_Img2"
+                  />
+                </figure>
+                <figure class="flex mt-[26px] mb-[14px]">
+                  <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
+                  <img
+                    src="../assets/img/IconInstagram.svg"
+                    class="w-6 h-6 mx-4"
+                    alt="Instagram_Img"
+                  />
+                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
+                </figure>
+                <h4 class="text-2xl font-medium">Christina</h4>
+                <p class="flex items-center mt-3 mb-4">
+                  <img
+                    src="../assets/img/IconLocation.svg"
+                    class="w-[9px] h-[13px]"
+                    alt="Facebook_Img"
+                  />
+                  <span class="ml-2">台南</span>
+                </p>
+                <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
+                  網頁前端工程師
+                </h5>
+                <ul class="list-none list-outside p-6">
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>前端開發和設計的工作經驗</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>注重網頁的可用性和使用者體驗設計</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </swiper-slide>
-        <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-          <div class="max-w-3xl flex flex-col">
-            <div class="card-secondary-p0 lg:mr-3">
-              <figure class="-mt-24">
-                <img
-                  src="../assets/img/Ellipse03.png"
-                  class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                  alt="Ellipse_Img3"
-                />
-              </figure>
-              <figure class="flex mt-[26px] mb-[14px]">
-                <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                <img
-                  src="../assets/img/IconInstagram.svg"
-                  class="w-6 h-6 mx-4"
-                  alt="Instagram_Img"
-                />
-                <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
-              </figure>
-              <h4 class="text-2xl font-medium">Pause</h4>
-              <p class="flex items-center mt-3 mb-4">
-                <img
-                  src="../assets/img/IconLocation.svg"
-                  class="w-[9px] h-[13px]"
-                  alt="Facebook_Img"
-                />
-                <span class="ml-2">台南</span>
-              </p>
-              <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                網頁前端工程師
-              </h5>
-              <ul class="list-none list-outside p-6">
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>前端開發和設計的工作經驗</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>注重網頁的可用性和使用者體驗設計</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
-                </li>
-              </ul>
+          </swiper-slide>
+          <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
+            <div class="max-w-3xl flex flex-col">
+              <div class="card-secondary-p0 lg:mr-3">
+                <figure class="-mt-24">
+                  <img
+                    src="../assets/img/Ellipse03.png"
+                    class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
+                    alt="Ellipse_Img3"
+                  />
+                </figure>
+                <figure class="flex mt-[26px] mb-[14px]">
+                  <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
+                  <img
+                    src="../assets/img/IconInstagram.svg"
+                    class="w-6 h-6 mx-4"
+                    alt="Instagram_Img"
+                  />
+                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
+                </figure>
+                <h4 class="text-2xl font-medium">Pause</h4>
+                <p class="flex items-center mt-3 mb-4">
+                  <img
+                    src="../assets/img/IconLocation.svg"
+                    class="w-[9px] h-[13px]"
+                    alt="Facebook_Img"
+                  />
+                  <span class="ml-2">台南</span>
+                </p>
+                <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
+                  網頁前端工程師
+                </h5>
+                <ul class="list-none list-outside p-6">
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>前端開發和設計的工作經驗</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>注重網頁的可用性和使用者體驗設計</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </swiper-slide>
-        <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-          <div class="max-w-3xl flex flex-col">
-            <div class="card-secondary-p0 lg:mr-3">
-              <figure class="-mt-24">
-                <img
-                  src="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2866&q=80"
-                  class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                  alt="Ellipse_Img4"
-                />
-              </figure>
-              <figure class="flex mt-[26px] mb-[14px]">
-                <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                <img
-                  src="../assets/img/IconInstagram.svg"
-                  class="w-6 h-6 mx-4"
-                  alt="Instagram_Img"
-                />
-                <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
-              </figure>
-              <h4 class="text-2xl font-medium">艾瑞克</h4>
-              <p class="flex items-center mt-3 mb-4">
-                <img
-                  src="../assets/img/IconLocation.svg"
-                  class="w-[9px] h-[13px]"
-                  alt="Facebook_Img"
-                />
-                <span class="ml-2">嘉義</span>
-              </p>
-              <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                網頁前端工程師
-              </h5>
-              <ul class="list-none list-outside p-6">
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>前端開發和設計的工作經驗</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>注重網頁的可用性和使用者體驗設計</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
-                </li>
-              </ul>
+          </swiper-slide>
+          <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
+            <div class="max-w-3xl flex flex-col">
+              <div class="card-secondary-p0 lg:mr-3">
+                <figure class="-mt-24">
+                  <img
+                    src="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2866&q=80"
+                    class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
+                    alt="Ellipse_Img4"
+                  />
+                </figure>
+                <figure class="flex mt-[26px] mb-[14px]">
+                  <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
+                  <img
+                    src="../assets/img/IconInstagram.svg"
+                    class="w-6 h-6 mx-4"
+                    alt="Instagram_Img"
+                  />
+                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
+                </figure>
+                <h4 class="text-2xl font-medium">艾瑞克</h4>
+                <p class="flex items-center mt-3 mb-4">
+                  <img
+                    src="../assets/img/IconLocation.svg"
+                    class="w-[9px] h-[13px]"
+                    alt="Facebook_Img"
+                  />
+                  <span class="ml-2">嘉義</span>
+                </p>
+                <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
+                  網頁前端工程師
+                </h5>
+                <ul class="list-none list-outside p-6">
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>前端開發和設計的工作經驗</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>注重網頁的可用性和使用者體驗設計</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </swiper-slide>
-        <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-          <div class="max-w-3xl flex flex-col">
-            <div class="card-secondary-p0 lg:mr-3">
-              <figure class="-mt-24">
-                <img
-                  src="https://images.unsplash.com/photo-1497021707778-a743a0bb2961?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mjg1fHxwZXJzb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60"
-                  class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                  alt="Ellipse_Img4"
-                />
-              </figure>
-              <figure class="flex mt-[26px] mb-[14px]">
-                <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                <img
-                  src="../assets/img/IconInstagram.svg"
-                  class="w-6 h-6 mx-4"
-                  alt="Instagram_Img"
-                />
-                <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
-              </figure>
-              <h4 class="text-2xl font-medium">祥 Kao</h4>
-              <p class="flex items-center mt-3 mb-4">
-                <img
-                  src="../assets/img/IconLocation.svg"
-                  class="w-[9px] h-[13px]"
-                  alt="Facebook_Img"
-                />
-                <span class="ml-2">東京</span>
-              </p>
-              <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                網頁前端工程師
-              </h5>
-              <ul class="list-none list-outside p-6">
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>前端開發和設計的工作經驗</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>注重網頁的可用性和使用者體驗設計</p>
-                </li>
-                <li class="flex">
-                  <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                  <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
-                </li>
-              </ul>
+          </swiper-slide>
+          <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
+            <div class="max-w-3xl flex flex-col">
+              <div class="card-secondary-p0 lg:mr-3">
+                <figure class="-mt-24">
+                  <img
+                    src="https://images.unsplash.com/photo-1497021707778-a743a0bb2961?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mjg1fHxwZXJzb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60"
+                    class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
+                    alt="Ellipse_Img4"
+                  />
+                </figure>
+                <figure class="flex mt-[26px] mb-[14px]">
+                  <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
+                  <img
+                    src="../assets/img/IconInstagram.svg"
+                    class="w-6 h-6 mx-4"
+                    alt="Instagram_Img"
+                  />
+                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
+                </figure>
+                <h4 class="text-2xl font-medium">祥 Kao</h4>
+                <p class="flex items-center mt-3 mb-4">
+                  <img
+                    src="../assets/img/IconLocation.svg"
+                    class="w-[9px] h-[13px]"
+                    alt="Facebook_Img"
+                  />
+                  <span class="ml-2">東京</span>
+                </p>
+                <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
+                  網頁前端工程師
+                </h5>
+                <ul class="list-none list-outside p-6">
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>前端開發和設計的工作經驗</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>注重網頁的可用性和使用者體驗設計</p>
+                  </li>
+                  <li class="flex">
+                    <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
+                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                  </li>
+                </ul>
+              </div>
             </div>
+          </swiper-slide>
+        </swiper>
+        <!-- mail -->
+        <button
+          type="button"
+          class="w-full btn btn-secondary flex justify-between items-center mt-15 lg:mt-24"
+          id="mail"
+        >
+          <div class="flex flex-col lg:flex-row lg:justify-between items-center">
+            <div class="flex lg:justify-between items-center">
+              <img src="../assets/img/IconEmail.svg" class="w-6 h-6" alt="Mail_Img" />
+              <p class="text-[28px] lg:text-[32px] font-bold ms-5">聯絡我們</p>
+            </div>
+            <p class="block lg:hidden text-xl lg:text-[28px] font-medium">email@mail.com</p>
           </div>
-        </swiper-slide>
-      </swiper>
-      <!-- mail -->
-      <button
-        type="button"
-        class="w-full btn btn-secondary flex justify-between items-center mt-15 lg:mt-24"
-        id="mail"
-      >
-        <div class="flex flex-col lg:flex-row lg:justify-between items-center">
-          <div class="flex lg:justify-between items-center">
-            <img src="../assets/img/IconEmail.svg" class="w-6 h-6" alt="Mail_Img" />
-            <p class="text-[28px] lg:text-[32px] font-bold ms-5">聯絡我們</p>
-          </div>
-          <p class="block lg:hidden text-xl lg:text-[28px] font-medium">email@mail.com</p>
-        </div>
-        <p class="hidden lg:block text-xl lg:text-[28px] font-medium">email@mail.com</p>
-        <img src="../assets/img/IconArrowRight.svg" class="w-6 h-6" alt="Mail_ArrowRight_Img" />
-      </button>
+          <p class="hidden lg:block text-xl lg:text-[28px] font-medium">email@mail.com</p>
+          <img src="../assets/img/IconArrowRight.svg" class="w-6 h-6" alt="Mail_ArrowRight_Img" />
+        </button>
+      </div>
     </section>
     <!-- copyright -->
     <footer class="bg-textself text-white text-center">
