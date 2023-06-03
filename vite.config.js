@@ -8,7 +8,7 @@ import eslintPlugin from 'vite-plugin-eslint'
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'istanbul',
+      provider: 'c8',
       reporter: ['text', 'json', 'html']
     }
   },

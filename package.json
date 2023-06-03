@@ -12,6 +12,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vitest/coverage-c8": "^0.29.8",
     "@vueuse/core": "^10.0.2",
     "@vueuse/integrations": "^10.0.2",
     "axios": "^1.3.5",
@@ -33,8 +34,6 @@
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",
     "@vitejs/plugin-vue": "^4.0.0",
-    "@vitest/coverage-c8": "^0.29.1",
-    "@vitest/coverage-istanbul": "^0.29.1",
     "@vue/eslint-config-prettier": "^7.1.0",
     "@vue/test-utils": "^2.3.0",
     "autoprefixer": "^10.4.14",
