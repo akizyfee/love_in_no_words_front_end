@@ -6,6 +6,12 @@ import eslintPlugin from 'vite-plugin-eslint'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  test: {
+    coverage: {
+      provider: 'istanbul',
+      reporter: ['text', 'json', 'html']
+    }
+  },
   plugins: [
     vue(),
     eslintPlugin({
