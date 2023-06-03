@@ -28,27 +28,24 @@ vi.mock('axios', () => {
 
 describe('UserAdmin', () => {
   const getSeats = axios.get.mockReturnValue({
-    data: {
-      usersList: [
+    data:
+      [
         {
-          _id: '6460eb68d1c638b9b291ad28',
-          number: 'A000000001',
-          name: '我是店長',
-          phone: '0912345678',
-          email: 'akizyfee@gmail.com',
-          titleNo: 1,
-          title: '店長',
-          createdAt: '2023/05/14',
-          isDisabled: false
+          _id: '6458ff1fdbc8a20949305e8e',
+          tableNo: 9,
+          tableName: 1,
+          seats: 2,
+          isWindowSeat: true,
+          isDisabled: false,
+          createdAt: '2023-05-08T13:54:39.297Z'
         }
       ]
-    }
   })
 
   beforeEach(() => {
     setActivePinia(createPinia())
   })
-  test('請求使用者列表有成功設置 List', async () => {
+  test('取得座位列表', async () => {
     const seatAdminStore = useSeatAdminStore()
     await seatAdminStore.getSeats()
     expect(seatAdminStore.seatList).toBeDefined()

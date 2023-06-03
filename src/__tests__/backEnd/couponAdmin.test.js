@@ -28,27 +28,25 @@ vi.mock('axios', () => {
 
 describe('UserAdmin', () => {
   const getCouponLists = axios.get.mockReturnValue({
-    data: {
-      usersList: [
-        {
-          _id: '6460eb68d1c638b9b291ad28',
-          number: 'A000000001',
-          name: '我是店長',
-          phone: '0912345678',
-          email: 'akizyfee@gmail.com',
-          titleNo: 1,
-          title: '店長',
-          createdAt: '2023/05/14',
-          isDisabled: false
-        }
-      ]
-    }
+    data:
+    [
+      {
+        _id: '6465d53dce9cafd7afc975d3',
+        couponNo: 'A000000005',
+        couponName: '打卡優惠',
+        couponCode: 'card',
+        discount: 90,
+        stoppedAt: null,
+        isDisabled: false,
+        createdAt: '2023-05-18T07:35:25.389Z'
+      }
+    ]
   })
 
   beforeEach(() => {
     setActivePinia(createPinia())
   })
-  test('優惠碼列表有成功設置 List', async () => {
+  test('取得優惠碼活動列表', async () => {
     const couponAdminStore = useCouponAdminStore()
     await couponAdminStore.getCoupon()
     expect(couponAdminStore.couponList).toBeDefined()

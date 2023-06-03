@@ -28,27 +28,21 @@ vi.mock('axios', () => {
 
 describe('UserAdmin', () => {
   const getProducts = axios.get.mockReturnValue({
-    data: {
-      usersList: [
-        {
-          _id: '6460eb68d1c638b9b291ad28',
-          number: 'A000000001',
-          name: '我是店長',
-          phone: '0912345678',
-          email: 'akizyfee@gmail.com',
-          titleNo: 1,
-          title: '店長',
-          createdAt: '2023/05/14',
-          isDisabled: false
-        }
-      ]
-    }
+    data:
+    [
+      {
+        _id: '6460f530d4b0dedd1aac045c',
+        productsType: 13,
+        productsTypeName: '蛋糕',
+        createdAt: '2023-05-14T14:50:24.755Z'
+      }
+    ]
   })
 
   beforeEach(() => {
     setActivePinia(createPinia())
   })
-  test('請求產品分類列表有成功設置 List', async () => {
+  test('取得產品分類列表', async () => {
     const productAdminStore = useProductAdminStore()
     await productAdminStore.fetchGetDessertTypeList()
     expect(productAdminStore.dessertTypeList).toBeDefined()

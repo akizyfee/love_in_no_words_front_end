@@ -48,7 +48,7 @@ describe('UserAdmin', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
-  test('請求使用者列表有成功設置 List', async () => {
+  test('取得使用者列表', async () => {
     const userAdminStore = useUserAdminStore()
     await userAdminStore.fetchUser()
     expect(userAdminStore.userList).toBeDefined()
