@@ -26,7 +26,7 @@ vi.mock('axios', () => {
   }
 })
 
-describe('UserAdmin', () => {
+describe('CouponAdmin', () => {
   const getCouponLists = axios.get.mockReturnValue({
     data:
     [

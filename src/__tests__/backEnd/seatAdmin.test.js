@@ -26,7 +26,7 @@ vi.mock('axios', () => {
   }
 })
 
-describe('UserAdmin', () => {
+describe('SeatAdmin', () => {
   const getSeats = axios.get.mockReturnValue({
     data:
       [
