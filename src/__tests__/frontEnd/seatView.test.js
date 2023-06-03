@@ -26,7 +26,7 @@ vi.mock('axios', () => {
   }
 })
 
-describe('UserAdmin', () => {
+describe('SeatView', () => {
   const getSeatList = axios.get.mockReturnValue({
     data: {
       tables:
@@ -43,14 +43,14 @@ describe('UserAdmin', () => {
           tableName: 3,
           seats: 7,
           isWindowSeat: false,
-          status: '未使用'
+          status: '使用中'
         },
         {
           tableNo: 19,
           tableName: 4,
           seats: 1,
           isWindowSeat: false,
-          status: '未使用'
+          status: '已預約'
         }
       ]
     }
