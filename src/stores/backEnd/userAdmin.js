@@ -14,7 +14,6 @@ export const useUserAdminStore = defineStore('counter', () => {
     const currentPage = 1
     const { data } = await getAdminUser(currentPage)
     userList.value = data.usersList
-    console.log('我有跑', data)
   })
 
   /**
