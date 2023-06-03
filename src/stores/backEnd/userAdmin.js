@@ -4,7 +4,7 @@ import { catchError } from '@/utils/catchError'
 import { successAlert } from '@/plugins/toast'
 import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/apis/user'
 
-export const useUserAdminStore = defineStore('counter', () => {
+export const useUserAdminStore = defineStore('userAdminData', () => {
   /**
  * 設置使用者列表
  */

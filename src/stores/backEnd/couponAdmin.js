@@ -4,7 +4,7 @@ import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
 import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon, getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
 
-export const useCouponAdminStore = defineStore('couponData', () => {
+export const useCouponAdminStore = defineStore('couponAdminData', () => {
   /**
    * 優惠碼活動
    * 取得優惠碼活動
