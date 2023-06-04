@@ -1,7 +1,6 @@
 <script setup>
 import Modal from '@/components/TheModal.vue'
 import { ref, nextTick, onMounted, computed } from 'vue'
-// import { getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
 import { warningAlert } from '@/plugins/toast'
 import { catchError } from '@/utils/catchError'
 import { useForm } from 'vee-validate'
@@ -77,6 +76,18 @@ const postFreebiePlus = () => {
 }
 
 /**
+ * 修改 A+B 活動的折扣比例
+ **/
+const patchFreebiePlus = () => {
+  const discountObj = { discount: freebiePlusForm.value.discount }
+  freebiePlusAdminStore.patchFreebiePlus(
+    freebiePlusCouponNoVal.value,
+    discountObj
+  )
+  handleModalClose()
+}
+
+/**
  * 刪除 A+B 活動
  **/
 const productsTypeAName = ref('')
@@ -131,6 +142,11 @@ const handleModalOpen = (checkIsNew, item) => {
           })
         })
       }
+    }
+    if (isCreate.value === 'update') {
+      const { couponNo, discount } = item
+      freebiePlusForm.value.discount = discount
+      freebiePlusCouponNoVal.value = couponNo
     }
     if (isCreate.value === 'delete') {
       const { couponNo, productsTypeA, productsTypeB } = item
@@ -187,7 +203,13 @@ const handleModalClose = () => {
           </td>
           <td class="py-3 text-center">{{ item.couponNo }}</td>
           <td class="py-3 text-center">{{ item.discount }}%</td>
-          <td class="flex justify-end">
+          <td class="flex justify-end items-center">
+            <button
+              @click="handleModalOpen('update', item)"
+              class="btn btn-outline-dark w-auto mx-1 my-2"
+            >
+              修改
+            </button>
             <button
               @click="handleModalOpen('delete', item)"
               class="btn btn-outline-dark w-auto mx-1 my-2"
@@ -206,6 +228,7 @@ const handleModalClose = () => {
         <!-- Modal header -->
         <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
           <h2 v-if="isCreate === 'create'" class="text-xl font-medium">新增 A + B 優惠活動</h2>
+          <h2 v-else-if="isCreate === 'update'" class="text-xl font-medium">修改 A + B 優惠活動</h2>
           <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除 A + B 優惠活動</h2>
           <button
             @click="handleModalClose()"
@@ -279,6 +302,25 @@ const handleModalClose = () => {
             <!-- send_btn -->
             <button type="submit" class="w-full btn btn-dark" @click.prevent="postFreebiePlus">
               確定新增
+            </button>
+          </form>
+          <form v-if="isCreate === 'update'" class="space-y-3" action="#">
+            <div>
+              <label for="form_discount" class="block mb-2 font-medium">折扣比例 </label>
+              <input
+                type="number"
+                name="discount"
+                id="form_discount"
+                class="form-input"
+                placeholder="請輸入折扣比例"
+                v-model.number="freebiePlusForm.discount"
+                required
+              />
+              <p class="text-sm text-primary-light mt-2">{{ errors.discount }}</p>
+            </div>
+            <!-- send_btn -->
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="patchFreebiePlus">
+              確定修改
             </button>
           </form>
           <form v-else-if="isCreate === 'delete'" class="space-y-3" action="#">

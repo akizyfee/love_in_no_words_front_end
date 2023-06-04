@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
-import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon, getAdminFreebiePlus, addAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
+import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon, getAdminFreebiePlus, addAdminFreebiePlus, editAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
 
 export const useCouponAdminStore = defineStore('couponAdminData', () => {
   /**
@@ -77,6 +77,16 @@ export const useFreebiePlusAdminStore = defineStore('freebiePlusData', () => {
 
   /**
    * A+B 活動
+   * 修改 A+B 活動的折扣比例
+   **/
+  const patchFreebiePlus = catchError(async (freebiePlusCouponNoVal, discount) => {
+    const { message } = await editAdminFreebiePlus(freebiePlusCouponNoVal, discount)
+    successAlert(message)
+    getFreebiePlus()
+  })
+
+  /**
+   * A+B 活動
    * 刪除 A+B 活動
    **/
   const delFreebiePlus = catchError(async (freebiePlusCouponNoVal) => {
@@ -85,5 +95,5 @@ export const useFreebiePlusAdminStore = defineStore('freebiePlusData', () => {
     getFreebiePlus()
   })
 
-  return { freebiePlusList, getFreebiePlus, postFreebiePlus, delFreebiePlus }
+  return { freebiePlusList, getFreebiePlus, postFreebiePlus, patchFreebiePlus, delFreebiePlus }
 })

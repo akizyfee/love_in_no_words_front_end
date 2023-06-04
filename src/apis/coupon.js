@@ -43,7 +43,14 @@ export const getAdminFreebiePlus = () => axios.get('/v1/abcoupons/admin')
 export const addAdminFreebiePlus = (payload) => axios.post('/v1/abcoupons/admin', payload)
 
 /**
- * O-6-3 刪除 A+B 活動
+ * O-6-3 修改 A+B 活動
+ * @param {string} 活動順序
+ * @param {number} 折扣比例
+ */
+export const editAdminFreebiePlus = (couponNo, discount) => axios.patch(`/v1/abcoupons/admin/${couponNo}`, discount)
+
+/**
+ * O-6-4 刪除 A+B 活動
  * @param {string} 活動順序
  */
 export const deleteAdminFreebiePlus = (couponNo) => axios.delete(`/v1/abcoupons/admin/${couponNo}`)
