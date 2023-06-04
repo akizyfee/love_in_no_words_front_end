@@ -6,13 +6,28 @@ import { getAdminUser, addAdminUser, editAdminUser, deleteAdminUser } from '@/ap
 
 export const useUserAdminStore = defineStore('userAdminData', () => {
   /**
+   * 載入新資料
+   */
+  const tempUserList = ref([])
+  const prePage = ref(null)
+
+  const LoadNewFile = catchError(async (currentPage) => {
+    const { data } = await getAdminUser(currentPage)
+    prePage.value = data.meta.pagination.nextPage
+    tempUserList.value = data.usersList
+    tempUserList.value.forEach((item) => {
+      userList.value.push(item)
+    })
+  })
+
+  /**
  * 設置使用者列表
  */
   const userList = ref([])
 
-  const fetchUser = catchError(async () => {
-    const currentPage = 1
+  const fetchUser = catchError(async (currentPage) => {
     const { data } = await getAdminUser(currentPage)
+    prePage.value = data.meta.pagination.nextPage
     userList.value = data.usersList
   })
 
@@ -22,7 +37,7 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
   const fetchAddUser = catchError(async (userProfile) => {
     const { message } = await addAdminUser(userProfile)
     successAlert(message)
-    fetchUser()
+    fetchUser(1)
   })
 
   /**
@@ -32,7 +47,7 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
     const Id = userProfile._id
     const { message } = await editAdminUser(Id, userProfile)
     successAlert(message)
-    fetchUser()
+    fetchUser(1)
   })
 
   /**
@@ -43,8 +58,8 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
     const TitleNo = userProfile.titleNo
     const { message } = await deleteAdminUser(Id, TitleNo)
     successAlert(message)
-    fetchUser()
+    fetchUser(1)
   })
 
-  return { userList, fetchUser, fetchAddUser, fetcheditUser, fetchDeleteUser }
+  return { userList, prePage, LoadNewFile, fetchUser, fetchAddUser, fetcheditUser, fetchDeleteUser }
 })
