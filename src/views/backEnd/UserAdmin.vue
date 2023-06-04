@@ -9,10 +9,20 @@ import { useUserAdminStore } from '@/stores/backEnd/userAdmin'
 const userAdminStore = useUserAdminStore()
 
 /**
+ * 分頁
+ */
+const lastPageIndex = ref(1)
+
+const fetchLoadNewFile = () => {
+  lastPageIndex.value++
+  userAdminStore.LoadNewFile(lastPageIndex.value)
+}
+
+/**
  * 設置使用者列表
  */
 onMounted(() => {
-  userAdminStore.fetchUser()
+  userAdminStore.fetchUser(lastPageIndex.value)
 })
 
 /**
@@ -153,6 +163,13 @@ const handleModalClose = () => {
             </tr>
           </tbody>
         </table>
+        <p
+          v-if="userAdminStore.prePage !== null"
+          @click="fetchLoadNewFile"
+          class="text-center text-xl font-medium mt-5"
+        >
+          點選以載入新資料
+        </p>
       </section>
     </main>
   </div>
