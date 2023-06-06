@@ -233,8 +233,8 @@ const handleModalClose = () => {
                 seat?.reservation?.phone ? seat.reservation.phone : '&emsp;'
               }}</span>
             </p>
-            <div class="flex justify-between items-center mt-4">
-              <p>
+            <div class="flex flex-wrap justify-between items-center mt-4">
+              <p class="mb-2">
                 <span
                   class="rounded py-1 px-2 mr-2"
                   :class="
