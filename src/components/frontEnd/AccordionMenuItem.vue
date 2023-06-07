@@ -31,13 +31,13 @@ const fetchLoadNewFile = () => {
  **/
 
 onMounted(() => {
-  orderStore.getOrders(searchForm, lastPageIndex.value)
+  orderStore.getOrders(searchForm, 1)
 })
 
 watch(
   [() => searchForm.orderStatus, () => searchForm.date],
   () => {
-    orderStore.getOrders(searchForm, lastPageIndex.value)
+    orderStore.getOrders(searchForm, 1)
   },
   {
     immediate: true,
