@@ -126,9 +126,9 @@ const downloadFile = async () => {
   })
   const downloadLink = document.createElement('a')
   const blob = new Blob([response.data], { type: response.headers['content-type'] })
-  // const fileName = '訂單資訊下載.xlsx'
+  const fileName = `${revenueYear.value}年${searchMouth.value}月營收報表`
   downloadLink.href = URL.createObjectURL(blob)
-  // downloadLink.download = fileName
+  downloadLink.download = fileName
   downloadLink.click()
 }
 </script>
