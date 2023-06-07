@@ -16,6 +16,7 @@ import useBarChart from '@/utils/useEcharBar'
 import { useWindowSize } from '@vueuse/core'
 import { successAlert } from '@/plugins/toast'
 import axios from 'axios'
+import { getCookieToken } from '@/utils/cookie'
 
 /**
  * 取得每月營收和訂單量
@@ -115,13 +116,19 @@ const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null)
  * O-5-6 下載訂單：Excel
  */
 const downloadFile = async () => {
+  const token = getCookieToken()
   const url = `https://love-in-no-words-api.onrender.com/v1/reports/admin/orders/download?month=${searchMouth.value}&dataAmount=${searchNumber.value}`
-  const response = await axios.get(url, { responseType: 'blob' })
+  const response = await axios.get(url, {
+    responseType: 'blob',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
   const downloadLink = document.createElement('a')
   const blob = new Blob([response.data], { type: response.headers['content-type'] })
-  const fileName = '訂單資訊下載.xlsx'
+  // const fileName = '訂單資訊下載.xlsx'
   downloadLink.href = URL.createObjectURL(blob)
-  downloadLink.download = fileName
+  // downloadLink.download = fileName
   downloadLink.click()
 }
 </script>
