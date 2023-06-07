@@ -14,7 +14,7 @@ export const useOrderStore = defineStore('orderData', () => {
   const LoadNewFile = catchError(async (searchForm, currentPage) => {
     const { orderStatus, date } = searchForm
     const { data } = await searchOrder(orderStatus, date, currentPage)
-    prePage.value = data.meta.pagination.nextPage
+    prePage.value = data.meta?.pagination.nextPage
     tempOrderList.value = data.ordersList
     tempOrderList.value.forEach((item) => {
       orderList.value.push(item)
@@ -29,13 +29,9 @@ export const useOrderStore = defineStore('orderData', () => {
   const getOrders = catchError(async (searchForm, currentPage) => {
     const { orderStatus, date } = searchForm
     const { data } = await searchOrder(orderStatus, date, currentPage)
-    if (data.ordersList.length === 0) {
-      warningAlert('沒有符合的訂單資料')
-    }
-    prePage.value = data.meta.pagination.nextPage
+    prePage.value = data.meta?.pagination.nextPage
     currentIndex.value = orderStatus
     orderList.value = data.ordersList
-    return data.ordersList
   })
 
   /**

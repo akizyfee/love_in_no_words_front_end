@@ -53,7 +53,7 @@ const getOrderDetail = (orderId) => {
 }
 
 /**
- * 新增會員
+ * 滿意度及建議回饋
  **/
 const initRatingForm = reactive({
   orderId: '',

@@ -13,7 +13,7 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
 
   const LoadNewFile = catchError(async (currentPage) => {
     const { data } = await getAdminUser(currentPage)
-    prePage.value = data.meta.pagination.nextPage
+    prePage.value = data.meta?.pagination.nextPage
     tempUserList.value = data.usersList
     tempUserList.value.forEach((item) => {
       userList.value.push(item)
@@ -27,7 +27,7 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
 
   const fetchUser = catchError(async (currentPage) => {
     const { data } = await getAdminUser(currentPage)
-    prePage.value = data.meta.pagination.nextPage
+    prePage.value = data.meta?.pagination.nextPage
     userList.value = data.usersList
   })
 
