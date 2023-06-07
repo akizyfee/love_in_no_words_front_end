@@ -17,7 +17,7 @@ export const addOrder = (payload) => axios.post('/v1/orders', payload)
  * @param {string} 已結帳未結帳狀態
  * @param {date}   訂單日期
  */
-export const searchOrder = (orderStatus, date) => axios.get(`/v1/orders?orderStatus=${orderStatus}&date=${date}`)
+export const searchOrder = (orderStatus, date, page) => axios.get(`/v1/orders?orderStatus=${orderStatus}&date=${date}&page=${page}`)
 
 /**
  * S-3-2 查詢訂單詳細內容

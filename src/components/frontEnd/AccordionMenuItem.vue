@@ -1,8 +1,8 @@
 <script setup>
-// import Modal from '@/components/TheModal.vue'
+import Modal from '@/components/TheModal.vue'
 import IconMinus from '@/assets/img/IconMinus.png'
 import IconAdd from '@/assets/img/IconAdd.png'
-import { ref, onMounted, watch, reactive } from 'vue'
+import { ref, nextTick, onMounted, watch, reactive } from 'vue'
 import { dayFormat, dayInterval } from '@/plugins/day'
 
 import { useOrderStore } from '@/stores/frontEnd/orderView'
@@ -17,23 +17,106 @@ const searchForm = reactive({
 const checkboxArray = ref([])
 
 /**
+ * 分頁
+ */
+const lastPageIndex = ref(1)
+
+const fetchLoadNewFile = () => {
+  lastPageIndex.value++
+  orderStore.LoadNewFile(searchForm, lastPageIndex.value)
+}
+
+/**
  * 查詢訂單功能
  **/
 
 onMounted(() => {
-  orderStore.getOrders(searchForm)
+  orderStore.getOrders(searchForm, lastPageIndex.value)
 })
 
 watch(
   [() => searchForm.orderStatus, () => searchForm.date],
   () => {
-    orderStore.getOrders(searchForm)
+    orderStore.getOrders(searchForm, lastPageIndex.value)
   },
   {
     immediate: true,
     deep: true
   }
 )
+
+/**
+ * 查詢訂單詳細內容
+ **/
+const getOrderDetail = (orderId) => {
+  orderStore.getOrderDetail(orderId)
+}
+
+/**
+ * 新增會員
+ **/
+const initRatingForm = reactive({
+  orderId: '',
+  orderNo: '',
+  tableName: '1',
+  payment: '',
+  orderType: '已結帳',
+  satisfaction: 1,
+  description: ''
+})
+
+const ratingForm = reactive({
+  orderId: '',
+  orderNo: '',
+  tableName: '1',
+  payment: '',
+  orderType: '已結帳',
+  satisfaction: 1,
+  description: ''
+})
+
+const postOrderRating = () => {
+  searchForm.orderStatus = statusList.value[1]
+  searchForm.date = ''
+  orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+  handleModalClose()
+}
+
+/**
+ * modal
+ * */
+const isCreate = ref(false)
+const childComponentRef = ref()
+
+const handleModalOpen = (checkIsCreate, item) => {
+  isCreate.value = checkIsCreate
+  const childComponent = childComponentRef.value
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.openModal()
+    }
+    if (isCreate.value === 'create') {
+      const { _id, orderNo, tableName } = item
+      ratingForm.orderId = _id
+      ratingForm.orderNo = orderNo
+      ratingForm.tableName = tableName
+    }
+  })
+}
+
+const handleModalClose = () => {
+  const childComponent = childComponentRef.value
+
+  nextTick(() => {
+    if (childComponent) {
+      childComponent.closeModal()
+      /**
+       * 清空欄位功能
+       **/
+      Object.assign(ratingForm, initRatingForm)
+    }
+  })
+}
 </script>
 <template>
   <main class="min-h-screen p-6">
@@ -51,8 +134,8 @@ watch(
         </li>
       </ul>
       <div>
-        <label for="seat_reservationDate" class="block mb-2 font-medium">日期</label>
-        <select id="seat_reservationDate" class="form-select" v-model="searchForm.date">
+        <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
+        <select id="form_reservationDate" class="form-select" v-model="searchForm.date">
           <option v-for="(option, key) in dateList" :value="option" :key="key">
             {{ option }}
           </option>
@@ -67,7 +150,7 @@ watch(
             <th class="p-4 col-span-1"></th>
             <th class="p-4 col-span-3">日期</th>
             <th class="p-4 col-span-4">訂單編號</th>
-            <th class="p-4 col-span-2">座位編號</th>
+            <th class="p-4 col-span-2">桌號</th>
             <th class="p-4 col-span-2"></th>
           </tr>
         </thead>
@@ -90,6 +173,7 @@ watch(
               />
               <label :for="order.orderNo">
                 <img
+                  @click="getOrderDetail(order._id)"
                   :src="checkboxArray[index] === true ? IconMinus : IconAdd"
                   width="32"
                   height="32"
@@ -104,7 +188,13 @@ watch(
               }}</span>
             </td>
             <td class="col-span-2 align-middle">
-              <button type="button" class="btn btn-outline-dark py-2 px-3 mt-1">結帳</button>
+              <button
+                type="button"
+                class="btn btn-outline-dark py-2 px-3 mt-1"
+                @click="handleModalOpen('create', order)"
+              >
+                結帳
+              </button>
             </td>
           </tr>
         </tbody>
@@ -131,26 +221,16 @@ watch(
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b-2 border-textself">
-                    <td class="p-4">1</td>
-                    <td class="p-4">鬆餅</td>
-                    <td class="p-4">150</td>
-                    <td class="p-4">1</td>
-                    <td class="p-4">無</td>
-                  </tr>
-                  <tr class="border-b-2 border-textself">
-                    <td class="p-4">2</td>
-                    <td class="p-4">甜甜圈</td>
-                    <td class="p-4">300</td>
-                    <td class="p-4">2</td>
-                    <td class="p-4">不要太甜</td>
-                  </tr>
-                  <tr class="border-b-2 border-textself">
-                    <td class="p-4">3</td>
-                    <td class="p-4">瑪得蓮</td>
-                    <td class="p-4">250</td>
-                    <td class="p-4">5</td>
-                    <td class="p-4">1</td>
+                  <tr
+                    class="border-b-2 border-textself"
+                    v-for="(product, index) in orderStore.orderDetail.orderList"
+                    :key="product._id"
+                  >
+                    <td class="p-4">{{ index + 1 }}</td>
+                    <td class="p-4">{{ product.productName }}</td>
+                    <td class="p-4">{{ product.price }}</td>
+                    <td class="p-4">{{ product.qty }}</td>
+                    <td class="p-4">這是備註，記得補上</td>
                   </tr>
                 </tbody>
               </table>
@@ -160,7 +240,24 @@ watch(
             <td class="p-4 col-span-1"></td>
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">製作時間</span>
-              <span class="ml-4 text-xl font-medium">20 分</span>
+              <span class="ml-4 text-xl font-medium"
+                >{{ orderStore.orderDetail.totalTime }} 分</span
+              >
+            </td>
+          </tr>
+          <tr class="bg-white text-left grid grid-cols-12">
+            <td class="p-4 col-span-1"></td>
+            <td class="p-4 col-span-11">
+              <span class="text-neutralself-200">出餐狀態</span>
+              <span
+                class="ml-4 inline text-sm font-medium rounded-lg py-1 px-2"
+                :class="
+                  orderStore.orderDetail.status === '未出餐'
+                    ? 'bg-neutralself-100 text-white'
+                    : 'bg-primary-light text-white'
+                "
+                >{{ orderStore.orderDetail.status }}</span
+              >
             </td>
           </tr>
           <tr class="bg-white text-left grid grid-cols-12">
@@ -179,20 +276,138 @@ watch(
             <td class="p-4 col-span-1"></td>
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">折扣金額</span>
-              <span class="ml-4 text-primary font-medium">$9</span>
+              <span class="ml-4 text-primary font-medium"
+                >$ {{ orderStore.orderDetail.discount }}</span
+              >
             </td>
           </tr>
           <tr class="bg-white text-left grid grid-cols-12">
             <td class="p-4 pb-4 col-span-1"></td>
             <td class="p-4 pb-4 col-span-11">
               <span class="text-neutralself-200">付款金額</span>
-              <span class="ml-4 text-primary text-xl font-medium">$999</span>
+              <span class="ml-4 text-primary text-xl font-medium"
+                >$ {{ orderStore.orderDetail.totalPrice }}</span
+              >
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <!-- 載入分頁內容 -->
+    <button
+      type="button"
+      class="w-full btn btn-secondary my-6"
+      v-if="orderStore.prePage !== null"
+      @click="fetchLoadNewFile"
+    >
+      <span class="text-xl lg:text-[28px] font-medium">點選以載入新資料</span>
+    </button>
   </main>
+  <Modal ref="childComponentRef">
+    <section class="relative w-full h-full max-w-md md:h-auto">
+      <!-- Modal content -->
+      <div class="relative bg-white border-2 border-textself rounded-lg shadow">
+        <!-- Modal header -->
+        <div class="flex items-center justify-end border-b-2 border-textself p-3 rounded-t">
+          <h2 v-if="isCreate === 'create'" class="text-xl font-medium">填寫付款資訊</h2>
+          <button
+            @click="handleModalClose()"
+            type="button"
+            class="text-gray-400 bg-black hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+          >
+            <svg
+              aria-hidden="true"
+              class="w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+            <span class="sr-only text-black">Close modal</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="w-full rounded-lg p-3" v-if="isCreate === 'create'">
+          <div class="flex justify-between items-center bg-bgself-light rounded-xl p-3 mb-3">
+            <p class="font-medium">
+              訂單編號
+              <span class="py-1 px-2">{{ ratingForm.orderNo }}</span>
+            </p>
+            <p class="font-medium">
+              桌號
+              <span class="text-white bg-primary-light rounded py-1 px-2">{{
+                ratingForm.tableName
+              }}</span>
+            </p>
+          </div>
+          <form class="space-y-3" action="#">
+            <div>
+              <label for="form_satisfaction" class="block mb-2 font-medium">滿意度</label>
+              <select
+                id="form_satisfaction"
+                class="form-select py-3"
+                v-model="ratingForm.satisfaction"
+              >
+                <option v-for="(option, key) in 10" :value="option" :key="key">
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label for="form_description" class="block font-medium">建議</label>
+              <textarea
+                id="form_description"
+                rows="5"
+                class="form-input my-2"
+                placeholder="請輸入建議"
+                v-model.trim="ratingForm.description"
+              ></textarea>
+            </div>
+            <div>
+              <h3 class="font-medium mb-1">付款方式</h3>
+              <ul class="flex">
+                <li class="mb-3 mr-3">
+                  <div class="flex items-center mb-3">
+                    <input
+                      id="payment_money"
+                      type="radio"
+                      value="現金"
+                      v-model="ratingForm.payment"
+                      name="form-radio"
+                      class="form-radio"
+                    />
+                    <label for="payment_money" class="ml-2 text-xl font-medium"> 現金 </label>
+                  </div>
+                </li>
+                <li class="mb-3 mr-3">
+                  <div class="flex items-center mb-3">
+                    <input
+                      id="payment_LinePay"
+                      type="radio"
+                      value="LinePay"
+                      v-model="ratingForm.payment"
+                      name="form-radio"
+                      class="form-radio"
+                    />
+                    <label for="payment_LinePay" class="ml-2 text-xl font-medium"> LinePay </label>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <!-- send_btn -->
+            <button type="submit" class="w-full btn btn-dark" @click.prevent="postOrderRating">
+              結帳
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </Modal>
 </template>
 <style scoped>
 table {
