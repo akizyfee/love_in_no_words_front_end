@@ -29,7 +29,7 @@ vi.mock('axios', () => {
 describe('OrderView', () => {
   const getOrders = axios.get.mockReturnValue({
     data: {
-      orders:
+      ordersList:
       [
         {
           _id: '646349bd7b6adbb593b143ad',
