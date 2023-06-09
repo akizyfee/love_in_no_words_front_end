@@ -41,6 +41,12 @@ export const errorsFormSchema = {
       return '購買數量需要大於 0，請重新填寫'
     }
     return true
+  },
+  payment(value) {
+    if (!value) {
+      return '付款方式必填'
+    }
+    return true
   }
 }
 

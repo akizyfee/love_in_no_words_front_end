@@ -33,6 +33,20 @@ export const searchOrderDetail = (orderId) => axios.get(`/v1/orders/detail/${ord
 export const addOrderRating = (orderId, payload) => axios.post(`/v1/orders/rating/${orderId}`, payload)
 
 /**
+ * S-5-1 LinePay 結帳
+ * @param {string} 訂單 ID
+ * @param {string} token 驗證用
+ */
+export const addLinePayOrder = (orderNo, token) => axios.post(`/v1/line_pay/${orderNo}?redirectDevUrl=true`, token)
+
+/**
+ * S-5-2 查詢訂單是否用 LinePay 完成結帳
+ * @param {string} 訂單 ID
+ * @param {string} token 驗證用
+ */
+export const searchLinePayOrderStatus = (orderNo) => axios.get(`/v1/line_pay/check/${orderNo}`)
+
+/**
  * C-1-1 查詢出餐訂單內容
  * @param {string} 已出餐未出餐狀態
  */
