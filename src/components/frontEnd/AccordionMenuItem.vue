@@ -2,8 +2,12 @@
 import Modal from '@/components/TheModal.vue'
 import IconMinus from '@/assets/img/IconMinus.png'
 import IconAdd from '@/assets/img/IconAdd.png'
-import { ref, nextTick, onMounted, watch, reactive } from 'vue'
+import { ref, nextTick, onMounted, watch, reactive, getCurrentInstance } from 'vue'
 import { dayFormat, dayInterval } from '@/plugins/day'
+import { getCookieToken } from '@/utils/cookie'
+import { useForm } from 'vee-validate'
+import { errorsFormSchema } from '@/utils/formValidate'
+import { warningAlert } from '@/plugins/toast'
 
 import { useOrderStore } from '@/stores/frontEnd/orderView'
 const orderStore = useOrderStore()
@@ -15,6 +19,16 @@ const searchForm = reactive({
   date: ''
 })
 const checkboxArray = ref([])
+
+/**
+ * 由於 Router 跳轉，所以強制更新頁面
+ **/
+const internalInstance = getCurrentInstance()
+const forceUpdate = internalInstance.ctx.$forceUpdate
+
+onMounted(() => {
+  forceUpdate()
+})
 
 /**
  * 分頁
@@ -29,15 +43,16 @@ const fetchLoadNewFile = () => {
 /**
  * 查詢訂單功能
  **/
-
 onMounted(() => {
   orderStore.getOrders(searchForm, 1)
+  lastPageIndex.value = 1
 })
 
 watch(
   [() => searchForm.orderStatus, () => searchForm.date],
   () => {
     orderStore.getOrders(searchForm, 1)
+    lastPageIndex.value = 1
   },
   {
     immediate: true,
@@ -53,15 +68,23 @@ const getOrderDetail = (orderId) => {
 }
 
 /**
- * 滿意度及建議回饋
+ * 取得 Token、LinePay 結帳、VeeValidate 套件、滿意度及建議回饋
  **/
+const token = ref(`${getCookieToken()}`)
+const linepayUrl = ref('')
+const linepayForm = ref()
+
+const { errors, useFieldModel } = useForm({
+  validationSchema: errorsFormSchema
+})
+
 const initRatingForm = reactive({
   orderId: '',
   orderNo: '',
   tableName: '1',
   payment: '',
   orderType: '已結帳',
-  satisfaction: 1,
+  satisfaction: 10,
   description: ''
 })
 
@@ -69,17 +92,38 @@ const ratingForm = reactive({
   orderId: '',
   orderNo: '',
   tableName: '1',
-  payment: '',
+  payment: useFieldModel('payment'),
   orderType: '已結帳',
-  satisfaction: 1,
+  satisfaction: 10,
   description: ''
 })
 
 const postOrderRating = () => {
+  if (!ratingForm.payment) {
+    warningAlert('請選擇付款類型')
+    return
+  }
   searchForm.orderStatus = statusList.value[1]
   searchForm.date = ''
-  orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+  if (ratingForm.payment === '現金') {
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+  } else if (ratingForm.payment === 'LinePay') {
+    ratingForm.orderType = '未結帳'
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    nextTick(() => {
+      if (linepayUrl.value) {
+        linepayForm.value.submit()
+      }
+    })
+  }
   handleModalClose()
+}
+
+/**
+ * 查詢訂單是否用 LinePay 完成結帳
+ **/
+const getLinePayStatus = (orderId) => {
+  orderStore.getLinePayStatus(orderId)
 }
 
 /**
@@ -100,6 +144,9 @@ const handleModalOpen = (checkIsCreate, item) => {
       ratingForm.orderId = _id
       ratingForm.orderNo = orderNo
       ratingForm.tableName = tableName
+      linepayUrl.value = `${
+        import.meta.env.VITE_API_URL
+      }/v1/line_pay/${orderNo}?redirectDevUrl=true`
     }
   })
 }
@@ -114,6 +161,7 @@ const handleModalClose = () => {
        * 清空欄位功能
        **/
       Object.assign(ratingForm, initRatingForm)
+      linepayUrl.value = ''
     }
   })
 }
@@ -149,9 +197,10 @@ const handleModalClose = () => {
           <tr class="grid grid-cols-12">
             <th class="p-4 col-span-1"></th>
             <th class="p-4 col-span-3">日期</th>
-            <th class="p-4 col-span-4">訂單編號</th>
-            <th class="p-4 col-span-2">桌號</th>
-            <th class="p-4 col-span-2"></th>
+            <th class="p-4 col-span-1">時段</th>
+            <th class="p-4 col-span-3">訂單編號</th>
+            <th class="p-4 col-span-1">桌號</th>
+            <th class="p-4 col-span-3"></th>
           </tr>
         </thead>
       </table>
@@ -181,20 +230,30 @@ const handleModalClose = () => {
               /></label>
             </td>
             <td class="p-4 col-span-3 align-middle">{{ dayFormat(order.createdAt) }}</td>
-            <td class="p-4 col-span-4 align-middle">{{ order.orderNo }}</td>
-            <td class="p-4 col-span-2 align-middle">
+            <td class="p-4 col-span-1 align-middle">{{ order.time }}</td>
+            <td class="p-4 col-span-3 align-middle">{{ order.orderNo }}</td>
+            <td class="p-4 col-span-1 align-middle">
               <span class="text-white bg-primary-light rounded py-1 px-2">{{
                 order.tableName
               }}</span>
             </td>
-            <td class="col-span-2 align-middle">
-              <button
-                type="button"
-                class="btn btn-outline-dark py-2 px-3 mt-1"
-                @click="handleModalOpen('create', order)"
-              >
-                結帳
-              </button>
+            <td class="col-span-3 align-middle">
+              <div class="flex">
+                <button
+                  type="button"
+                  class="w-full mr-1 btn btn-outline-dark"
+                  @click="handleModalOpen('create', order)"
+                >
+                  結帳
+                </button>
+                <button
+                  type="button"
+                  class="w-full ml-1 btn btn-dark"
+                  @click="getLinePayStatus(order.orderNo)"
+                >
+                  查詢
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -302,6 +361,11 @@ const handleModalClose = () => {
     >
       <span class="text-xl lg:text-[28px] font-medium">點選以載入新資料</span>
     </button>
+    <!-- LinePay 表單 -->
+    <form :action="linepayUrl" method="POST" ref="linepayForm" class="sr-only">
+      <input type="hidden" name="_token" :value="token" />
+      <button type="submit">送出表單</button>
+    </form>
   </main>
   <Modal ref="childComponentRef">
     <section class="relative w-full h-full max-w-md md:h-auto">
@@ -371,8 +435,8 @@ const handleModalClose = () => {
             <div>
               <h3 class="font-medium mb-1">付款方式</h3>
               <ul class="flex">
-                <li class="mb-3 mr-3">
-                  <div class="flex items-center mb-3">
+                <li class="mr-3">
+                  <div class="flex items-center">
                     <input
                       id="payment_money"
                       type="radio"
@@ -384,8 +448,8 @@ const handleModalClose = () => {
                     <label for="payment_money" class="ml-2 text-xl font-medium"> 現金 </label>
                   </div>
                 </li>
-                <li class="mb-3 mr-3">
-                  <div class="flex items-center mb-3">
+                <li>
+                  <div class="flex items-center">
                     <input
                       id="payment_LinePay"
                       type="radio"
@@ -398,6 +462,7 @@ const handleModalClose = () => {
                   </div>
                 </li>
               </ul>
+              <p class="text-sm text-primary-light mt-2">{{ errors.payment }}</p>
             </div>
             <!-- send_btn -->
             <button type="submit" class="w-full btn btn-dark" @click.prevent="postOrderRating">

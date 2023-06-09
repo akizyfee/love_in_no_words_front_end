@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
-import { searchOrder, searchOrderDetail, addOrderRating } from '@/apis/order'
+import { searchOrder, searchOrderDetail, addOrderRating, searchLinePayOrderStatus } from '@/apis/order'
 
 export const useOrderStore = defineStore('orderData', () => {
   /**
@@ -58,5 +58,13 @@ export const useOrderStore = defineStore('orderData', () => {
     getOrders(searchForm)
   })
 
-  return { prePage, currentIndex, orderList, orderDetail, LoadNewFile, getOrders, getOrderDetail, postOrderRating }
+  /**
+   * 查詢訂單是否用 LinePay 完成結帳
+   **/
+  const getLinePayStatus = catchError(async (orderNo) => {
+    const { message } = await searchLinePayOrderStatus(orderNo)
+    successAlert(message)
+  })
+
+  return { prePage, currentIndex, orderList, orderDetail, LoadNewFile, getOrders, getOrderDetail, postOrderRating, getLinePayStatus }
 })
