@@ -3,18 +3,24 @@ import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
 import { searchMember, addMember, editMember, deleteMember } from '@/apis/user'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useMemberStore = defineStore('memberData', () => {
+  const loding = useLoadingStore()
+
   /**
    * 查詢會員功能
    **/
   const memberList = ref([])
   const getMembers = catchError(async (phone, page) => {
+    loding.isLoading = true
     const { data } = await searchMember(phone, page)
     if (data.membersList.length === 0) {
       warningAlert('沒有符合的會員資料')
+      loding.isLoading = false
     }
     memberList.value = data.membersList
+    loding.isLoading = false
   })
 
   /**
