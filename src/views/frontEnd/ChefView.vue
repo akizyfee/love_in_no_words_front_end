@@ -1,14 +1,14 @@
 <script setup>
 import SiderBar from '@/components/frontEnd/SideBar.vue'
 import { io } from 'socket.io-client'
-import { successAlert, warningAlert } from '@/plugins/toast'
-import { onMounted, ref, watch } from 'vue'
-
-import { searchPickUp, editPickUp } from '@/apis/order'
+import { warningAlert } from '@/plugins/toast'
+import { onMounted, watch } from 'vue'
 import { catchError } from '@/utils/catchError'
 
-const socket = io(import.meta.env.VITE_SOCKET_URL)
+import { useChefStore } from '@/stores/frontEnd/chefView'
 
+const socket = io(import.meta.env.VITE_SOCKET_URL)
+const chefStore = useChefStore()
 /**
  * 接收訊息
  */
@@ -16,44 +16,21 @@ socket.on('chef', (messages) => {
   // 這邊等 API 串接收到消息可以改成刷新訂單，就不用通知了
   if (messages) {
     warningAlert('收到前台點餐訂單')
-    fetchSearchPickUp()
+    chefStore.fetchSearchPickUp()
   }
 })
 
 /**
- * 出餐時間計算
- */
-const useProductionTimeCaculater = (data) => {
-  return data.map((temp) => {
-    const totalTime = temp.orderList
-      .map((item) => {
-        return item.qty * item.productionTime
-      })
-      .reduce((acc, cur) => acc + cur, 0)
-    return { ...temp, totalTime }
-  })
-}
-
-/**
  * 查詢訂單
  */
-const selectStatus = ref(['未出餐', '已出餐'])
-const currentStatus = ref('未出餐')
-const pickUpList = ref([])
-const fetchSearchPickUp = catchError(async () => {
-  const { data } = await searchPickUp(currentStatus.value)
-  const newDessertList = useProductionTimeCaculater(data)
-  pickUpList.value = newDessertList
-})
-
 onMounted(() => {
-  fetchSearchPickUp()
+  chefStore.fetchSearchPickUp()
 })
 
 watch(
-  [() => currentStatus],
+  [() => chefStore.currentStatus],
   () => {
-    fetchSearchPickUp()
+    chefStore.fetchSearchPickUp()
   },
   {
     immediate: true,
@@ -64,18 +41,12 @@ watch(
 /**
  * 出餐
  */
-const overStatus = ref({
-  status: '已出餐'
-})
 const fetchSendPickUp = catchError(async (oderId) => {
-  const { data } = await editPickUp(oderId, overStatus.value)
-  successAlert(data.status)
-
+  chefStore.fetchSendPickUp(oderId)
   const sendMessage = {
     message: `'訂單 ${oderId} 已製作完成，請出餐'`
   }
   socket.emit('employee', sendMessage)
-  fetchSearchPickUp()
 })
 </script>
 <template>
@@ -90,11 +61,11 @@ const fetchSendPickUp = catchError(async (oderId) => {
     <main class="min-h-screen p-6">
       <!-- menu -->
       <ul class="flex text-xl font-medium text-center break-keep overflow-x-auto mb-6">
-        <li v-for="(select, key) in selectStatus" :key="key" class="mr-2">
+        <li v-for="(select, key) in chefStore.selectStatus" :key="key" class="mr-2">
           <a
-            @click.prevent="currentStatus = select"
+            @click.prevent="chefStore.currentStatus = select"
             class="block px-6 py-3 rounded-lg hover:text-primary-light hover:bg-white"
-            :class="{ 'tabbar-active': currentStatus === select }"
+            :class="{ 'tabbar-active': chefStore.currentStatus === select }"
             >{{ select }}</a
           >
         </li>
@@ -102,7 +73,7 @@ const fetchSendPickUp = catchError(async (oderId) => {
       <!-- table -->
       <ul class="overflow-x-auto flex space-x-2">
         <li
-          v-for="item in pickUpList"
+          v-for="item in chefStore.pickUpList"
           :key="item.orderNo"
           class="min-w-[300px] h-[600px] bg-white flex flex-col justify-between border-2 border-textself rounded-lg shadow"
         >
