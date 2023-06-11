@@ -14,6 +14,16 @@ const searchForm = reactive({
 })
 
 /**
+ * 分頁
+ */
+const lastPageIndex = ref(1)
+
+const fetchLoadNewFile = () => {
+  lastPageIndex.value++
+  memberStore.LoadNewFile(searchForm.phone, lastPageIndex.value)
+}
+
+/**
  * 查詢會員功能
  **/
 
@@ -172,6 +182,15 @@ const handleModalClose = () => {
           </tbody>
         </table>
       </section>
+      <!-- 載入分頁內容 -->
+      <button
+        type="button"
+        class="w-full btn btn-secondary my-6"
+        v-if="memberStore.prePage !== null"
+        @click="fetchLoadNewFile"
+      >
+        <span class="text-xl lg:text-[28px] font-medium">點選以載入新資料</span>
+      </button>
     </main>
   </section>
   <Modal ref="childComponentRef">

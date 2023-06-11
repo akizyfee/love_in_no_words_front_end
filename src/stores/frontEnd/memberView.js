@@ -9,6 +9,25 @@ export const useMemberStore = defineStore('memberData', () => {
   const loding = useLoadingStore()
 
   /**
+   * 載入新資料
+   */
+  const tempMemberList = ref([])
+  const prePage = ref()
+
+  const LoadNewFile = catchError(async (phone, currentPage) => {
+    loding.isLoading = true
+    const { data } = await searchMember(phone, currentPage)
+    console.log(data)
+    prePage.value = data.meta?.pagination.nextPage
+    console.log(prePage.value)
+    tempMemberList.value = data.membersList
+    tempMemberList.value.forEach((item) => {
+      memberList.value.push(item)
+    })
+    loding.isLoading = false
+  })
+
+  /**
    * 查詢會員功能
    **/
   const memberList = ref([])
@@ -53,5 +72,5 @@ export const useMemberStore = defineStore('memberData', () => {
     getMembers(phone, page)
   })
 
-  return { memberList, getMembers, postMember, patchMember, delMember }
+  return { memberList, getMembers, prePage, postMember, patchMember, delMember, LoadNewFile }
 })

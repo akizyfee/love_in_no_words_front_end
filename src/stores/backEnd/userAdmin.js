@@ -12,7 +12,7 @@ export const useUserAdminStore = defineStore('userAdminData', () => {
    * 載入新資料
    */
   const tempUserList = ref([])
-  const prePage = ref(null)
+  const prePage = ref()
 
   const LoadNewFile = catchError(async (currentPage) => {
     loding.isLoading = true
