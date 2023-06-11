@@ -3,8 +3,11 @@ import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
 import { searchOrder, searchOrderDetail, addOrderRating, searchLinePayOrderStatus } from '@/apis/order'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useOrderStore = defineStore('orderData', () => {
+  const loding = useLoadingStore()
+
   /**
    * 載入新資料
    */
@@ -12,6 +15,7 @@ export const useOrderStore = defineStore('orderData', () => {
   const prePage = ref(null)
 
   const LoadNewFile = catchError(async (searchForm, currentPage) => {
+    loding.isLoading = true
     const { orderStatus, date } = searchForm
     const { data } = await searchOrder(orderStatus, date, currentPage)
     prePage.value = data.meta?.pagination.nextPage
@@ -19,6 +23,7 @@ export const useOrderStore = defineStore('orderData', () => {
     tempOrderList.value.forEach((item) => {
       orderList.value.push(item)
     })
+    loding.isLoading = false
   })
 
   /**
@@ -27,11 +32,13 @@ export const useOrderStore = defineStore('orderData', () => {
   const orderList = ref([])
   const currentIndex = ref(0)
   const getOrders = catchError(async (searchForm, currentPage) => {
+    loding.isLoading = true
     const { orderStatus, date } = searchForm
     const { data } = await searchOrder(orderStatus, date, currentPage)
     prePage.value = data.meta?.pagination.nextPage
     currentIndex.value = orderStatus
     orderList.value = data.ordersList
+    loding.isLoading = false
   })
 
   /**
@@ -39,11 +46,14 @@ export const useOrderStore = defineStore('orderData', () => {
    **/
   const orderDetail = ref([])
   const getOrderDetail = catchError(async (orderId) => {
+    loding.isLoading = true
     const { data } = await searchOrderDetail(orderId)
     if (data.orderList.length === 0) {
       warningAlert('沒有符合的訂單資料')
+      loding.isLoading = false
     }
     orderDetail.value = data
+    loding.isLoading = false
   })
 
   /**
@@ -62,8 +72,10 @@ export const useOrderStore = defineStore('orderData', () => {
    * 查詢訂單是否用 LinePay 完成結帳
    **/
   const getLinePayStatus = catchError(async (orderNo) => {
+    loding.isLoading = true
     const { message } = await searchLinePayOrderStatus(orderNo)
     successAlert(message)
+    loding.isLoading = false
   })
 
   return { prePage, currentIndex, orderList, orderDetail, LoadNewFile, getOrders, getOrderDetail, postOrderRating, getLinePayStatus }
