@@ -3,8 +3,11 @@ import { ref } from 'vue'
 import { catchError } from '@/utils/catchError'
 import { searchPickUp, editPickUp } from '@/apis/order'
 import { successAlert } from '@/plugins/toast'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useChefStore = defineStore('chefData', () => {
+  const loding = useLoadingStore()
+
   const selectStatus = ref(['未出餐', '已出餐'])
   const currentStatus = ref('未出餐')
   const pickUpList = ref([])
@@ -26,9 +29,11 @@ export const useChefStore = defineStore('chefData', () => {
  * 查詢訂單
  */
   const fetchSearchPickUp = catchError(async () => {
+    loding.isLoading = true
     const { data } = await searchPickUp(currentStatus.value)
     const newDessertList = useProductionTimeCaculater(data)
     pickUpList.value = newDessertList
+    loding.isLoading = false
   })
 
   /**

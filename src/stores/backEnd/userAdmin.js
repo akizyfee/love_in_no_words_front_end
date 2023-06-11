@@ -7,6 +7,7 @@ import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useUserAdminStore = defineStore('userAdminData', () => {
   const loding = useLoadingStore()
+
   /**
    * 載入新資料
    */

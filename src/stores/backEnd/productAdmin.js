@@ -12,15 +12,20 @@ import {
   deleteAdminProduct,
   uploadAdminPhotos
 } from '@/apis/product'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useProductAdminStore = defineStore('productAdminData', () => {
+  const loding = useLoadingStore()
+
   /**
    * 取得產品分類列表
    */
   const dessertTypeList = ref([])
   const fetchGetDessertTypeList = catchError(async () => {
+    loding.isLoading = true
     const { data } = await getAdminDessertType()
     dessertTypeList.value = data
+    loding.isLoading = false
   })
 
   /**
@@ -46,14 +51,17 @@ export const useProductAdminStore = defineStore('productAdminData', () => {
    */
   const productList = ref([])
   const fetchAllProduct = catchError(async () => {
+    loding.isLoading = true
     const { data } = await searchAdminProduct()
     productList.value = data
+    loding.isLoading = false
   })
 
   /**
    * 搜尋商品
    */
   const fetchSearchProduct = catchError(async (searchFilterProduct) => {
+    loding.isLoading = true
     const { productsType, priceLowerLimit, priceUpperLimit, amountStatus } = searchFilterProduct
     const { data } = await searchAdminProduct(
       productsType,
@@ -62,6 +70,7 @@ export const useProductAdminStore = defineStore('productAdminData', () => {
       amountStatus
     )
     productList.value = data
+    loding.isLoading = false
   })
 
   /**
@@ -95,7 +104,9 @@ export const useProductAdminStore = defineStore('productAdminData', () => {
    * 圖片上傳
    */
   const uploadFile = catchError(async (formData) => {
+    loding.isLoading = true
     const { data } = await uploadAdminPhotos(formData)
+    loding.isLoading = false
     return data
   })
 
