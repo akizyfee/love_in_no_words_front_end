@@ -9,12 +9,16 @@ import {
   editReservation,
   deleteReservation
 } from '@/apis/seat'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useSeatStore = defineStore('seatData', () => {
+  const loding = useLoadingStore()
+
   /**
    * 入座功能
    **/
   const haveASeat = catchError(async (searchForm) => {
+    loding.isLoading = true
     const { reservationDate, reservationTime, tableNo } = searchForm
     const { message } = await noReservation({
       reservationDate,
@@ -23,6 +27,7 @@ export const useSeatStore = defineStore('seatData', () => {
     })
     message === '成功' && successAlert('修改入座成功')
     searchSeats(searchForm)
+    loding.isLoading = false
   })
 
   /**
@@ -30,6 +35,7 @@ export const useSeatStore = defineStore('seatData', () => {
    **/
   const seatList = ref([])
   const searchSeats = catchError(async (searchForm) => {
+    loding.isLoading = true
     const { status, reservationDate, reservationTime } = searchForm
     const { data } = await searchReservation(
       status,
@@ -38,10 +44,12 @@ export const useSeatStore = defineStore('seatData', () => {
     )
     if (data.tables.length === 0) {
       warningAlert('沒有符合的座位資料')
+      loding.isLoading = false
     }
     seatList.value = data.tables.sort(function (a, b) {
       return a.tableName - b.tableName
     })
+    loding.isLoading = false
   })
 
   /**
