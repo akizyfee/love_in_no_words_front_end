@@ -17,6 +17,9 @@ import { useWindowSize } from '@vueuse/core'
 import { successAlert } from '@/plugins/toast'
 import axios from 'axios'
 import { getCookieToken } from '@/utils/cookie'
+import { useLoadingStore } from '@/stores/TheLoading'
+
+const loding = useLoadingStore()
 
 /**
  * 取得每月營收和訂單量
@@ -26,11 +29,13 @@ const revenueYear = ref(nowYear)
 const BarcharDom = ref()
 
 const fetchGetAdminRevenueAndOrders = catchError(async () => {
+  loding.isLoading = true
   const dataCash = await getAdminRevenue(revenueYear)
   const dataOrder = await getAdminOrdersQty(revenueYear)
   const setOption = useBarChart(BarcharDom.value)
   setOption.updateChart(dataCash.data, dataOrder.data)
   setOption.resize()
+  loding.isLoading = false
 })
 
 onMounted(() => {
@@ -54,6 +59,7 @@ watch(
 const sellQtyYear = ref(nowYear)
 const c3SellQtyReport = []
 const fetchGetAdminSellQty = catchError(async () => {
+  loding.isLoading = true
   const { data } = await getAdminSellQty(sellQtyYear)
   const filterReport = data.map((item) => {
     const productName = item.productName
@@ -62,6 +68,7 @@ const fetchGetAdminSellQty = catchError(async () => {
   })
   c3SellQtyReport.push(...filterReport)
   useDountChart(c3SellQtyReport)
+  loding.isLoading = false
 })
 
 onMounted(() => {
@@ -74,9 +81,11 @@ onMounted(() => {
 const orderReportList = ref([])
 const orderReportListPrice = ref([])
 const fetchSearchAllAdminOrders = catchError(async () => {
+  loding.isLoading = true
   const { data } = await searchAllAdminOrders()
   orderReportList.value = data.data
   orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
+  loding.isLoading = false
 })
 
 onMounted(() => {
@@ -89,26 +98,32 @@ onMounted(() => {
 const searchMouth = ref()
 const searchNumber = ref()
 const fetchSearchAdminOrders = catchError(async () => {
+  loding.isLoading = true
   const { data, message } = await searchAdminOrders(searchMouth.value, searchNumber.value)
   orderReportList.value = data.data
   orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
   successAlert(message)
+  loding.isLoading = false
 })
 
 /**
  * 營收報表+賣出訂單報表寄送
  */
 const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null) => {
+  loding.isLoading = true
   if (reportType1) {
     const { message } = await sendAdminReport(reportType1)
     successAlert(message)
+    loding.isLoading = false
   }
   if (reportType1 && reportType2) {
     const message1 = await sendAdminReport(reportType1)
     const message2 = await sendAdminReport(reportType2)
     if (message1 === '報表寄送成功' && message2 === '報表寄送成功') {
       successAlert('報表寄送成功')
+      loding.isLoading = false
     }
+    loding.isLoading = false
   }
 })
 
@@ -116,6 +131,7 @@ const fetchSendAdminRreport = catchError(async (reportType1, reportType2 = null)
  * O-5-6 下載訂單：Excel
  */
 const downloadFile = async () => {
+  loding.isLoading = true
   const token = getCookieToken()
   const url = `https://love-in-no-words-api.onrender.com/v1/reports/admin/orders/download?month=${searchMouth.value}&dataAmount=${searchNumber.value}`
   const response = await axios.get(url, {
@@ -130,6 +146,7 @@ const downloadFile = async () => {
   downloadLink.href = URL.createObjectURL(blob)
   downloadLink.download = fileName
   downloadLink.click()
+  loding.isLoading = false
 }
 </script>
 <template>
