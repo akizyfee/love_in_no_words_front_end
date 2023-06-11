@@ -60,7 +60,7 @@ describe('ChefView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
-  test('取得會員列表', async () => {
+  test('取得待製作訂單列表', async () => {
     const chefViewStore = useChefStore()
     await chefViewStore.fetchSearchPickUp()
     expect(chefViewStore.pickUpList).toBeDefined()

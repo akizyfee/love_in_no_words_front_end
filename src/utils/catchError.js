@@ -1,14 +1,14 @@
-import { useLoadingStore } from '@/stores/TheLoading'
+// import { useLoadingStore } from '@/stores/TheLoading'
 import { errorAlert } from '@/plugins/toast'
 
-const loding = useLoadingStore()
+// const loding = useLoadingStore()
 
 export const catchError = (asFn) => {
   return (param, paramTwo = null, paramThree = null) => {
     return asFn(param, paramTwo, paramThree).catch((err) => {
       console.log(err)
       errorAlert(err.message)
-      loding.isLoading = false
+      // loding.isLoading = false
     })
   }
 }
