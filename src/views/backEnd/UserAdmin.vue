@@ -163,14 +163,16 @@ const handleModalClose = () => {
             </tr>
           </tbody>
         </table>
-        <p
-          v-if="userAdminStore.prePage !== null"
-          @click="fetchLoadNewFile"
-          class="text-center text-xl font-medium mt-5"
-        >
-          點選以載入新資料
-        </p>
       </section>
+      <!-- 載入分頁內容 -->
+      <button
+        type="button"
+        class="w-full btn btn-secondary my-6"
+        v-if="userAdminStore.prePage !== null"
+        @click="fetchLoadNewFile"
+      >
+        <span class="text-xl lg:text-[28px] font-medium">點選以載入新資料</span>
+      </button>
     </main>
   </div>
   <Modal ref="childComponentRef">
