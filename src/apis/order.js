@@ -56,4 +56,4 @@ export const searchPickUp = (status) => axios.get(`/v1/orders/pick-up?status=${s
  * C-1-2 修改出餐訂單
  * @param {string} 訂單 ID
  */
-export const editPickUp = (orderId) => axios.patch(`/v1/orders/pick-up/${orderId}`)
+export const editPickUp = (orderId, payload) => axios.patch(`/v1/orders/pick-up/${orderId}`, payload)
