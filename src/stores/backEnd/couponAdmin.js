@@ -3,19 +3,24 @@ import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
 import { getAdminCoupon, addAdminCoupon, editAdminCoupon, deleteAdminCoupon, getAdminFreebiePlus, addAdminFreebiePlus, editAdminFreebiePlus, deleteAdminFreebiePlus } from '@/apis/coupon'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 export const useCouponAdminStore = defineStore('couponAdminData', () => {
+  const loding = useLoadingStore()
+
   /**
    * 優惠碼活動
    * 取得優惠碼活動
    **/
   const couponList = ref([])
   const getCoupon = catchError(async () => {
+    loding.isLoading = true
     const { data } = await getAdminCoupon('cuponCode')
     if (data.length === 0) {
       warningAlert('尚未建立優惠碼活動')
     }
     couponList.value = data
+    loding.isLoading = false
   })
 
   /**
@@ -52,17 +57,20 @@ export const useCouponAdminStore = defineStore('couponAdminData', () => {
 })
 
 export const useFreebiePlusAdminStore = defineStore('freebiePlusData', () => {
+  const loding = useLoadingStore()
   /**
    * A+B 活動
    * 取得 A+B 活動
    **/
   const freebiePlusList = ref([])
   const getFreebiePlus = catchError(async () => {
+    loding.isLoading = true
     const { data } = await getAdminFreebiePlus()
     if (data.list.length === 0) {
       warningAlert('尚未建立 A+B 活動')
     }
     freebiePlusList.value = data
+    loding.isLoading = false
   })
 
   /**
