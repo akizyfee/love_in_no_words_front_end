@@ -1,6 +1,9 @@
+import { setActivePinia, createPinia } from 'pinia'
 import { useLoadingStore } from '@/stores/TheLoading'
 import { errorAlert } from '@/plugins/toast'
 
+const pinia = createPinia().use(useLoadingStore)
+setActivePinia(pinia)
 const loding = useLoadingStore()
 
 export const catchError = (asFn) => {
