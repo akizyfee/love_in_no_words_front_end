@@ -105,9 +105,10 @@ export const useProductStore = defineStore('productData', () => {
    **/
   const fetchAddOreder = catchError(async (orderProductTotalPrice) => {
     loding.isLoading = true
-    const { message } = await addOrder(orderProductTotalPrice)
+    const { status, message } = await addOrder(orderProductTotalPrice)
     successAlert(message)
     loding.isLoading = false
+    return status
   })
 
   return { typeList, currentIndex, productList, memberList, couponList, checkProductTotalPrice, fetchAllDessertType, fetchProduct, getMembers, postMember, getCouponCode, fetchCalculateTotalPrice, fetchAddOreder }

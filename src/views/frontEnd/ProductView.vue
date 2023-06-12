@@ -7,12 +7,14 @@ import { useProductStore } from '@/stores/frontEnd/productView'
 import { successAlert, errorAlert } from '@/plugins/toast'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 const router = useRouter()
 
 const productStore = useProductStore()
+const loding = useLoadingStore()
 
 /**
  * 取得商品種類代碼、查詢商品類別
@@ -141,9 +143,14 @@ const fetchCalculateTotalPrice = () => {
  * */
 const fetchAddOreder = () => {
   orderProductTotalPrice.value.products = tempProduct.value
-  productStore.fetchAddOreder(orderProductTotalPrice.value)
-  tempProduct.value = []
-  router.push('/order')
+  productStore.fetchAddOreder(orderProductTotalPrice.value).then((status) => {
+    if (status === 'OK') {
+      tempProduct.value = []
+      router.push('/order')
+    } else {
+      loding.isLoading = false
+    }
+  })
 }
 
 /**

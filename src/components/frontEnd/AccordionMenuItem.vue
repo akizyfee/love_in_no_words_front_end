@@ -8,9 +8,10 @@ import { getCookieToken } from '@/utils/cookie'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 import { warningAlert } from '@/plugins/toast'
-
 import { useOrderStore } from '@/stores/frontEnd/orderView'
+import { useLoadingStore } from '@/stores/TheLoading'
 const orderStore = useOrderStore()
+const loding = useLoadingStore()
 
 const statusList = ref(['', '未結帳', '已結帳'])
 const dateList = ref(dayInterval())
@@ -106,13 +107,21 @@ const postOrderRating = () => {
   searchForm.orderStatus = statusList.value[1]
   searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
-  } else if (ratingForm.payment === 'LinePay') {
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
+      if (status === 'NG') {
+        loding.isLoading = false
+      }
+    })
+  } else if (ratingForm.payment === 'linepay') {
     ratingForm.orderType = '未結帳'
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
-    nextTick(() => {
-      if (linepayUrl.value) {
-        linepayForm.value.submit()
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
+      if (status === 'NG') {
+        loding.isLoading = false
+      } else {
+        if (linepayUrl.value) {
+          linepayForm.value.submit()
+          linepayUrl.value = ''
+        }
       }
     })
   }
@@ -161,7 +170,6 @@ const handleModalClose = () => {
        * 清空欄位功能
        **/
       Object.assign(ratingForm, initRatingForm)
-      linepayUrl.value = ''
     }
   })
 }
@@ -199,8 +207,8 @@ const handleModalClose = () => {
             <th class="p-4 col-span-3">日期</th>
             <th class="p-4 col-span-1">時段</th>
             <th class="p-4 col-span-3">訂單編號</th>
-            <th class="p-4 col-span-1">桌號</th>
-            <th class="p-4 col-span-3"></th>
+            <th class="p-4 col-span-2">桌號</th>
+            <th class="p-4 col-span-2"></th>
           </tr>
         </thead>
       </table>
@@ -232,17 +240,18 @@ const handleModalClose = () => {
             <td class="p-4 col-span-3 align-middle">{{ dayFormat(order.createdAt) }}</td>
             <td class="p-4 col-span-1 align-middle">{{ order.time }}</td>
             <td class="p-4 col-span-3 align-middle">{{ order.orderNo }}</td>
-            <td class="p-4 col-span-1 align-middle">
+            <td class="p-4 col-span-2 align-middle">
               <span class="text-white bg-primary-light rounded py-1 px-2">{{
                 order.tableName
               }}</span>
             </td>
-            <td class="col-span-3 align-middle">
+            <td class="col-span-2 align-middle">
               <div class="flex">
                 <button
                   type="button"
                   class="w-full mr-1 btn btn-outline-dark"
                   @click="handleModalOpen('create', order)"
+                  :class="order.orderStatus === '未結帳' ? '' : 'hidden'"
                 >
                   結帳
                 </button>
@@ -250,6 +259,7 @@ const handleModalClose = () => {
                   type="button"
                   class="w-full ml-1 btn btn-dark"
                   @click="getLinePayStatus(order.orderNo)"
+                  :class="order.payment === 'linepay' ? '' : 'hidden'"
                 >
                   查詢
                 </button>
@@ -454,7 +464,7 @@ const handleModalClose = () => {
                     <input
                       id="payment_LinePay"
                       type="radio"
-                      value="LinePay"
+                      value="linepay"
                       v-model="ratingForm.payment"
                       name="form-radio"
                       class="form-radio"

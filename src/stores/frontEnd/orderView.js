@@ -61,11 +61,15 @@ export const useOrderStore = defineStore('orderData', () => {
    **/
   const postOrderRating = catchError(async (orderId, ratingForm, searchForm) => {
     const { payment, orderType, satisfaction, description } = ratingForm
-    const { message } = await addOrderRating(orderId, {
+    const { status, message } = await addOrderRating(orderId, {
       payment, orderType, satisfaction, description
     })
-    successAlert(message)
-    getOrders(searchForm)
+    if (status === 'NG') {
+      return status
+    } else {
+      successAlert(message)
+      getOrders(searchForm)
+    }
   })
 
   /**
