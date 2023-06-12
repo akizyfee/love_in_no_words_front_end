@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
@@ -44,15 +44,15 @@ export const useOrderStore = defineStore('orderData', () => {
   /**
    * 查詢訂單詳細內容
    **/
-  const orderDetail = ref([])
-  const getOrderDetail = catchError(async (orderId) => {
+  const orderDetail = reactive({})
+  const getOrderDetail = catchError(async (orderId, orderNo) => {
     loding.isLoading = true
     const { data } = await searchOrderDetail(orderId)
     if (data.orderList.length === 0) {
       warningAlert('沒有符合的訂單資料')
       loding.isLoading = false
     }
-    orderDetail.value = data
+    orderDetail.value = { [orderNo]: data, ...orderDetail.value }
     loding.isLoading = false
   })
 

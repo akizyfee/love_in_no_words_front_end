@@ -63,8 +63,8 @@ watch(
 /**
  * 查詢訂單詳細內容
  **/
-const getOrderDetail = (orderId) => {
-  orderStore.getOrderDetail(orderId)
+const getOrderDetail = (orderId, orderNo) => {
+  orderStore.getOrderDetail(orderId, orderNo)
 }
 
 /**
@@ -222,7 +222,7 @@ const handleModalClose = () => {
               />
               <label :for="order.orderNo">
                 <img
-                  @click="getOrderDetail(order._id)"
+                  @click="getOrderDetail(order._id, order.orderNo)"
                   :src="checkboxArray[index] === true ? IconMinus : IconAdd"
                   width="32"
                   height="32"
@@ -282,7 +282,8 @@ const handleModalClose = () => {
                 <tbody>
                   <tr
                     class="border-b-2 border-textself"
-                    v-for="(product, index) in orderStore.orderDetail.orderList"
+                    v-for="(product, index) in orderStore.orderDetail.value?.[order.orderNo]
+                      ?.orderList"
                     :key="product._id"
                   >
                     <td class="p-4">{{ index + 1 }}</td>
@@ -300,7 +301,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">製作時間</span>
               <span class="ml-4 text-xl font-medium"
-                >{{ orderStore.orderDetail.totalTime }} 分</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.totalTime }} 分</span
               >
             </td>
           </tr>
@@ -311,11 +312,11 @@ const handleModalClose = () => {
               <span
                 class="ml-4 inline text-sm font-medium rounded-lg py-1 px-2"
                 :class="
-                  orderStore.orderDetail.status === '未出餐'
+                  orderStore.orderDetail.value?.[order.orderNo]?.status === '未出餐'
                     ? 'bg-neutralself-100 text-white'
                     : 'bg-primary-light text-white'
                 "
-                >{{ orderStore.orderDetail.status }}</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.status }}</span
               >
             </td>
           </tr>
@@ -336,7 +337,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">折扣金額</span>
               <span class="ml-4 text-primary font-medium"
-                >$ {{ orderStore.orderDetail.discount }}</span
+                >$ {{ orderStore.orderDetail.value?.[order.orderNo]?.discount }}</span
               >
             </td>
           </tr>
@@ -345,7 +346,7 @@ const handleModalClose = () => {
             <td class="p-4 pb-4 col-span-11">
               <span class="text-neutralself-200">付款金額</span>
               <span class="ml-4 text-primary text-xl font-medium"
-                >$ {{ orderStore.orderDetail.totalPrice }}</span
+                >$ {{ orderStore.orderDetail.value?.[order.orderNo]?.totalPrice }}</span
               >
             </td>
           </tr>
