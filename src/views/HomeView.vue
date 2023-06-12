@@ -10,7 +10,6 @@ import { useWindowSize } from '@vueuse/core'
  */
 import 'swiper/css'
 import 'swiper/css/navigation'
-import 'swiper/css/pagination'
 
 const modules = [Navigation, Mousewheel, Keyboard]
 
@@ -41,13 +40,17 @@ const isMobile = computed(() => {
 })
 
 /**
- * 跳轉至對應的錨點
+ * 跳轉至對應的錨點、寄信
  */
 const toHref = (id) => {
   const el = document.getElementById(id)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
   }
+}
+const mailtoHref = () => {
+  const mail = 'mailto:loveinnowords@gmail.com'
+  self.location.href = mail
 }
 </script>
 
@@ -351,7 +354,7 @@ const toHref = (id) => {
       </ul>
     </section>
     <!-- about -->
-    <section class="relative overflow-hidden -z-20" id="about">
+    <section class="relative overflow-hidden" id="about">
       <figure class="absolute -top-20 -left-20 -z-10">
         <img
           src="../assets/img/ImgAboutBg01.svg"
@@ -402,23 +405,17 @@ const toHref = (id) => {
           :style="isMobile ? '' : 'margin-right: -240px'"
         >
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <div class="flex flex-col max-w-3xl">
+            <a class="flex flex-col max-w-3xl" href="https://github.com/hiYifang" target="_blank">
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="../assets/img/Ellipse01.png"
+                    src="../assets/img/Eva.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                    alt="Ellipse_Img1"
+                    alt="Eva_Img"
                   />
                 </figure>
                 <figure class="flex mt-[26px] mb-[14px]">
                   <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                  <img
-                    src="../assets/img/IconInstagram.svg"
-                    class="w-6 h-6 mx-4"
-                    alt="Instagram_Img"
-                  />
-                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
                 </figure>
                 <h4 class="text-2xl font-medium">Eva Li</h4>
                 <p class="flex items-center mt-3 mb-4">
@@ -430,43 +427,37 @@ const toHref = (id) => {
                   <span class="ml-2">高雄</span>
                 </p>
                 <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                  網頁前端工程師
+                  前端工程師
                 </h5>
                 <ul class="list-none list-outside p-6">
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>前端開發和設計的工作經驗</p>
+                    <p>由非本科系轉職，主要以 Vue.js 技術開發約半年的經驗</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>注重網頁的可用性和使用者體驗設計</p>
+                    <p>喜歡共同學習、成長的感覺，報名課程給予一個自我挑戰的目標</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                    <p>目前熱衷於寶可夢的太晶團體戰，可以一起揪團連線！</p>
                   </li>
                 </ul>
               </div>
-            </div>
+            </a>
           </swiper-slide>
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <div class="max-w-3xl flex flex-col">
+            <a class="max-w-3xl flex flex-col" href="https://github.com/ChrisC0210" target="_blank">
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="../assets/img/Ellipse02.png"
+                    src="../assets/img/Christina.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                    alt="Ellipse_Img2"
+                    alt="Christina_Img"
                   />
                 </figure>
                 <figure class="flex mt-[26px] mb-[14px]">
                   <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                  <img
-                    src="../assets/img/IconInstagram.svg"
-                    class="w-6 h-6 mx-4"
-                    alt="Instagram_Img"
-                  />
-                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
                 </figure>
                 <h4 class="text-2xl font-medium">Christina</h4>
                 <p class="flex items-center mt-3 mb-4">
@@ -483,38 +474,32 @@ const toHref = (id) => {
                 <ul class="list-none list-outside p-6">
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>前端開發和設計的工作經驗</p>
+                    <p>擁有 3~4 年網頁設計經驗，掌握 Bootstrap、Vue.js 技術開發約半年的經驗</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>注重網頁的可用性和使用者體驗設計</p>
+                    <p>為了探索 Node.js，報名課程提升自我</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                    <p>喜歡樂高、公仔和玩遊戲，歡迎同好找我一起討論～</p>
                   </li>
                 </ul>
               </div>
-            </div>
+            </a>
           </swiper-slide>
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <div class="max-w-3xl flex flex-col">
+            <a class="max-w-3xl flex flex-col" href="https://github.com/akizyfee" target="_blank">
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="../assets/img/Ellipse03.png"
+                    src="../assets/img/pause.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                    alt="Ellipse_Img3"
+                    alt="Pause_Img"
                   />
                 </figure>
                 <figure class="flex mt-[26px] mb-[14px]">
                   <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                  <img
-                    src="../assets/img/IconInstagram.svg"
-                    class="w-6 h-6 mx-4"
-                    alt="Instagram_Img"
-                  />
-                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
                 </figure>
                 <h4 class="text-2xl font-medium">Pause</h4>
                 <p class="flex items-center mt-3 mb-4">
@@ -526,43 +511,37 @@ const toHref = (id) => {
                   <span class="ml-2">台南</span>
                 </p>
                 <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                  網頁前端工程師
+                  前端工程師
                 </h5>
                 <ul class="list-none list-outside p-6">
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>前端開發和設計的工作經驗</p>
+                    <p>擁有 Bootstrap、Vue.js 開發經驗一年</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>注重網頁的可用性和使用者體驗設計</p>
+                    <p>重視團隊合作，報名課程來強化與後端的溝通技巧</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                    <p>夢想得到各種讓生活更便利和貼近人性的科技技術，如果買不到，就自己 coding!</p>
                   </li>
                 </ul>
               </div>
-            </div>
+            </a>
           </swiper-slide>
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <div class="max-w-3xl flex flex-col">
+            <a class="max-w-3xl flex flex-col" href="https://github.com/kerickkkkk" target="_blank">
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2866&q=80"
+                    src="../assets/img/Eric.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                    alt="Ellipse_Img4"
+                    alt="Eric_Img"
                   />
                 </figure>
                 <figure class="flex mt-[26px] mb-[14px]">
                   <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                  <img
-                    src="../assets/img/IconInstagram.svg"
-                    class="w-6 h-6 mx-4"
-                    alt="Instagram_Img"
-                  />
-                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
                 </figure>
                 <h4 class="text-2xl font-medium">艾瑞克</h4>
                 <p class="flex items-center mt-3 mb-4">
@@ -574,43 +553,39 @@ const toHref = (id) => {
                   <span class="ml-2">嘉義</span>
                 </p>
                 <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                  網頁前端工程師
+                  前端工程師
                 </h5>
                 <ul class="list-none list-outside p-6">
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>前端開發和設計的工作經驗</p>
+                    <p>主要使用 Bootstrap、Vue.js 技術進行開發</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>注重網頁的可用性和使用者體驗設計</p>
+                    <p>
+                      秉持著一群人走得更遠的想法，常扮演溝通的橋樑，報名課程來磨練如何建立團隊技巧
+                    </p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                    <p>喜歡美食，歡迎找我一起吃遍台南小吃</p>
                   </li>
                 </ul>
               </div>
-            </div>
+            </a>
           </swiper-slide>
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <div class="max-w-3xl flex flex-col">
+            <a class="max-w-3xl flex flex-col" href="https://github.com/Patrick-Kao" target="_blank">
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="https://images.unsplash.com/photo-1497021707778-a743a0bb2961?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mjg1fHxwZXJzb258ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60"
+                    src="../assets/img/Kao.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
-                    alt="Ellipse_Img4"
+                    alt="Kao_Img"
                   />
                 </figure>
                 <figure class="flex mt-[26px] mb-[14px]">
                   <img src="../assets/img/IconGithub.svg" class="w-6 h-6" alt="Github_Img" />
-                  <img
-                    src="../assets/img/IconInstagram.svg"
-                    class="w-6 h-6 mx-4"
-                    alt="Instagram_Img"
-                  />
-                  <img src="../assets/img/IconFacebook.svg" class="w-6 h-6" alt="Facebook_Img" />
                 </figure>
                 <h4 class="text-2xl font-medium">祥 Kao</h4>
                 <p class="flex items-center mt-3 mb-4">
@@ -622,40 +597,42 @@ const toHref = (id) => {
                   <span class="ml-2">東京</span>
                 </p>
                 <h5 class="text-xl font-medium text-white text-center bg-textself w-full py-6">
-                  網頁前端工程師
+                  全端工程師
                 </h5>
                 <ul class="list-none list-outside p-6">
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>前端開發和設計的工作經驗</p>
+                    <p>擁有 Bootstrap、Nuxt.js、Java、Spring Boot 等一年的開發經驗</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>注重網頁的可用性和使用者體驗設計</p>
+                    <p>想讓未來的自己更貼近心目中理想的日本企業要求，報名課程來鍛鍊</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>使用 HTML、CSS、JavaScript 、Vue 前端技術完成工作需求</p>
+                    <p>重視健康管理，平時有進行飲食控制，歡迎有興趣者找我討論如何規劃！</p>
                   </li>
                 </ul>
               </div>
-            </div>
+            </a>
           </swiper-slide>
         </swiper>
         <!-- mail -->
         <button
           type="button"
           class="w-full btn btn-secondary flex justify-between items-center mt-15 lg:mt-24"
-          id="mail"
+          @click="mailtoHref"
         >
           <div class="flex flex-col lg:flex-row lg:justify-between items-center">
             <div class="flex lg:justify-between items-center">
               <img src="../assets/img/IconEmail.svg" class="w-6 h-6" alt="Mail_Img" />
               <p class="text-[28px] lg:text-[32px] font-bold ms-5">聯絡我們</p>
             </div>
-            <p class="block lg:hidden text-xl lg:text-[28px] font-medium">email@mail.com</p>
+            <p class="block lg:hidden text-xl lg:text-[28px] font-medium">
+              loveinnowords@gmail.com
+            </p>
           </div>
-          <p class="hidden lg:block text-xl lg:text-[28px] font-medium">email@mail.com</p>
+          <p class="hidden lg:block text-xl lg:text-[28px] font-medium">loveinnowords@gmail.com</p>
           <img src="../assets/img/IconArrowRight.svg" class="w-6 h-6" alt="Mail_ArrowRight_Img" />
         </button>
       </div>
