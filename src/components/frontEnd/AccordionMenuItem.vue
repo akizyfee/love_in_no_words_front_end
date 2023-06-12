@@ -16,7 +16,7 @@ const statusList = ref(['', '未結帳', '已結帳'])
 const dateList = ref(dayInterval())
 const searchForm = reactive({
   orderStatus: statusList.value[0],
-  date: ''
+  createdAt: ''
 })
 const checkboxArray = ref([])
 
@@ -49,7 +49,7 @@ onMounted(() => {
 })
 
 watch(
-  [() => searchForm.orderStatus, () => searchForm.date],
+  [() => searchForm.orderStatus, () => searchForm.createdAt],
   () => {
     orderStore.getOrders(searchForm, 1)
     lastPageIndex.value = 1
@@ -104,7 +104,7 @@ const postOrderRating = () => {
     return
   }
   searchForm.orderStatus = statusList.value[1]
-  searchForm.date = ''
+  searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
     orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
   } else if (ratingForm.payment === 'LinePay') {
@@ -182,8 +182,8 @@ const handleModalClose = () => {
         </li>
       </ul>
       <div>
-        <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
-        <select id="form_reservationDate" class="form-select" v-model="searchForm.date">
+        <label for="form_createdAt" class="block mb-2 font-medium">日期</label>
+        <select id="form_createdAt" class="form-select" v-model="searchForm.createdAt">
           <option v-for="(option, key) in dateList" :value="option" :key="key">
             {{ option }}
           </option>

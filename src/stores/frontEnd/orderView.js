@@ -16,8 +16,8 @@ export const useOrderStore = defineStore('orderData', () => {
 
   const LoadNewFile = catchError(async (searchForm, currentPage) => {
     loding.isLoading = true
-    const { orderStatus, date } = searchForm
-    const { data } = await searchOrder(orderStatus, date, currentPage)
+    const { orderStatus, createdAt } = searchForm
+    const { data } = await searchOrder(orderStatus, createdAt, currentPage)
     prePage.value = data.meta?.pagination.nextPage
     tempOrderList.value = data.ordersList
     tempOrderList.value.forEach((item) => {
@@ -33,8 +33,8 @@ export const useOrderStore = defineStore('orderData', () => {
   const currentIndex = ref(0)
   const getOrders = catchError(async (searchForm, currentPage) => {
     loding.isLoading = true
-    const { orderStatus, date } = searchForm
-    const { data } = await searchOrder(orderStatus, date, currentPage)
+    const { orderStatus, createdAt } = searchForm
+    const { data } = await searchOrder(orderStatus, createdAt, currentPage)
     prePage.value = data.meta?.pagination.nextPage
     currentIndex.value = orderStatus
     orderList.value = data.ordersList
