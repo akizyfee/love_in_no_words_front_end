@@ -28,7 +28,9 @@ const internalInstance = getCurrentInstance()
 const forceUpdate = internalInstance.ctx.$forceUpdate
 
 onMounted(() => {
+  loding.isLoading = true
   forceUpdate()
+  loding.isLoading = false
 })
 
 /**
@@ -38,21 +40,28 @@ const lastPageIndex = ref(1)
 
 const fetchLoadNewFile = () => {
   lastPageIndex.value++
+
+  loding.isLoading = true
   orderStore.LoadNewFile(searchForm, lastPageIndex.value)
+  loding.isLoading = false
 }
 
 /**
  * 查詢訂單功能
  **/
 onMounted(() => {
+  loding.isLoading = true
   orderStore.getOrders(searchForm, 1)
+  loding.isLoading = false
   lastPageIndex.value = 1
 })
 
 watch(
   [() => searchForm.orderStatus, () => searchForm.createdAt],
   () => {
+    loding.isLoading = true
     orderStore.getOrders(searchForm, 1)
+    loding.isLoading = false
     lastPageIndex.value = 1
   },
   {
@@ -65,7 +74,9 @@ watch(
  * 查詢訂單詳細內容
  **/
 const getOrderDetail = (orderId, orderNo) => {
+  loding.isLoading = true
   orderStore.getOrderDetail(orderId, orderNo)
+  loding.isLoading = false
 }
 
 /**
@@ -107,23 +118,14 @@ const postOrderRating = () => {
   searchForm.orderStatus = statusList.value[1]
   searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
-      if (status === 'NG') {
-        loding.isLoading = false
-      }
-    })
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
   } else if (ratingForm.payment === 'linepay') {
     ratingForm.orderType = '未結帳'
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
-      if (status === 'NG') {
-        loding.isLoading = false
-      } else {
-        if (linepayUrl.value) {
-          linepayForm.value.submit()
-          linepayUrl.value = ''
-        }
-      }
-    })
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    if (linepayUrl.value) {
+      linepayForm.value.submit()
+      linepayUrl.value = ''
+    }
   }
   handleModalClose()
 }
@@ -132,7 +134,9 @@ const postOrderRating = () => {
  * 查詢訂單是否用 LinePay 完成結帳
  **/
 const getLinePayStatus = (orderId) => {
+  loding.isLoading = true
   orderStore.getLinePayStatus(orderId)
+  loding.isLoading = false
 }
 
 /**
@@ -300,7 +304,7 @@ const handleModalClose = () => {
                     <td class="p-4">{{ product.productName }}</td>
                     <td class="p-4">{{ product.price }}</td>
                     <td class="p-4">{{ product.qty }}</td>
-                    <td class="p-4">這是備註，記得補上</td>
+                    <td class="p-4">{{ product.note }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -335,10 +339,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">優惠活動</span>
               <span class="ml-4 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                >已符合 A + B</span
-              >
-              <span class="ml-5 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                >買一送一</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.couponName }}</span
               >
             </td>
           </tr>
