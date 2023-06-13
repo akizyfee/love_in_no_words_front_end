@@ -1,14 +1,7 @@
 <script setup>
 import SiderBar from '@/components/backEnd/SideBar.vue'
 import { onMounted, ref, watch } from 'vue'
-import {
-  getAdminRevenue,
-  getAdminOrdersQty,
-  getAdminSellQty,
-  searchAdminOrders,
-  searchAllAdminOrders,
-  sendAdminReport
-} from '@/apis/report'
+import { getAdminRevenue, getAdminOrdersQty, getAdminSellQty, sendAdminReport } from '@/apis/report'
 import { catchError } from '@/utils/catchError'
 import { nowYear } from '@/plugins/day'
 import useDountChart from '@/utils/useDountChar'
@@ -18,8 +11,10 @@ import { successAlert } from '@/plugins/toast'
 import axios from 'axios'
 import { getCookieToken } from '@/utils/cookie'
 import { useLoadingStore } from '@/stores/TheLoading'
+import { useReportAdminStore } from '@/stores/backEnd/reportAdmin'
 
 const loding = useLoadingStore()
+const reportStore = useReportAdminStore()
 
 /**
  * 取得每月營收和訂單量
@@ -78,18 +73,8 @@ onMounted(() => {
 /**
  * 初始化報表表格資訊
  */
-const orderReportList = ref([])
-const orderReportListPrice = ref([])
-const fetchSearchAllAdminOrders = catchError(async () => {
-  loding.isLoading = true
-  const { data } = await searchAllAdminOrders()
-  orderReportList.value = data.data
-  orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
-  loding.isLoading = false
-})
-
 onMounted(() => {
-  fetchSearchAllAdminOrders()
+  reportStore.fetchSearchAllAdminOrders()
 })
 
 /**
@@ -99,10 +84,7 @@ const searchMouth = ref()
 const searchNumber = ref()
 const fetchSearchAdminOrders = catchError(async () => {
   loding.isLoading = true
-  const { data, message } = await searchAdminOrders(searchMouth.value, searchNumber.value)
-  orderReportList.value = data.data
-  orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
-  successAlert(message)
+  reportStore.fetchSearchAdminOrders(searchMouth.value, searchNumber.value)
   loding.isLoading = false
 })
 
@@ -228,7 +210,7 @@ const downloadFile = async () => {
           </thead>
           <tbody>
             <tr
-              v-for="reportList in orderReportList"
+              v-for="reportList in reportStore.orderReportList"
               :key="reportList.orderNo"
               class="border-b-2 border-black"
             >
@@ -239,7 +221,7 @@ const downloadFile = async () => {
             <tr class="border-b-2 border-black">
               <td class="py-3">總營業額</td>
               <td></td>
-              <td class="py-3">{{ orderReportListPrice }}</td>
+              <td class="py-3">{{ reportStore.orderReportListPrice }}</td>
             </tr>
           </tbody>
         </table>

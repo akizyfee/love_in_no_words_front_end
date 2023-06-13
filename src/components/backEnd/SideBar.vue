@@ -19,7 +19,7 @@ const signOut = catchError(async () => {
         <router-link to="signin" class="flex justify-center my-12">
           <img src="@/assets/img/LOGO_horizon.svg" class="w-1/2 object-cover" alt="Logo_PC" />
         </router-link>
-        <ul class="font-medium text-center px-10">
+        <ul class="font-medium text-center px-10 overflow-y-scroll">
           <li class="mb-4">
             <h2 class="flex justify-center p-3 text-2xl">管理者您好</h2>
           </li>
