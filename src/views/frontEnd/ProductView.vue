@@ -173,7 +173,6 @@ const handleModalOpen = (checkIsCreate, item) => {
         productName,
         photoUrl,
         price,
-        originalPrice,
         inStockAmount,
         amountStatus,
         isDisabled,
@@ -183,12 +182,12 @@ const handleModalOpen = (checkIsCreate, item) => {
         qty,
         note
       } = item
+      console.log(item)
       productCard._id = _id
       productCard.productNo = productNo
       productCard.productName = productName
       productCard.photoUrl = photoUrl
       productCard.price = price
-      productCard.originalPrice = originalPrice
       productCard.inStockAmount = inStockAmount
       productCard.amountStatus = amountStatus
       productCard.isDisabled = isDisabled
@@ -197,6 +196,12 @@ const handleModalOpen = (checkIsCreate, item) => {
       productCard.description = description
       productCard.qty = qty
       productCard.note = note
+
+      if (!Object.keys(item).includes('originalPrice')) {
+        productCard.originalPrice = item.price
+      } else {
+        productCard.originalPrice = item.originalPrice
+      }
     }
   })
 }
@@ -335,7 +340,7 @@ const handleModalClose = () => {
                   <span>&emsp;{{ tempProducts.qty }}份</span>
                 </h2>
                 <p class="font-medium text-xl my-2">
-                  ${{ tempProducts.price === '' ? tempProducts.originalPrice : tempProducts.price }}
+                  ${{ tempProducts.originalPrice }}
                 </p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
@@ -493,7 +498,7 @@ const handleModalClose = () => {
                   {{ productCard.description }}
                 </h3>
                 <div class="flex justify-between items-center">
-                  <p class="text-[32px] font-bold">${{ productCard.price }}</p>
+                  <p class="text-[32px] font-bold">${{ productCard.originalPrice }}</p>
                   <div class="flex flex-col items-end">
                     <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
@@ -588,7 +593,7 @@ const handleModalClose = () => {
                   {{ productCard.description }}
                 </h3>
                 <div class="flex justify-between items-center">
-                  <p class="text-[32px] font-bold">${{ productCard.price }}</p>
+                  <p class="text-[32px] font-bold">${{ productCard.originalPrice }}</p>
                   <div class="flex flex-col items-end">
                     <p v-if="productCard.amountStatus === 'safe'" class="font-normal">
                       <span class="text-neutralself-200">剩餘</span>
