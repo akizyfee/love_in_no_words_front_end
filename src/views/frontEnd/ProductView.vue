@@ -182,7 +182,6 @@ const handleModalOpen = (checkIsCreate, item) => {
         qty,
         note
       } = item
-      console.log(item)
       productCard._id = _id
       productCard.productNo = productNo
       productCard.productName = productName

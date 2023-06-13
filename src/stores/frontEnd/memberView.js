@@ -17,9 +17,7 @@ export const useMemberStore = defineStore('memberData', () => {
   const LoadNewFile = catchError(async (phone, currentPage) => {
     loding.isLoading = true
     const { data } = await searchMember(phone, currentPage)
-    console.log(data)
     prePage.value = data.meta?.pagination.nextPage
-    console.log(prePage.value)
     tempMemberList.value = data.membersList
     tempMemberList.value.forEach((item) => {
       memberList.value.push(item)

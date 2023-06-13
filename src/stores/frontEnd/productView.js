@@ -89,7 +89,6 @@ export const useProductStore = defineStore('productData', () => {
   const fetchCalculateTotalPrice = catchError(async (orderProductTotalPrice) => {
     loding.isLoading = true
     const { data } = await calculateTotalPrice(orderProductTotalPrice)
-    console.log('計算', data)
     checkProductTotalPrice.value = data
     if (!Object.keys(data).includes('couponName')) {
       checkProductTotalPrice.value.couponName = ''

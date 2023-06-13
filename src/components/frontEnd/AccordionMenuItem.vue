@@ -119,29 +119,13 @@ const postOrderRating = () => {
   searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
     orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
-    // orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
-    //   if (status === 'NG') {
-    //     loding.isLoading = false
-    //   }
-    // })
   } else if (ratingForm.payment === 'linepay') {
     ratingForm.orderType = '未結帳'
-
     orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
     if (linepayUrl.value) {
       linepayForm.value.submit()
       linepayUrl.value = ''
     }
-    // orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
-    //   if (status === 'NG') {
-    //     loding.isLoading = false
-    //   } else {
-    //     if (linepayUrl.value) {
-    //       linepayForm.value.submit()
-    //       linepayUrl.value = ''
-    //     }
-    //   }
-    // })
   }
   handleModalClose()
 }
@@ -320,7 +304,7 @@ const handleModalClose = () => {
                     <td class="p-4">{{ product.productName }}</td>
                     <td class="p-4">{{ product.price }}</td>
                     <td class="p-4">{{ product.qty }}</td>
-                    <td class="p-4">這是備註，記得補上</td>
+                    <td class="p-4">{{ product.note }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -355,10 +339,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">優惠活動</span>
               <span class="ml-4 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                >已符合 A + B</span
-              >
-              <span class="ml-5 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
-                >買一送一</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.couponName }}</span
               >
             </td>
           </tr>
