@@ -7,12 +7,14 @@ import { useProductStore } from '@/stores/frontEnd/productView'
 import { successAlert, errorAlert } from '@/plugins/toast'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
+import { useLoadingStore } from '@/stores/TheLoading'
 
 const route = useRoute()
 const getTable = ref(`${route.query.table}`)
 const router = useRouter()
 
 const productStore = useProductStore()
+const loding = useLoadingStore()
 
 /**
  * 取得商品種類代碼、查詢商品類別
@@ -141,9 +143,14 @@ const fetchCalculateTotalPrice = () => {
  * */
 const fetchAddOreder = () => {
   orderProductTotalPrice.value.products = tempProduct.value
-  productStore.fetchAddOreder(orderProductTotalPrice.value)
-  tempProduct.value = []
-  router.push('/order')
+  productStore.fetchAddOreder(orderProductTotalPrice.value).then((status) => {
+    if (status === 'OK') {
+      tempProduct.value = []
+      router.push('/order')
+    } else {
+      loding.isLoading = false
+    }
+  })
 }
 
 /**
@@ -166,6 +173,7 @@ const handleModalOpen = (checkIsCreate, item) => {
         productName,
         photoUrl,
         price,
+        originalPrice,
         inStockAmount,
         amountStatus,
         isDisabled,
@@ -180,6 +188,7 @@ const handleModalOpen = (checkIsCreate, item) => {
       productCard.productName = productName
       productCard.photoUrl = photoUrl
       productCard.price = price
+      productCard.originalPrice = originalPrice
       productCard.inStockAmount = inStockAmount
       productCard.amountStatus = amountStatus
       productCard.isDisabled = isDisabled
@@ -325,7 +334,9 @@ const handleModalClose = () => {
                   <span>{{ tempProducts.productName }}</span>
                   <span>&emsp;{{ tempProducts.qty }}份</span>
                 </h2>
-                <p class="font-medium text-xl my-2">${{ tempProducts.price }}</p>
+                <p class="font-medium text-xl my-2">
+                  ${{ tempProducts.price === '' ? tempProducts.originalPrice : tempProducts.price }}
+                </p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
                   v-show="tempProducts.couponName"

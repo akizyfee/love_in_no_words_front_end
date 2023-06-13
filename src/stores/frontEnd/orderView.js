@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
@@ -16,8 +16,8 @@ export const useOrderStore = defineStore('orderData', () => {
 
   const LoadNewFile = catchError(async (searchForm, currentPage) => {
     loding.isLoading = true
-    const { orderStatus, date } = searchForm
-    const { data } = await searchOrder(orderStatus, date, currentPage)
+    const { orderStatus, createdAt } = searchForm
+    const { data } = await searchOrder(orderStatus, createdAt, currentPage)
     prePage.value = data.meta?.pagination.nextPage
     tempOrderList.value = data.ordersList
     tempOrderList.value.forEach((item) => {
@@ -33,8 +33,8 @@ export const useOrderStore = defineStore('orderData', () => {
   const currentIndex = ref(0)
   const getOrders = catchError(async (searchForm, currentPage) => {
     loding.isLoading = true
-    const { orderStatus, date } = searchForm
-    const { data } = await searchOrder(orderStatus, date, currentPage)
+    const { orderStatus, createdAt } = searchForm
+    const { data } = await searchOrder(orderStatus, createdAt, currentPage)
     prePage.value = data.meta?.pagination.nextPage
     currentIndex.value = orderStatus
     orderList.value = data.ordersList
@@ -44,15 +44,15 @@ export const useOrderStore = defineStore('orderData', () => {
   /**
    * 查詢訂單詳細內容
    **/
-  const orderDetail = ref([])
-  const getOrderDetail = catchError(async (orderId) => {
+  const orderDetail = reactive({})
+  const getOrderDetail = catchError(async (orderId, orderNo) => {
     loding.isLoading = true
     const { data } = await searchOrderDetail(orderId)
     if (data.orderList.length === 0) {
       warningAlert('沒有符合的訂單資料')
       loding.isLoading = false
     }
-    orderDetail.value = data
+    orderDetail.value = { [orderNo]: data, ...orderDetail.value }
     loding.isLoading = false
   })
 
@@ -61,11 +61,15 @@ export const useOrderStore = defineStore('orderData', () => {
    **/
   const postOrderRating = catchError(async (orderId, ratingForm, searchForm) => {
     const { payment, orderType, satisfaction, description } = ratingForm
-    const { message } = await addOrderRating(orderId, {
+    const { status, message } = await addOrderRating(orderId, {
       payment, orderType, satisfaction, description
     })
-    successAlert(message)
-    getOrders(searchForm)
+    if (status === 'NG') {
+      return status
+    } else {
+      successAlert(message)
+      getOrders(searchForm)
+    }
   })
 
   /**

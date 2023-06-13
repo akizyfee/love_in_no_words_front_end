@@ -8,15 +8,16 @@ import { getCookieToken } from '@/utils/cookie'
 import { useForm } from 'vee-validate'
 import { errorsFormSchema } from '@/utils/formValidate'
 import { warningAlert } from '@/plugins/toast'
-
 import { useOrderStore } from '@/stores/frontEnd/orderView'
+import { useLoadingStore } from '@/stores/TheLoading'
 const orderStore = useOrderStore()
+const loding = useLoadingStore()
 
 const statusList = ref(['', '未結帳', '已結帳'])
 const dateList = ref(dayInterval())
 const searchForm = reactive({
   orderStatus: statusList.value[0],
-  date: ''
+  createdAt: ''
 })
 const checkboxArray = ref([])
 
@@ -49,7 +50,7 @@ onMounted(() => {
 })
 
 watch(
-  [() => searchForm.orderStatus, () => searchForm.date],
+  [() => searchForm.orderStatus, () => searchForm.createdAt],
   () => {
     orderStore.getOrders(searchForm, 1)
     lastPageIndex.value = 1
@@ -63,8 +64,8 @@ watch(
 /**
  * 查詢訂單詳細內容
  **/
-const getOrderDetail = (orderId) => {
-  orderStore.getOrderDetail(orderId)
+const getOrderDetail = (orderId, orderNo) => {
+  orderStore.getOrderDetail(orderId, orderNo)
 }
 
 /**
@@ -104,15 +105,23 @@ const postOrderRating = () => {
     return
   }
   searchForm.orderStatus = statusList.value[1]
-  searchForm.date = ''
+  searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
-  } else if (ratingForm.payment === 'LinePay') {
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
+      if (status === 'NG') {
+        loding.isLoading = false
+      }
+    })
+  } else if (ratingForm.payment === 'linepay') {
     ratingForm.orderType = '未結帳'
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
-    nextTick(() => {
-      if (linepayUrl.value) {
-        linepayForm.value.submit()
+    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm).then((status) => {
+      if (status === 'NG') {
+        loding.isLoading = false
+      } else {
+        if (linepayUrl.value) {
+          linepayForm.value.submit()
+          linepayUrl.value = ''
+        }
       }
     })
   }
@@ -161,7 +170,6 @@ const handleModalClose = () => {
        * 清空欄位功能
        **/
       Object.assign(ratingForm, initRatingForm)
-      linepayUrl.value = ''
     }
   })
 }
@@ -182,8 +190,8 @@ const handleModalClose = () => {
         </li>
       </ul>
       <div>
-        <label for="form_reservationDate" class="block mb-2 font-medium">日期</label>
-        <select id="form_reservationDate" class="form-select" v-model="searchForm.date">
+        <label for="form_createdAt" class="block mb-2 font-medium">日期</label>
+        <select id="form_createdAt" class="form-select" v-model="searchForm.createdAt">
           <option v-for="(option, key) in dateList" :value="option" :key="key">
             {{ option }}
           </option>
@@ -199,8 +207,8 @@ const handleModalClose = () => {
             <th class="p-4 col-span-3">日期</th>
             <th class="p-4 col-span-1">時段</th>
             <th class="p-4 col-span-3">訂單編號</th>
-            <th class="p-4 col-span-1">桌號</th>
-            <th class="p-4 col-span-3"></th>
+            <th class="p-4 col-span-2">桌號</th>
+            <th class="p-4 col-span-2"></th>
           </tr>
         </thead>
       </table>
@@ -222,7 +230,7 @@ const handleModalClose = () => {
               />
               <label :for="order.orderNo">
                 <img
-                  @click="getOrderDetail(order._id)"
+                  @click="getOrderDetail(order._id, order.orderNo)"
                   :src="checkboxArray[index] === true ? IconMinus : IconAdd"
                   width="32"
                   height="32"
@@ -232,17 +240,18 @@ const handleModalClose = () => {
             <td class="p-4 col-span-3 align-middle">{{ dayFormat(order.createdAt) }}</td>
             <td class="p-4 col-span-1 align-middle">{{ order.time }}</td>
             <td class="p-4 col-span-3 align-middle">{{ order.orderNo }}</td>
-            <td class="p-4 col-span-1 align-middle">
+            <td class="p-4 col-span-2 align-middle">
               <span class="text-white bg-primary-light rounded py-1 px-2">{{
                 order.tableName
               }}</span>
             </td>
-            <td class="col-span-3 align-middle">
+            <td class="col-span-2 align-middle">
               <div class="flex">
                 <button
                   type="button"
                   class="w-full mr-1 btn btn-outline-dark"
                   @click="handleModalOpen('create', order)"
+                  :class="order.orderStatus === '未結帳' ? '' : 'hidden'"
                 >
                   結帳
                 </button>
@@ -250,6 +259,7 @@ const handleModalClose = () => {
                   type="button"
                   class="w-full ml-1 btn btn-dark"
                   @click="getLinePayStatus(order.orderNo)"
+                  :class="order.payment === 'linepay' ? '' : 'hidden'"
                 >
                   查詢
                 </button>
@@ -282,7 +292,8 @@ const handleModalClose = () => {
                 <tbody>
                   <tr
                     class="border-b-2 border-textself"
-                    v-for="(product, index) in orderStore.orderDetail.orderList"
+                    v-for="(product, index) in orderStore.orderDetail.value?.[order.orderNo]
+                      ?.orderList"
                     :key="product._id"
                   >
                     <td class="p-4">{{ index + 1 }}</td>
@@ -300,7 +311,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">製作時間</span>
               <span class="ml-4 text-xl font-medium"
-                >{{ orderStore.orderDetail.totalTime }} 分</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.totalTime }} 分</span
               >
             </td>
           </tr>
@@ -311,11 +322,11 @@ const handleModalClose = () => {
               <span
                 class="ml-4 inline text-sm font-medium rounded-lg py-1 px-2"
                 :class="
-                  orderStore.orderDetail.status === '未出餐'
+                  orderStore.orderDetail.value?.[order.orderNo]?.status === '未出餐'
                     ? 'bg-neutralself-100 text-white'
                     : 'bg-primary-light text-white'
                 "
-                >{{ orderStore.orderDetail.status }}</span
+                >{{ orderStore.orderDetail.value?.[order.orderNo]?.status }}</span
               >
             </td>
           </tr>
@@ -336,7 +347,7 @@ const handleModalClose = () => {
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">折扣金額</span>
               <span class="ml-4 text-primary font-medium"
-                >$ {{ orderStore.orderDetail.discount }}</span
+                >$ {{ orderStore.orderDetail.value?.[order.orderNo]?.discount }}</span
               >
             </td>
           </tr>
@@ -345,7 +356,7 @@ const handleModalClose = () => {
             <td class="p-4 pb-4 col-span-11">
               <span class="text-neutralself-200">付款金額</span>
               <span class="ml-4 text-primary text-xl font-medium"
-                >$ {{ orderStore.orderDetail.totalPrice }}</span
+                >$ {{ orderStore.orderDetail.value?.[order.orderNo]?.totalPrice }}</span
               >
             </td>
           </tr>
@@ -453,7 +464,7 @@ const handleModalClose = () => {
                     <input
                       id="payment_LinePay"
                       type="radio"
-                      value="LinePay"
+                      value="linepay"
                       v-model="ratingForm.payment"
                       name="form-radio"
                       class="form-radio"
