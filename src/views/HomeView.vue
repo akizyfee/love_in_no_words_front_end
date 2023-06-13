@@ -493,7 +493,7 @@ const mailtoHref = () => {
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
-                    src="../assets/img/pause.png"
+                    src="../assets/img/Pause.png"
                     class="w-[180px] h-[180px] lg:w-60 lg:h-60 rounded-full object-cover"
                     alt="Pause_Img"
                   />
@@ -575,7 +575,11 @@ const mailtoHref = () => {
             </a>
           </swiper-slide>
           <swiper-slide class="pt-40 pb-[92px] lg:pt-[188px] lg:pb-48">
-            <a class="max-w-3xl flex flex-col" href="https://github.com/Patrick-Kao" target="_blank">
+            <a
+              class="max-w-3xl flex flex-col"
+              href="https://github.com/Patrick-Kao"
+              target="_blank"
+            >
               <div class="card-secondary-p0 lg:mr-3">
                 <figure class="-mt-24">
                   <img
