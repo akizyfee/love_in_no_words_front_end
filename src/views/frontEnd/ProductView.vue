@@ -313,7 +313,7 @@ const handleModalClose = () => {
     </main>
     <aside class="fixed top-0 right-0 z-40 w-[315px] h-screen">
       <div class="w-full h-full border-l-2 border-textself">
-        <div class="h-full bg-white flex flex-col justify-between">
+        <div class="h-full bg-white flex flex-col justify-between overflow-scroll no-scrollbar">
           <div class="flex justify-between px-3 py-4 border-b-2 border-black">
             <h1 class="text-xl font-medium">確認訂單</h1>
             <p class="text-xl font-medium">
@@ -327,7 +327,7 @@ const handleModalClose = () => {
             <p class="font-medium">還沒有點選餐點喔！</p>
           </div>
           <!-- cartList -->
-          <ul class="flex flex-col p-3 overflow-scroll">
+          <ul class="flex flex-col p-3 overflow-scroll no-scrollbar">
             <li
               v-for="tempProducts in tempProduct"
               :key="tempProducts._id"
@@ -338,9 +338,7 @@ const handleModalClose = () => {
                   <span>{{ tempProducts.productName }}</span>
                   <span>&emsp;{{ tempProducts.qty }}份</span>
                 </h2>
-                <p class="font-medium text-xl my-2">
-                  ${{ tempProducts.originalPrice }}
-                </p>
+                <p class="font-medium text-xl my-2">${{ tempProducts.originalPrice }}</p>
                 <p
                   class="inline text-sm font-medium text-white bg-secondary-light rounded-lg py-1 px-2"
                   v-show="tempProducts.couponName"

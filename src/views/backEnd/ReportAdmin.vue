@@ -82,11 +82,11 @@ onMounted(() => {
  */
 const searchMouth = ref()
 const searchNumber = ref()
-const fetchSearchAdminOrders = catchError(async () => {
+const fetchSearchAdminOrders = async () => {
   loding.isLoading = true
-  reportStore.fetchSearchAdminOrders(searchMouth.value, searchNumber.value)
+  await reportStore.fetchSearchAdminOrders(searchMouth.value, searchNumber.value)
   loding.isLoading = false
-})
+}
 
 /**
  * 營收報表+賣出訂單報表寄送

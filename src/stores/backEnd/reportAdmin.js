@@ -23,12 +23,10 @@ export const useReportAdminStore = defineStore('reportAdminData', () => {
  * 條件搜尋定單資訊
  */
   const fetchSearchAdminOrders = catchError(async (searchMouth, searchNumber) => {
-    loding.isLoading = true
     const { data, message } = await searchAdminOrders(searchMouth, searchNumber)
     orderReportList.value = data.data
     orderReportListPrice.value = orderReportList.value.reduce((sum, item) => sum + item.totalPrice, 0)
     successAlert(message)
-    loding.isLoading = false
   })
 
   return { orderReportList, orderReportListPrice, fetchSearchAllAdminOrders, fetchSearchAdminOrders }

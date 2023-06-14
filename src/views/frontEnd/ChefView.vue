@@ -99,7 +99,7 @@ const fetchSendPickUp = catchError(async (oderId) => {
                     <span>{{ dessert.productName }}</span>
                     <span>&emsp;x{{ dessert.qty }}</span>
                   </h2>
-                  <p class="font-medium text-xl text-primary-light my-2">備註訊息：後續補上</p>
+                  <p class="font-medium text-xl text-primary-light my-2">備註：{{ item.note }}</p>
                 </div>
               </li>
             </ul>
