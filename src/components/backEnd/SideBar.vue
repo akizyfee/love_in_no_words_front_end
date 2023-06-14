@@ -14,12 +14,12 @@ const signOut = catchError(async () => {
 </script>
 <template>
   <div class="w-full h-full border-r-2 border-textself">
-    <div class="h-full bg-bgself flex flex-col justify-between">
+    <div class="h-full bg-bgself flex flex-col justify-between overflow-y-scroll no-scrollbar">
       <section>
         <router-link to="signin" class="flex justify-center my-12">
           <img src="@/assets/img/LOGO_horizon.svg" class="w-1/2 object-cover" alt="Logo_PC" />
         </router-link>
-        <ul class="font-medium text-center px-10 overflow-y-scroll">
+        <ul class="font-medium text-center px-10">
           <li class="mb-4">
             <h2 class="flex justify-center p-3 text-2xl">管理者您好</h2>
           </li>
