@@ -20,6 +20,7 @@ const searchForm = reactive({
   createdAt: ''
 })
 const checkboxArray = ref([])
+const lastPageIndex = ref(1)
 
 /**
  * 由於 Router 跳轉，所以強制更新頁面
@@ -34,10 +35,15 @@ onMounted(() => {
 })
 
 /**
+ * 清空任何狀態
+ */
+const clearStatus = () => {
+  searchForm.createdAt = ''
+}
+
+/**
  * 分頁
  */
-const lastPageIndex = ref(1)
-
 const fetchLoadNewFile = () => {
   lastPageIndex.value++
 
@@ -174,6 +180,9 @@ const handleModalClose = () => {
        * 清空欄位功能
        **/
       Object.assign(ratingForm, initRatingForm)
+      searchForm.orderStatus = statusList.value[0]
+      searchForm.createdAt = ''
+      lastPageIndex.value = 1
     }
   })
 }
@@ -193,14 +202,23 @@ const handleModalClose = () => {
           >
         </li>
       </ul>
-      <div>
-        <label for="form_createdAt" class="block mb-2 font-medium">日期</label>
-        <select id="form_createdAt" class="form-select" v-model="searchForm.createdAt">
-          <option v-for="(option, key) in dateList" :value="option" :key="key">
-            {{ option }}
-          </option>
-        </select>
-      </div>
+      <section class="flex flex-col">
+        <label for="form_createdAt" class="block mb-1 font-medium whitespace-nowrap">日期</label>
+        <div class="flex items-center mr-3">
+          <select id="form_createdAt" class="form-select" v-model="searchForm.createdAt">
+            <option v-for="(option, key) in dateList" :value="option" :key="key">
+              {{ option }}
+            </option>
+          </select>
+          <button
+            @click.prevent="clearStatus"
+            type="button"
+            class="btn btn-outline-dark whitespace-nowrap mx-3"
+          >
+            清空
+          </button>
+        </div>
+      </section>
     </div>
     <!-- orderList -->
     <div class="overflow-auto">
@@ -334,11 +352,15 @@ const handleModalClose = () => {
               >
             </td>
           </tr>
-          <tr class="bg-white text-left grid grid-cols-12">
+          <tr
+            class="bg-white text-left grid grid-cols-12"
+            v-show="orderStore.orderDetail.value?.[order.orderNo]?.couponName"
+          >
             <td class="p-4 col-span-1"></td>
             <td class="p-4 col-span-11">
               <span class="text-neutralself-200">優惠活動</span>
-              <span class="ml-4 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
+              <span
+                class="ml-4 inline text-sm font-medium bg-secondary-light rounded-lg py-1 px-2"
                 >{{ orderStore.orderDetail.value?.[order.orderNo]?.couponName }}</span
               >
             </td>

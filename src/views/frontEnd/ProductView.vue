@@ -75,7 +75,7 @@ const productCard = reactive({
   note: ''
 })
 
-const tempProductCardQty = ref(1)
+const tempProductCardQty = ref(null)
 const tempProduct = ref([])
 
 const plusProductCount = () => {
@@ -166,7 +166,7 @@ const handleModalOpen = (checkIsCreate, item) => {
     if (childComponent) {
       childComponent.openModal()
     }
-    if (isCreate.value === 'create' || isCreate.value === 'update' || isCreate.value === 'delete') {
+    if (isCreate.value === 'create') {
       const {
         _id,
         productNo,
@@ -195,12 +195,44 @@ const handleModalOpen = (checkIsCreate, item) => {
       productCard.description = description
       productCard.qty = qty
       productCard.note = note
+      tempProductCardQty.value = 0
 
       if (!Object.keys(item).includes('originalPrice')) {
         productCard.originalPrice = item.price
-      } else {
-        productCard.originalPrice = item.originalPrice
       }
+    }
+    if (isCreate.value === 'update' || isCreate.value === 'delete') {
+      const {
+        _id,
+        productNo,
+        productName,
+        photoUrl,
+        originalPrice,
+        price,
+        inStockAmount,
+        amountStatus,
+        isDisabled,
+        productionTime,
+        productsType,
+        description,
+        qty,
+        note
+      } = item
+      productCard._id = _id
+      productCard.productNo = productNo
+      productCard.productName = productName
+      productCard.photoUrl = photoUrl
+      productCard.originalPrice = originalPrice
+      productCard.price = price
+      productCard.inStockAmount = inStockAmount
+      productCard.amountStatus = amountStatus
+      productCard.isDisabled = isDisabled
+      productCard.productionTime = productionTime
+      productCard.productsType = productsType
+      productCard.description = description
+      productCard.qty = qty
+      productCard.note = note
+      tempProductCardQty.value = qty
     }
   })
 }
@@ -221,6 +253,7 @@ const handleModalClose = () => {
       memberForm.phone = ''
       productCard.qty = 1
       productCard.note = ''
+      tempProductCardQty.value = 0
     }
   })
 }
@@ -399,6 +432,7 @@ const handleModalClose = () => {
               <button
                 @click.prevent="fetchCalculateTotalPrice"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
+                :disabled="tempProduct.length === 0"
               >
                 <span>金額試算</span>
                 <img class="ms-2" src="@/assets/img/IconCashCalculate.png" alt="IconMemberSearch" />
@@ -434,7 +468,7 @@ const handleModalClose = () => {
                 >NT$ {{ productStore.checkProductTotalPrice.totalPrice }}</span
               >
             </p>
-            <button @click="fetchAddOreder" class="btn btn-dark py-2 w-full">送出訂單</button>
+            <button @click="fetchAddOreder" class="btn btn-dark py-2 w-full" :disabled="tempProduct.length === 0">送出訂單</button>
           </div>
         </div>
       </div>
@@ -535,7 +569,7 @@ const handleModalClose = () => {
                   type="number"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
-                  placeholder="1"
+                  placeholder="0"
                   required
                   min="1"
                   :max="productCard.inStockAmount"
@@ -630,10 +664,7 @@ const handleModalClose = () => {
                   type="number"
                   id="form_qty"
                   class="form-input flex-1 rounded-none rounded-x-lg"
-                  placeholder="1"
                   required
-                  min="0"
-                  :max="productCard.inStockAmount"
                   v-model.number="productCard.qty"
                 />
                 <button
