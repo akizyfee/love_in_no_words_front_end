@@ -182,6 +182,7 @@ const handleModalClose = () => {
       Object.assign(ratingForm, initRatingForm)
       searchForm.orderStatus = statusList.value[0]
       searchForm.createdAt = ''
+      lastPageIndex.value = 1
     }
   })
 }
