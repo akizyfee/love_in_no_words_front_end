@@ -9,15 +9,13 @@ import { errorsFormSchema } from '@/utils/formValidate'
 const memberStore = useMemberStore()
 
 const searchForm = reactive({
-  phone: '',
-  page: 1
+  phone: ''
 })
+const lastPageIndex = ref(1)
 
 /**
  * 分頁
  */
-const lastPageIndex = ref(1)
-
 const fetchLoadNewFile = () => {
   lastPageIndex.value++
   memberStore.LoadNewFile(searchForm.phone, lastPageIndex.value)
@@ -28,13 +26,15 @@ const fetchLoadNewFile = () => {
  **/
 
 onMounted(() => {
-  memberStore.getMembers(searchForm.phone, searchForm.page)
+  memberStore.getMembers(searchForm.phone, 1)
+  lastPageIndex.value = 1
 })
 
 watch(
-  [() => searchForm.phone, () => searchForm.page],
+  () => searchForm.phone,
   () => {
-    memberStore.getMembers(searchForm.phone, searchForm.page)
+    memberStore.getMembers(searchForm.phone, 1)
+    lastPageIndex.value = 1
   },
   {
     immediate: true,
@@ -97,6 +97,7 @@ const handleModalOpen = (checkisCreate, item) => {
       memberForm._id = _id
       memberForm.name = name
       memberForm.phone = phone
+      lastPageIndex.value = 1
     }
   })
 }
@@ -111,7 +112,6 @@ const handleModalClose = () => {
        * 清空欄位功能
        **/
       searchForm.phone = ''
-      searchForm.page = 1
       memberForm.name = ''
       memberForm.phone = ''
     }

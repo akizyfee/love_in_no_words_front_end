@@ -12,7 +12,7 @@ export const useMemberStore = defineStore('memberData', () => {
    * 載入新資料
    */
   const tempMemberList = ref([])
-  const prePage = ref()
+  const prePage = ref(null)
 
   const LoadNewFile = catchError(async (phone, currentPage) => {
     loding.isLoading = true
@@ -29,9 +29,10 @@ export const useMemberStore = defineStore('memberData', () => {
    * 查詢會員功能
    **/
   const memberList = ref([])
-  const getMembers = catchError(async (phone, page) => {
+  const getMembers = catchError(async (phone, currentPage) => {
     loding.isLoading = true
-    const { data } = await searchMember(phone, page)
+    const { data } = await searchMember(phone, currentPage)
+    prePage.value = data.meta?.pagination.nextPage
     if (data.membersList.length === 0) {
       warningAlert('沒有符合的會員資料')
       loding.isLoading = false
@@ -44,30 +45,30 @@ export const useMemberStore = defineStore('memberData', () => {
    * 新增會員功能
    **/
   const postMember = catchError(async (memberForm, searchForm) => {
-    const { phone, page } = searchForm
+    const { phone } = searchForm
     const { message } = await addMember(memberForm)
     successAlert(message)
-    getMembers(phone, page)
+    getMembers(phone, 1)
   })
 
   /**
    * 修改會員功能
    **/
   const patchMember = catchError(async (id, memberForm, searchForm) => {
-    const { phone, page } = searchForm
+    const { phone } = searchForm
     const { message } = await editMember(id, memberForm)
     successAlert(message)
-    getMembers(phone, page)
+    getMembers(phone, 1)
   })
 
   /**
    * 刪除會員功能
    **/
   const delMember = catchError(async (id, searchForm) => {
-    const { phone, page } = searchForm
+    const { phone } = searchForm
     const { message } = await deleteMember(id)
     successAlert(message)
-    getMembers(phone, page)
+    getMembers(phone, 1)
   })
 
   return { memberList, getMembers, prePage, postMember, patchMember, delMember, LoadNewFile }
