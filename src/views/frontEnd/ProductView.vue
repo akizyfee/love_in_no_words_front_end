@@ -402,7 +402,7 @@ const handleModalClose = () => {
                 @click.prevent="handleModalOpen('readMember')"
                 class="w-full btn btn-outline-dark flex items-center justify-center"
               >
-                <span>查詢會員</span>
+                <span>查詢資格</span>
                 <img class="ms-2" src="@/assets/img/IconMemberSearch.png" alt="IconMemberSearch" />
               </button>
             </li>
@@ -483,7 +483,7 @@ const handleModalClose = () => {
           <h2 v-if="isCreate === 'create'" class="text-xl font-medium">新增餐點</h2>
           <h2 v-else-if="isCreate === 'update'" class="text-xl font-medium">修改餐點</h2>
           <h2 v-else-if="isCreate === 'delete'" class="text-xl font-medium">刪除餐點</h2>
-          <h2 v-else-if="isCreate === 'readMember'" class="text-xl font-medium">查詢會員</h2>
+          <h2 v-else-if="isCreate === 'readMember'" class="text-xl font-medium">查詢會員資格</h2>
           <h2 v-else-if="isCreate === 'createMember'" class="text-xl font-medium">加入會員</h2>
           <h2 v-else-if="isCreate === 'createActivity'" class="text-xl font-medium">
             選擇活動 (活動擇一)
@@ -728,23 +728,9 @@ const handleModalClose = () => {
               <p v-if="productStore.memberList.length === 0" class="text-primary-light">
                 沒有符合的會員資料
               </p>
-              <div
-                v-else
-                class="flex items-center"
-                v-for="member in productStore.memberList"
-                :key="member.number"
-              >
-                <input
-                  checked
-                  id="form_readmember_radio"
-                  type="radio"
-                  name="form-radio"
-                  class="form-radio"
-                />
-                <label for="form_readmember_radio" class="ml-2 text-xl font-medium">{{
-                  member.name
-                }}</label>
-              </div>
+              <p v-else-if="productStore.memberList.length > 0" class="text-primary-light">
+                有符合的會員資料
+              </p>
             </div>
             <!-- send_btn -->
             <div class="flex">

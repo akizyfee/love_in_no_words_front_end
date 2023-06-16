@@ -169,9 +169,7 @@ const handleModalOpen = (checkIsCreate, item) => {
       ratingForm.orderId = _id
       ratingForm.orderNo = orderNo
       ratingForm.tableName = tableName
-      linepayUrl.value = `${
-        import.meta.env.VITE_API_URL
-      }/v1/line_pay/${orderNo}?redirectDevUrl=true`
+      linepayUrl.value = `${import.meta.env.VITE_API_URL}/v1/line_pay/${orderNo}`
     }
   })
 }

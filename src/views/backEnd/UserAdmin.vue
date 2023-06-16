@@ -23,6 +23,7 @@ const fetchLoadNewFile = () => {
  */
 onMounted(() => {
   userAdminStore.fetchUser(lastPageIndex.value)
+  lastPageIndex.value = 1
 })
 
 /**
@@ -95,6 +96,7 @@ const handleModalOpen = (checkisCreate, item) => {
       userProfile.titleNo = titleNo
       userProfile.isDisabled = isDisabled
       userProfile.password = password
+      lastPageIndex.value = 1
     }
   })
 }

@@ -71,6 +71,10 @@ const delTypeList = catchError(async (type) => {
  * 新增 A+B 活動
  **/
 const postFreebiePlus = () => {
+  if (!freebiePlusForm.value.discount) {
+    warningAlert('請填寫折扣比例')
+    return
+  }
   freebiePlusAdminStore.postFreebiePlus(freebiePlusForm.value)
   handleModalClose()
 }
@@ -80,10 +84,7 @@ const postFreebiePlus = () => {
  **/
 const patchFreebiePlus = () => {
   const discountObj = { discount: freebiePlusForm.value.discount }
-  freebiePlusAdminStore.patchFreebiePlus(
-    freebiePlusCouponNoVal.value,
-    discountObj
-  )
+  freebiePlusAdminStore.patchFreebiePlus(freebiePlusCouponNoVal.value, discountObj)
   handleModalClose()
 }
 
