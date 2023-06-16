@@ -28,9 +28,9 @@ const lastPageIndex = ref(1)
 const internalInstance = getCurrentInstance()
 const forceUpdate = internalInstance.ctx.$forceUpdate
 
-onMounted(() => {
+onMounted(async () => {
   loding.isLoading = true
-  forceUpdate()
+  await forceUpdate()
   loding.isLoading = false
 })
 
@@ -44,29 +44,29 @@ const clearStatus = () => {
 /**
  * 分頁
  */
-const fetchLoadNewFile = () => {
+const fetchLoadNewFile = async () => {
   lastPageIndex.value++
 
   loding.isLoading = true
-  orderStore.LoadNewFile(searchForm, lastPageIndex.value)
+  await orderStore.LoadNewFile(searchForm, lastPageIndex.value)
   loding.isLoading = false
 }
 
 /**
  * 查詢訂單功能
  **/
-onMounted(() => {
+onMounted(async () => {
   loding.isLoading = true
-  orderStore.getOrders(searchForm, 1)
+  await orderStore.getOrders(searchForm, 1)
   loding.isLoading = false
   lastPageIndex.value = 1
 })
 
 watch(
   [() => searchForm.orderStatus, () => searchForm.createdAt],
-  () => {
+  async () => {
     loding.isLoading = true
-    orderStore.getOrders(searchForm, 1)
+    await orderStore.getOrders(searchForm, 1)
     loding.isLoading = false
     lastPageIndex.value = 1
   },
@@ -79,9 +79,9 @@ watch(
 /**
  * 查詢訂單詳細內容
  **/
-const getOrderDetail = (orderId, orderNo) => {
+const getOrderDetail = async (orderId, orderNo) => {
   loding.isLoading = true
-  orderStore.getOrderDetail(orderId, orderNo)
+  await orderStore.getOrderDetail(orderId, orderNo)
   loding.isLoading = false
 }
 
@@ -116,7 +116,7 @@ const ratingForm = reactive({
   description: ''
 })
 
-const postOrderRating = () => {
+const postOrderRating = async () => {
   if (!ratingForm.payment) {
     warningAlert('請選擇付款類型')
     return
@@ -124,24 +124,30 @@ const postOrderRating = () => {
   searchForm.orderStatus = statusList.value[1]
   searchForm.createdAt = ''
   if (ratingForm.payment === '現金') {
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    loding.isLoading = true
+    await orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    loding.isLoading = false
   } else if (ratingForm.payment === 'linepay') {
     ratingForm.orderType = '未結帳'
-    orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    loding.isLoading = true
+    await orderStore.postOrderRating(ratingForm.orderId, ratingForm, searchForm)
+    loding.isLoading = false
     if (linepayUrl.value) {
       linepayForm.value.submit()
       linepayUrl.value = ''
+      loding.isLoading = false
     }
   }
   handleModalClose()
+  loding.isLoading = false
 }
 
 /**
  * 查詢訂單是否用 LinePay 完成結帳
  **/
-const getLinePayStatus = (orderId) => {
+const getLinePayStatus = async (orderId) => {
   loding.isLoading = true
-  orderStore.getLinePayStatus(orderId)
+  await orderStore.getLinePayStatus(orderId)
   loding.isLoading = false
 }
 
