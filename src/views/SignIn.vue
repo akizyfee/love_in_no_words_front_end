@@ -1,13 +1,17 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
+import { useLoadingStore } from '@/stores/TheLoading'
 import { useForm } from 'vee-validate'
 import { loginApi } from '@/apis/user'
 import { setCookieToken } from '@/utils/cookie'
 import { setCookieTitleNo } from '@/utils/titleNo'
-import { catchError } from '@/utils/catchError'
+// import { catchError } from '@/utils/catchError'
 import { errorsFormSchema } from '@/utils/formValidate'
+import { errorAlert } from '@/plugins/toast'
+
 const router = useRouter()
+const loding = useLoadingStore()
 
 /**
  * VeeValidate 套件
@@ -23,31 +27,41 @@ const loginForm = reactive({
 /**
  * 登入功能
  */
-const signIn = catchError(async () => {
-  const { data } = await loginApi(loginForm)
-  const { token, titleNo } = data.user
-  switch (titleNo) {
-    case 1:
-      await setCookieToken(token)
-      await setCookieTitleNo(titleNo)
-      router.push('/userAdmin')
-      break
-    case 2:
-      await setCookieToken(token)
-      await setCookieTitleNo(titleNo)
-      router.push('/seat')
-      break
-    case 3:
-      await setCookieToken(token)
-      await setCookieTitleNo(titleNo)
-      router.push('/chef')
-      break
-    default:
-      console.log('非任何職位!')
-      router.push('/')
-      break
+const signIn = async () => {
+  loding.isLoading = true
+  try {
+    const { data } = await loginApi(loginForm)
+    const { token, titleNo } = data.user
+    switch (titleNo) {
+      case 1:
+        await setCookieToken(token)
+        await setCookieTitleNo(titleNo)
+        router.push('/userAdmin')
+        loding.isLoading = false
+        break
+      case 2:
+        await setCookieToken(token)
+        await setCookieTitleNo(titleNo)
+        router.push('/seat')
+        loding.isLoading = false
+        break
+      case 3:
+        await setCookieToken(token)
+        await setCookieTitleNo(titleNo)
+        router.push('/chef')
+        loding.isLoading = false
+        break
+      default:
+        console.log('非任何職位!')
+        router.push('/')
+        loding.isLoading = false
+        break
+    }
+  } catch (err) {
+    loding.isLoading = false
+    errorAlert(err.message)
   }
-})
+}
 </script>
 <template>
   <div class="px-8 py-12">
