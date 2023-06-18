@@ -85,7 +85,7 @@ export const useSeatStore = defineStore('seatData', () => {
   })
 
   /**
-   * 取消訂位功能
+   * 取消訂位功能、清空座位功能
    **/
   const delReservation = catchError(async (seatForm, searchForm) => {
     const { reservationId } = seatForm

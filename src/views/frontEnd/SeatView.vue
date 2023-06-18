@@ -103,6 +103,29 @@ const delReservation = () => {
 }
 
 /**
+ * 清空座位功能
+ **/
+const delSeat = (seat) => {
+  const { tableNo, tableName, seats, status, reservation } = seat
+  seatForm.tableNo = tableNo
+  seatForm.tableName = tableName
+  seatForm.seats = seats
+  seatForm.status = status
+  seatForm.reservationDate = reservation.reservationDate
+  seatForm.reservationId = reservation.reservationId
+  seatForm.reservationTime = reservation.reservationTime
+  seatForm.name = ''
+  seatForm.phone = ''
+  const searchForm = reactive({
+    status: statusList.value[0],
+    reservationDate: dateList.value[0],
+    reservationTime: timeList.value[0],
+    tableNo: 0
+  })
+  seatStore.delReservation(seatForm, searchForm)
+}
+
+/**
  * 跳轉至點餐頁面
  */
 const toProduct = (tableName) => {
@@ -283,6 +306,14 @@ const handleModalClose = () => {
                   :class="seat.status === '使用中' ? '' : 'hidden'"
                 >
                   點餐
+                </button>
+                <button
+                  @click="delSeat(seat)"
+                  type="button"
+                  class="btn btn-outline-dark mx-1"
+                  :class="seat.status === '使用中' ? '' : 'hidden'"
+                >
+                  清空
                 </button>
               </div>
             </div>
