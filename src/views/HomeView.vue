@@ -610,7 +610,7 @@ const mailtoHref = () => {
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
-                    <p>想讓未來的自己更貼近心目中理想的日本企業要求，報名課程來鍛鍊</p>
+                    <p>想讓未來的自己更貼近心目中理想的企業要求，報名課程來鍛鍊</p>
                   </li>
                   <li class="flex">
                     <img src="../assets/img/IconList.svg" class="w-6 h-6" alt="List_Img" />
