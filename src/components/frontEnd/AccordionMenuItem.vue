@@ -152,6 +152,15 @@ const getLinePayStatus = async (orderId) => {
 }
 
 /**
+ * 查詢訂單結帳狀態
+ **/
+const getOrderStatus = async (orderId) => {
+  loding.isLoading = true
+  await orderStore.getOrderStatus(orderId)
+  loding.isLoading = false
+}
+
+/**
  * modal
  * */
 const isCreate = ref(false)
@@ -286,6 +295,14 @@ const handleModalClose = () => {
                   class="w-full ml-1 btn btn-dark"
                   @click="getLinePayStatus(order.orderNo)"
                   :class="order.payment === 'linepay' ? '' : 'hidden'"
+                >
+                  查詢
+                </button>
+                <button
+                  type="button"
+                  class="w-full ml-1 btn btn-primary"
+                  @click="getOrderStatus(order.orderNo)"
+                  :class="order.payment === '現金' ? '' : 'hidden'"
                 >
                   查詢
                 </button>

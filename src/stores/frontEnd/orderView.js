@@ -2,7 +2,7 @@ import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 import { catchError } from '@/utils/catchError'
 import { warningAlert, successAlert } from '@/plugins/toast'
-import { searchOrder, searchOrderDetail, addOrderRating, searchLinePayOrderStatus } from '@/apis/order'
+import { searchOrder, searchOrderDetail, addOrderRating, searchLinePayOrderStatus, searchOrderStatus } from '@/apis/order'
 
 export const useOrderStore = defineStore('orderData', () => {
   /**
@@ -66,5 +66,13 @@ export const useOrderStore = defineStore('orderData', () => {
     successAlert(message)
   })
 
-  return { prePage, currentIndex, orderList, orderDetail, LoadNewFile, getOrders, getOrderDetail, postOrderRating, getLinePayStatus }
+  /**
+   * 查詢訂單結帳狀態
+   **/
+  const getOrderStatus = catchError(async (orderNo) => {
+    const { message } = await searchOrderStatus(orderNo)
+    successAlert(message)
+  })
+
+  return { prePage, currentIndex, orderList, orderDetail, LoadNewFile, getOrders, getOrderDetail, postOrderRating, getLinePayStatus, getOrderStatus }
 })
