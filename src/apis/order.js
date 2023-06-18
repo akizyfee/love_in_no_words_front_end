@@ -33,6 +33,12 @@ export const searchOrderDetail = (orderId) => axios.get(`/v1/orders/detail/${ord
 export const addOrderRating = (orderId, payload) => axios.post(`/v1/orders/rating/${orderId}`, payload)
 
 /**
+ * S-3-5 查詢訂單結帳狀態 (通用)
+ * @param {string} 訂單 ID
+ */
+export const searchOrderStatus = (orderNo) => axios.get(`/v1/orders/check/cash/${orderNo}`)
+
+/**
  * S-5-1 LinePay 結帳
  * @param {string} 訂單 ID
  * @param {string} token 驗證用
